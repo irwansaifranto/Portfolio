@@ -1,0 +1,149 @@
+﻿@model SecurityGuard.ViewModels.AddActionsToModuleViewModel
+@{
+    ViewBag.Title = "AddActions";
+    //Layout = "~/Areas/SecurityGuard/Views/Shared/_SecurityGuardLayoutPage.cshtml";
+}
+
+<div id="breadcrumb">
+    @Html.ActionLink("Dashboard", "Index", "Dashboard") > 
+    @Html.ActionLink("Manage Module", "Index", "Module") > 
+    Add Actions to Module
+</div>
+
+<div class="page-header">
+	<h1>Add Actions to Module</h1>
+</div>
+
+<p>Clicking the &quot;Add&quot; or &quot;Revoke&quot; buttons will execute that command.</p>
+<p>Add any of the following actions to: <span id="modulename-to-grant-roles">@Model.ModuleName</span></p>
+
+<ul class="system_messages" style="display: none;">
+    <li><span class="ico"></span><strong class="system_title"></strong></li>
+</ul>
+
+<div class="row">
+    <div class="col-xs-4">
+        <div id="available-roles">
+            <h3>Available actions</h3>
+            @Html.ListBox("AvailableActions", Model.AvailableActions, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="col-xs-2">
+        <div id="add-controls">
+            <button id="add-button" class="btn btn-default">Grant --&gt;</button><br />
+            <button id="revoke-button" class="btn btn-default">&lt;-- Revoke</button>
+        </div>
+    </div>
+    <div class="col-xs-4">
+        <div id="granted-actions">
+            <h3>Added Actions</h3>
+            @Html.ListBox("GrantedActions", Model.AddedActions, new { @class = "form-control" })
+        </div>
+    </div>
+</div>
+
+@section sgscripts{
+<script type="text/javascript">
+    $(function () {
+
+        var message = $(".system_messages");
+
+        /******************************************************
+        * Begin Grant/Revoke commands
+        ******************************************************/
+        var availableList = $("#AvailableActions");
+        var grantedList = $("#GrantedActions");
+
+        $("#add-button").click(function () {
+            // First check if any items in the available list
+            // are selected.
+            if (availableList.val() == null) {
+                alert("You must select a action to add.");
+                return;
+            }
+
+            // Then move the selected list items to the 
+            // granted roles list.
+            move_list_items("AvailableActions", "GrantedActions");
+
+            // Now take all the roles from the granted list
+            // and create a single comma-delimited list.
+            var grantedActions = "";
+            $.each(grantedList.val(), function (index, data) {
+                grantedActions += data + ",";
+            });
+
+            // Now execute the command using jQuery ajax.
+            $.ajax({
+                url: '@Url.Action("GrantActionsToModule", "Module")',
+                dataType: 'json',
+                type: 'POST',
+                data: { moduleId    : '@Model.GUID', actions: grantedActions },
+                success: OnGrantedSuccess,
+                error: OnGrantedError
+            });
+        });
+
+        function OnGrantedSuccess(data) {
+            message.show().delay(5000).fadeOut();    // Show the message
+            $("li", message).addClass("green");      // Apply the Green style
+            $("strong", message).text(data.Message); // Insert the message
+        }
+
+        function OnGrantedError(xhr, status, error) {
+            alert(error);
+        }
+
+
+
+        $("#revoke-button").click(function () {
+            // First make sure at least one role in the 
+            // granted list is selected to revoke.
+            if (grantedList.val() == null) {
+                alert("You must select a actions to revoke.");
+                return;
+            }
+
+            // Now move the item back to the Available list.
+            move_list_items("GrantedActions", "AvailableActions");
+
+            // Now make a comma-delimited string of revoked items.
+            var revokedActions = "";
+            $.each(availableList.val(), function (index, data) {
+                revokedActions += data + ",";
+            });
+
+            // Now execute the command using jQuery ajax.
+            $.ajax({
+                url: '@Url.Action("RevokeActionsForModule", "Module")',
+                dataType: 'json',
+                type: 'POST',
+                data: { moduleId: '@Model.GUID', actions: revokedActions },
+                success: OnRevokedSuccess,
+                error: OnRevokedError
+            });
+        });
+
+        function OnRevokedSuccess(data) {
+            message.show().delay(5000).fadeOut();
+            $("li", message).addClass("green");
+            $("strong", message).text(data.Message);
+        }
+
+        function OnRevokedError(xhr, status, error) {
+            alert(error);
+        }
+
+        // This function moves items from one list to the other.
+        function move_list_items(sourceid, destinationid) {
+            $("#" + sourceid + "  option:selected").appendTo("#" + destinationid);
+        }
+        /******************************************************
+        * End Grant/Revoke commands
+        ******************************************************/
+
+
+
+    });
+</script>
+}

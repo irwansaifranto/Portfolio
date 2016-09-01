@@ -1,0 +1,441 @@
+@using WebUI.Extension;
+@using MvcSiteMapProvider.Web.Html;
+@using Common.Enums
+@{
+    ViewBag.Title = "Dashboard";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentController = (WebUI.Controllers.BookingController)ViewContext.Controller;
+
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+    WebUI.Models.Booking.BookingStatisticModel statistic = ViewBag.Statistic;
+
+    Guid? idPrint = ViewBag.IdPrint;
+}
+
+<div class="row">
+    <div class="col-xs-12 col-sm-4">
+        <div class="page-header">
+            <h1>@ViewBag.Title</h1>
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-8">
+        <ul class="" id="sparks">
+            <li class="sparks-info">
+                <h5>
+                    Berangkat Besok
+                    <span class="txt-color-purple">@statistic.TomorrowDeparture.ToString("n0") Pesanan</span>
+                </h5>
+            </li>
+            <li class="sparks-info">
+                <h5>
+                    Belum Ditugaskan
+                    <span class="txt-color-purple">@statistic.UnassignedCar Mobil @statistic.UnassignedDriver Supir</span>
+                </h5>
+            </li>
+            <li class="sparks-info">
+                <h5>
+                    Belum Dibayar
+                    <span class="txt-color-purple">@statistic.UnpaidInvoice Invoice</span>
+                </h5>
+            </li>
+            <li class="sparks-info">
+                <h5>
+                    Order Batal
+                    <span class="txt-color-purple">@statistic.CancelledRent Pesanan</span>
+                </h5>
+            </li>
+            <li class="sparks-info">
+                @Html.ActionLink("Tambah Booking", "Create", new { area = "" }, new { @class = "btn btn-primary" })
+            </li>
+        </ul>
+    </div>
+</div>
+
+@Html.Raw(currentController.GetMessage())
+
+<section class="date-section">
+    @*<span class="date-text">2 Januari 2016</span>*@
+    <div class="date-form form-inline">
+        <div class="form-group">
+            <input type="text" class="form-control-datepicker" id="date-filter" value="@DateTime.Now" />
+        </div>
+        <button type="submit" class="btn btn-primary" onclick="executeFilterDate()">Tampilkan</button>
+        <button type="submit" class="btn btn-default" onclick="clearFilterDate()">Tampilkan Semua</button>
+    </div>
+</section>
+
+<div id="grid"></div>
+
+<span id="notification"></span>
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/buzz")
+
+    <script type="text/javascript">
+        var ds;
+
+        //functions
+        function printQuotation(id) {
+            var url = '@Url.Action("PrintQuotation")?id=' + id;
+            var windowName = "quotation";
+
+            openPrintWindow(url, windowName);
+        }
+
+        function deleteItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            goToDeletePage('@Url.Action("Delete")' + "?id=" + data.Id,this.dataSource);
+        }
+
+        function editItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            window.location.href = "@Url.Action("Edit")" + "?id=" + data.Id;
+        }
+
+        function viewItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            window.location.href = "@Url.Action("Detail")" + "?id=" + data.Id;
+        }
+
+        function executeFilterDate() {
+            //kamus
+            var dateVal = $('#date-filter').data('kendoDatePicker').value();
+            var filter = { filters: [], logic: 'and' };
+            var additionalFilter;
+            var dateText = $('.date-text');
+
+            //algoritma
+            if (dateVal !== null) {
+                additionalFilter = { field: "filter_date", operator: 'eq', value: kendo.toString(dateVal, "yyyy-MM-dd") };
+                filter.filters.push(additionalFilter);
+
+                dateText.text(kendo.toString(dateVal, '@dfh.JsFullDateFormat2'));
+            } else {
+                dateText.text('Menampilkan Semua Booking');
+            }
+
+            ds.filter(filter)
+        }
+
+        function clearFilterDate() {
+            $('#date-filter').data('kendoDatePicker').value('');
+            executeFilterDate();
+        }
+
+        function listStatus(element) {
+            element.kendoDropDownList({
+                dataTextField: "Text",
+                dataValueField: "Value",
+                dataSource: {
+                    data: @Html.Raw(ViewBag.ListStatus)
+                    },
+                optionLabel: "--Pilih--",
+            });
+        }
+
+        $(document).ready(function () {
+            ds = new kendo.data.DataSource({
+                pageable: true,
+                pageSize: 10,
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                sortable:true,
+                transport: {
+                    read: {
+                        url: "@Url.Action("Binding")",
+                        dataType: "json",
+                        type:"POST",
+                    },
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options != '') {
+                            return kendo.stringify(options);
+                        }
+                        else if (operation == "read") {
+                            var filter;
+
+                            if (options.filter) {
+                                filter = options.filter.filters;
+                                for (var i in filter) {
+                                    if (filter[i].field == "Name") {
+                                        var additional =
+                                            {
+                                                filters:
+                                                    [
+                                                        { field: "customer.name", operator: 'contains', value: filter[i].value },
+                                                        { field: "customer.phone_number", operator: 'contains', value: filter[i].value }
+                                                    ],
+                                                logic: 'or',
+                                            };
+
+                                        filter[i] = additional;
+                                    } else if (filter[i].field == "CarModelName") {
+                                        var additional =
+                                            {
+                                                filters:
+                                                    [
+                                                        { field: "car.license_plate", operator: 'contains', value: filter[i].value },
+                                                        { field: "car_model.name", operator: 'contains', value: filter[i].value }
+                                                    ],
+                                                logic: 'or',
+                                            };
+
+                                        filter[i] = additional;
+                                    } else if (filter[i].field == 'DriverName') {
+                                        filter[i].field = 'driver.name';
+                                    } else if (filter[i].field == "CreatedTime") {
+                                        var date = filter[i].value;
+                                        filter[i].value = kendo.toString(date, "yyyy-MM-dd");
+                                    }
+                                }
+                            }
+
+                            if (options.sort) {
+                                sort = options.sort;
+                                for (var i in sort) {
+                                    if (sort[i].field == "CarModelName") {
+                                        sort[i].field = "car_model.name";
+                                    } else if (sort[i].field == "DriverName") {
+                                        sort[i].field = "driver.name";
+                                    } else if (sort[i].field == "Name") {
+                                        sort[i].field = "customer.name";
+                                    }
+                                }
+                            }
+                            return options;
+                        }
+                    }
+                },
+                schema: {
+                    data: "data",
+                    total: "total",
+                    model: {
+                        fields: {
+                            "Price": { type: "number" },
+                            "StartRent": { type: "date" },
+                            "FinishRent": { type: "date" },
+                            "CreatedTime": { type: "date" },
+                        }
+                    }
+                },
+                sort: { field: "CreatedTime", dir: "desc" }
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: ds,
+                filterable: kendoGridFilterable,
+                pageable: {
+                    pageSizes: true,
+                },
+                sortable: true,
+                resizable: true,
+                autoBind: false,
+                columns: [
+                    {
+                        command: [
+                            {
+                                name: "detail",
+                                text: "detail",
+                                click: viewItem,
+                                imageClass: "glyphicon glyphicon-list-alt",
+                                template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=iconClass# #=imageClass#"></span></a>'
+                            },
+                            {
+                                name: "edit",
+                                text: "edit",
+                                click: editItem,
+                                imageClass: "glyphicon glyphicon-edit",
+                                template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=imageClass#"></span></a>'
+                            },
+                        ],
+                        width: 65,
+                        locked: true
+                    },
+                    {
+                        field: "CreatedTime",
+                        title: "Book Date",
+                        format: "@dfh.JsCompactDateFormat",
+                        width: 130,
+                    },
+					{
+					    field: "Code",
+					    title: "Kode Booking",
+					    width: 150,
+					    template: kendo.template($("#code-template").html()),
+					},
+					{
+					    field: "Name",
+					    title: "Tamu",
+					    template: '#= Name + "<br />" + PhoneNumber #',
+					    encoded: false,
+					    width: 130,
+					},
+					{
+					    field: "CarModelName",
+					    title: "Kendaraan",
+					    template: '#= CarModelName + "<br />" + (LicensePlate == null ? \'<span class="glyphicon glyphicon-warning-sign"></span>\' : LicensePlate) #',
+					    encoded: false,
+					    width: 130,
+					},
+					{
+					    field: "Price",
+					    title: "Harga Akhir",
+					    format: '{0:n0}',
+					    attributes: { 'class': 'text-right' },
+					    width: 125,
+					},
+					{
+					    field: "StartRent",
+					    title: "Tanggal Berangkat",
+					    template: '#= "Jemput: " + kendo.toString(StartRent, "@dfh.JsShortDateTimeFormat2") + "<br />Selesai: " + kendo.toString(FinishRent, "@dfh.JsShortDateTimeFormat2") #',
+					    encoded: false,
+					    width: 200,
+					    filterable: false,
+					},
+					{
+					    field: "PickupLocation",
+					    title: "Penjemputan",
+					    width: 170,
+					},
+					{
+					    field: "DriverName",
+					    title: "Supir",
+					    template: '#= (DriverName === null ? \'<span class="glyphicon glyphicon-warning-sign"></span>\' : DriverName) #',
+					    width: 100,
+					},
+					{
+					    field: "Status",
+					    width: 100,
+					    sortable: false,
+					    filterable: {
+					        ui: listStatus,
+					        operators: {
+					            string: {
+					                eq: "Sama Dengan",
+					            }
+					        },
+					        extra: false,
+					    },
+					},
+					{
+					    field: "CreatedBy",
+					    title: "Karyawan",
+					    width: 130,
+					},
+					//{
+                    //    field: "CarBrandName",
+                    //    title: "Merek",
+                    //    filterable: {
+                    //        ui: ListBrand,
+                    //        operators: {
+                    //            string: {
+                    //                eq: "Sama Dengan",
+                    //            }
+                    //        },
+                    //        extra: false,
+                    //    },
+                    //},
+                ],
+            });
+
+            $('.date-action').click(function () {
+                if ($('.date-form').hasClass('hide')) {
+                    $('.date-form').removeClass('hide');
+                } else {
+                    $('.date-form').addClass('hide');
+                }
+            });
+
+            clearFilterDate();
+
+            @{
+                if (idPrint.HasValue)
+                {
+                    <text>
+                        printQuotation('@idPrint.Value.ToString()');
+                    </text>
+                }
+            }
+
+            //notification
+            var notif = new buzz.sound("@Url.Content("/Content/sound/ding.mp3")");
+            setInterval(function(){
+                $.post('@Url.Action("Get", "Notification")', function(data){
+                    //console.log(data);
+                    if(data !== ''){
+                        var notificationWidget = $("#notification").kendoNotification({
+                            position : {
+                                top:30,
+                                right: 30
+                            },
+                            button :true,
+                            hideOnClick : true,
+                            autoHideAfter : 0,
+                            width: 400,
+                            height: 100,
+                        }).data("kendoNotification");
+
+                        notificationWidget.show(data, "info");
+
+                        notif.play();
+
+                        //console.log(document.getElementsByClassName("k-notification-info"));
+                        //if(document.getElementsByClassName("k-notification-info").length == 0)
+                        //{
+                        //    if(cnt != data)
+                        //    {
+                        //        notificationWidget.show("you have "+ data +" new booking", "info");
+                        //        cnt = data;
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //    if(cnt != data)
+                        //    {
+                        //        var notification = document.getElementsByClassName("k-notification-wrap")[0].children[0].nextSibling.nodeValue;
+                        //        var numb = notification.match(/\d/g);
+                        //        var finalTotalCount = data;
+                        //        document.getElementsByClassName("k-notification-wrap")[0].children[0].nextSibling.nodeValue =
+                        //            notification.replace(numb, finalTotalCount );
+                        //        cnt = data;
+                        //    }
+                        //}
+                    }
+
+                    //$(".k-notification-info > .k-notification-wrap > :not(.k-i-close)").click(function(){
+                    @*$(".k-notification-info").click(function(e){
+                        if(e.target.className.split(" ")[1] != 'k-i-close') {
+                            $.post('@Url.Action("Get", "Notification")');
+                        }
+                    });*@
+                });
+
+            }, 5000);
+
+            setInterval(function(){
+                ds.read();
+            }, 300000);
+        });
+
+
+    </script>
+
+    <script type="text/x-kendo-template" id="code-template">
+        # if(StatusEnum == '@RentStatus.CANCEL.ToString()') { #
+        <span class="text-cancel">#= Code #</span>
+        # } else if(StatusEnum == '@RentStatus.NEW.ToString()') { #
+        <span class="text-new">#= Code #</span>
+        # } else if(StatusEnum == '@RentStatus.GO.ToString()') { #
+        <span class="text-go">#= Code #</span>
+        # } else if(StatusEnum == '@RentStatus.FINISH.ToString()') { #
+        <span class="text-finish">#= Code #</span>
+        # } else { #
+        <span class="">#= Code #</span>
+        # } #
+    </script>
+}
+

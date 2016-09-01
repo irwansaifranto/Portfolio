@@ -1,0 +1,153 @@
+@using WebUI.Extension
+@model WebUI.Areas.Report.Models.DailyFilterModel
+@{
+    ViewBag.Title = "Laporan Supir";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentController = (WebUI.Areas.Report.Controllers.DriverReportController)ViewContext.Controller;
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+}
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+@Html.Raw(currentController.GetMessage())
+
+<div class="form-inline">
+    <div class="form-group">
+        @Html.EditorFor(m => m.StartDate, new { htmlAttributes = new { placeholder = "Tanggal Awal" } })
+    </div>
+    <div class="form-group">
+        <label>s/d</label>
+        @Html.EditorFor(m => m.EndDate, new { htmlAttributes = new { placeholder = "Tanggal Akhir" } })
+    </div>
+    <button type="submit" class="btn btn-default" onclick="reloadGrid()">Tampilkan</button>
+</div><br />
+
+<div id="grid"></div>
+
+@section scripts
+{
+<script type="text/javascript">
+    var ds;
+
+    function reloadGrid() {
+        //kamus
+        var start = $('#StartDate').data('kendoDatePicker').value();
+        var end = $('#EndDate').data('kendoDatePicker').value();
+        var strStart = kendo.toString(start, 'yyyy-MM-dd');
+        var strEnd = kendo.toString(end, 'yyyy-MM-dd');
+        var filter = { StartDate: strStart, EndDate: strEnd };
+
+        //algoritma
+        $.post('@Url.Action("Binding")', filter, function (data) {
+            ds.data(data);
+        }, 'json');
+    }
+
+    function detailItem(e) {
+        e.preventDefault();
+
+        //kamus
+        var start = $('#StartDate').data('kendoDatePicker').value();
+        var end = $('#EndDate').data('kendoDatePicker').value();
+        var strStart = kendo.toString(start, 'yyyy-MM-dd');
+        var strEnd = kendo.toString(end, 'yyyy-MM-dd');
+
+        var data = this.dataItem(getDataRowGrid(e));
+        window.location.href = "@Url.Action("Detail")" + "?id=" + data.Id + "&startDate=" + strStart + "&endDate=" + strEnd;
+    }
+
+    $(document).ready(function () {
+        ds = new kendo.data.DataSource({
+            pageable: true,
+            pageSize: 10,
+            serverFiltering: false,
+            serverPaging: false,
+            serverSorting: false,
+            transport: {
+                read: {
+                    url: "@Url.Action("Binding")",
+                    dataType: "json",
+                    type: "POST",
+                },
+                //parameterMap: function (options, operation) {
+                //    if (operation !== "read" && options != '') {
+                //        return kendo.stringify(options);
+                //    }
+                //    else if (operation == "read") {
+                //        return options;
+                //    }
+                //}
+            },
+            schema: {
+                data: "data",
+                total: "total",
+                model: {
+                    fields: {
+                        "Name": { type: "string" },
+                        "Amount": { type: "number" },
+                        "Quantity": { type: "number" },
+                    }
+                }
+            },
+            aggregate: [
+                { field: "Amount", aggregate: "sum" },
+                { field: "Quantity", aggregate: "sum" }
+            ],
+            sort: { field: 'Name', dir: 'asc' },
+        });
+
+        $("#grid").kendoGrid({
+            dataSource: ds,
+            autoBind: false,
+            filterable: kendoGridFilterable,
+            pageable: true,
+            sortable: true,
+            columns: [
+                {
+                    command: [
+                        {
+                            name: "detail",
+                            text: "detail",
+                            click: detailItem,
+                            imageClass: "glyphicon glyphicon-search",
+                            template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=imageClass#"></span></a>'
+                            //template: '<form action="/Car/Create" class="form-horizontal" method="post"><button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></form>'
+                        }
+                    ],
+                    width: "90px"
+                },
+                {
+                    field: "Name",
+                    title: "Nama",
+                },
+                {
+                    field: "Quantity",
+                    title: "Penggunaaan",
+                    format: "{0:n0}",
+                    footerTemplate: "<div>Total Penggunaan: #=kendo.toString(sum, \"n0\")#</div>",
+                    attributes: {
+                        'class': 'text-right' 
+                    },
+                    filterable: false,
+                    sortable: false
+                },
+                {
+                    field: "Amount",
+                    title: "Pemasukan",
+                    format: "{0:n0}",
+                    footerTemplate: "<div>Total Pemasukan: #=kendo.toString(sum, \"n0\")#</div>",
+                    attributes: {
+                        'class': 'text-right'
+                    },
+                    filterable: false,
+                    sortable: false
+                },
+            ],
+        });
+
+        reloadGrid();
+    });
+</script>
+}
+

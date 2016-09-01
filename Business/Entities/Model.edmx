@@ -1,0 +1,1806 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="karentalModel.Store" Provider="Npgsql" ProviderManifestToken="9.5.1" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="api_rent">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="id_rent" Type="uuid" Nullable="false" />
+          <Property Name="partner" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="status" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="cancellation_status" Type="varchar" MaxLength="10" />
+        </EntityType>
+        <EntityType Name="car">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="id_car_model" Type="uuid" Nullable="false" />
+          <Property Name="license_plate" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="capacity" Type="int4" />
+          <Property Name="status" Type="varchar" MaxLength="50" />
+          <Property Name="is_active" Type="bool" Nullable="false" />
+          <Property Name="id_owner" Type="uuid" Nullable="false" />
+          <Property Name="model_year" Type="int4" />
+          <Property Name="transmission" Type="varchar" MaxLength="4" />
+          <Property Name="fuel" Type="varchar" MaxLength="8" />
+          <Property Name="color" Type="varchar" MaxLength="16" />
+          <Property Name="photo" Type="varchar" MaxLength="128" />
+          <Property Name="vehicle_registration_file" Type="varchar" MaxLength="128" />
+          <Property Name="tax_file" Type="varchar" MaxLength="128" />
+        </EntityType>
+        <EntityType Name="car_brand">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="car_expense">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="expense_date" Type="date" Nullable="false" />
+          <Property Name="id_car" Type="uuid" Nullable="false" />
+          <Property Name="expense_type" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="other" Type="varchar" MaxLength="256" />
+          <Property Name="distance" Type="int4" />
+          <Property Name="expense_value" Type="int4" Nullable="false" />
+          <Property Name="attachment" Type="varchar" MaxLength="256" />
+          <Property Name="notes" Type="varchar" MaxLength="256" />
+          <Property Name="created_by" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="created_time" Type="timestamptz" Precision="7" Nullable="false" />
+          <Property Name="updated_by" Type="varchar" MaxLength="50" />
+          <Property Name="updated_time" Type="timestamptz" Precision="7" />
+        </EntityType>
+        <EntityType Name="car_model">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="id_car_brand" Type="uuid" Nullable="false" />
+          <Property Name="capacity" Type="int2" Nullable="false" />
+        </EntityType>
+        <EntityType Name="car_package">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="id_car_model" Type="uuid" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="price" Type="int4" Nullable="false" />
+          <Property Name="created_by" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="created_time" Type="timestamptz" Precision="7" Nullable="false" />
+          <Property Name="updated_by" Type="varchar" MaxLength="50" />
+          <Property Name="updated_time" Type="timestamptz" Precision="7" />
+          <Property Name="is_active" Type="bool" Nullable="false" />
+          <Property Name="id_owner" Type="uuid" Nullable="false" />
+        </EntityType>
+        <EntityType Name="city">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="latitude" Type="float8" Nullable="false" />
+          <Property Name="longitude" Type="float8" Nullable="false" />
+        </EntityType>
+        <EntityType Name="customer">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="customer_type" Type="varchar" MaxLength="50" />
+          <Property Name="phone_number" Type="varchar" MaxLength="100" />
+          <Property Name="address" Type="text" />
+          <Property Name="city" Type="varchar" MaxLength="100" />
+          <Property Name="email" Type="text" />
+          <Property Name="notes" Type="text" />
+          <Property Name="id_owner" Type="uuid" Nullable="false" />
+          <Property Name="title" Type="varchar" MaxLength="4" />
+          <Property Name="company" Type="varchar" MaxLength="32" />
+          <Property Name="photo" Type="varchar" MaxLength="128" />
+        </EntityType>
+        <EntityType Name="d_notification">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="message" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="is_read" Type="bool" Nullable="false" />
+          <Property Name="id_owner" Type="uuid" Nullable="false" />
+        </EntityType>
+        <EntityType Name="driver">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="name" Type="text" Nullable="false" />
+          <Property Name="driver_type" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="phone_number" Type="varchar" MaxLength="100" />
+          <Property Name="address" Type="text" />
+          <Property Name="city" Type="text" />
+          <Property Name="email" Type="text" />
+          <Property Name="notes" Type="text" />
+          <Property Name="id_owner" Type="uuid" Nullable="false" />
+          <Property Name="work_start_date" Type="date" />
+          <Property Name="photo" Type="varchar" MaxLength="128" />
+          <Property Name="username" Type="varchar" MaxLength="50" />
+          <Property Name="device_id" Type="varchar" MaxLength="50" />
+          <Property Name="driver_license_file" Type="varchar" MaxLength="128" />
+        </EntityType>
+        <EntityType Name="expense">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="id_rent" Type="uuid" Nullable="false" />
+          <Property Name="date" Type="date" Nullable="false" />
+          <Property Name="created_by" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="created_time" Type="timestamptz" Precision="7" Nullable="false" />
+          <Property Name="updated_by" Type="varchar" MaxLength="50" />
+          <Property Name="updated_time" Type="timestamptz" Precision="7" />
+        </EntityType>
+        <EntityType Name="expense_item">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="id_expense" Type="uuid" Nullable="false" />
+          <Property Name="category" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="value" Type="int4" Nullable="false" />
+          <Property Name="description" Type="text" />
+        </EntityType>
+        <EntityType Name="invoice">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="id_rent" Type="uuid" Nullable="false" />
+          <Property Name="price" Type="int4" Nullable="false" />
+          <Property Name="code" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="invoice_date" Type="date" Nullable="false" />
+          <Property Name="status" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="cancel_notes" Type="text" />
+          <Property Name="created_by" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="created_time" Type="timestamptz" Precision="7" Nullable="false" />
+          <Property Name="updated_by" Type="varchar" MaxLength="50" />
+          <Property Name="updated_time" Type="timestamptz" Precision="7" />
+          <Property Name="ppn" Type="bool" Nullable="false" />
+          <Property Name="total" Type="int4" Nullable="false" />
+        </EntityType>
+        <EntityType Name="invoice_item">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="id_invoice" Type="uuid" Nullable="false" />
+          <Property Name="category" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="value" Type="int4" Nullable="false" />
+        </EntityType>
+        <EntityType Name="log_api_rent">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="id_api_rent" Type="uuid" Nullable="false" />
+          <Property Name="status" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="created_time" Type="timestamptz" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="log_ws">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="created_time" Type="timestamptz" Precision="7" Nullable="false" />
+          <Property Name="request_body" Type="text" Nullable="false" />
+          <Property Name="response_body" Type="text" />
+          <Property Name="url" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="request_header" Type="text" />
+          <Property Name="response_header" Type="text" />
+          <Property Name="id" Type="uuid" Nullable="false" />
+        </EntityType>
+        <EntityType Name="owner">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="code" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="created_by" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="created_time" Type="timestamptz" Precision="7" Nullable="false" />
+          <Property Name="updated_by" Type="varchar" MaxLength="50" />
+          <Property Name="updated_time" Type="timestamptz" Precision="7" />
+          <Property Name="logo" Type="varchar" MaxLength="100" />
+          <Property Name="contact" Type="text" />
+          <Property Name="terms" Type="text" />
+          <Property Name="id_city" Type="int4" Nullable="false" />
+        </EntityType>
+        <EntityType Name="owner_user">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id_owner" Type="uuid" Nullable="false" />
+          <Property Name="username" Type="varchar" MaxLength="250" Nullable="false" />
+          <Property Name="id" Type="uuid" Nullable="false" />
+        </EntityType>
+        <EntityType Name="rent">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="id_customer" Type="uuid" Nullable="false" />
+          <Property Name="id_owner" Type="uuid" Nullable="false" />
+          <Property Name="pickup_location" Type="text" />
+          <Property Name="id_driver" Type="uuid" />
+          <Property Name="id_car_model" Type="uuid" Nullable="false" />
+          <Property Name="id_car" Type="uuid" />
+          <Property Name="start_rent" Type="timestamptz" Precision="7" Nullable="false" />
+          <Property Name="finish_rent" Type="timestamptz" Precision="7" Nullable="false" />
+          <Property Name="price" Type="int4" Nullable="false" />
+          <Property Name="notes" Type="text" />
+          <Property Name="code" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="created_by" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="created_time" Type="timestamptz" Precision="7" Nullable="false" />
+          <Property Name="updated_by" Type="varchar" MaxLength="50" />
+          <Property Name="updated_time" Type="timestamptz" Precision="7" />
+          <Property Name="status" Type="varchar" MaxLength="50" />
+          <Property Name="cancel_notes" Type="text" />
+          <Property Name="id_car_package" Type="uuid" />
+          <Property Name="discount" Type="int4" />
+          <Property Name="package_price" Type="int4" Nullable="false" />
+        </EntityType>
+        <EntityType Name="rent_code">
+          <Key>
+            <PropertyRef Name="code" />
+          </Key>
+          <Property Name="code" Type="varchar" MaxLength="10" Nullable="false" />
+        </EntityType>
+        <EntityType Name="rent_package">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id_rent" Type="uuid" Nullable="false" />
+          <Property Name="id_car_package" Type="uuid" Nullable="false" />
+          <Property Name="quantity" Type="int4" Nullable="false" />
+          <Property Name="price_each" Type="int4" Nullable="false" />
+          <Property Name="id" Type="uuid" Nullable="false" />
+        </EntityType>
+        <EntityType Name="rent_position">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="uuid" Nullable="false" />
+          <Property Name="id_rent" Type="uuid" Nullable="false" />
+          <Property Name="created_by" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="created_time" Type="timestamptz" Precision="7" Nullable="false" />
+          <Property Name="latitude" Type="float8" Nullable="false" />
+          <Property Name="longitude" Type="float8" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6013: The table/view 'karental.public.view_report_driver' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
+        <EntityType Name="view_report_driver">
+          <Property Name="driver_name" Type="text" />
+          <Property Name="amount" Type="int8" />
+          <Property Name="quantity" Type="int8" />
+        </EntityType>-->
+        <Association Name="fk_api_rent_rent">
+          <End Role="rent" Type="Self.rent" Multiplicity="1" />
+          <End Role="api_rent" Type="Self.api_rent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="rent">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="api_rent">
+              <PropertyRef Name="id_rent" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_car_car_model">
+          <End Role="car_model" Type="Self.car_model" Multiplicity="1" />
+          <End Role="car" Type="Self.car" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="car_model">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="car">
+              <PropertyRef Name="id_car_model" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_car_expense_car">
+          <End Role="car" Type="Self.car" Multiplicity="1" />
+          <End Role="car_expense" Type="Self.car_expense" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="car">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="car_expense">
+              <PropertyRef Name="id_car" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_car_model_car_brand">
+          <End Role="car_brand" Type="Self.car_brand" Multiplicity="1" />
+          <End Role="car_model" Type="Self.car_model" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="car_brand">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="car_model">
+              <PropertyRef Name="id_car_brand" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_car_owner">
+          <End Role="owner" Type="Self.owner" Multiplicity="1" />
+          <End Role="car" Type="Self.car" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="owner">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="car">
+              <PropertyRef Name="id_owner" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_car_package_car_model">
+          <End Role="car_model" Type="Self.car_model" Multiplicity="1" />
+          <End Role="car_package" Type="Self.car_package" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="car_model">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="car_package">
+              <PropertyRef Name="id_car_model" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_car_package_owner">
+          <End Role="owner" Type="Self.owner" Multiplicity="1" />
+          <End Role="car_package" Type="Self.car_package" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="owner">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="car_package">
+              <PropertyRef Name="id_owner" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_cost_item_cost">
+          <End Role="expense" Type="Self.expense" Multiplicity="1" />
+          <End Role="expense_item" Type="Self.expense_item" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="expense">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="expense_item">
+              <PropertyRef Name="id_expense" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_cost_rent">
+          <End Role="rent" Type="Self.rent" Multiplicity="1" />
+          <End Role="expense" Type="Self.expense" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="rent">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="expense">
+              <PropertyRef Name="id_rent" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_customer_owner">
+          <End Role="owner" Type="Self.owner" Multiplicity="1" />
+          <End Role="customer" Type="Self.customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="owner">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="id_owner" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_d_notification_owner">
+          <End Role="owner" Type="Self.owner" Multiplicity="1" />
+          <End Role="d_notification" Type="Self.d_notification" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="owner">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="d_notification">
+              <PropertyRef Name="id_owner" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_driver_owner">
+          <End Role="owner" Type="Self.owner" Multiplicity="1" />
+          <End Role="driver" Type="Self.driver" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="owner">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="driver">
+              <PropertyRef Name="id_owner" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_invoice_invoice_item">
+          <End Role="invoice" Type="Self.invoice" Multiplicity="1" />
+          <End Role="invoice_item" Type="Self.invoice_item" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="invoice">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="invoice_item">
+              <PropertyRef Name="id_invoice" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_invoice_rent">
+          <End Role="rent" Type="Self.rent" Multiplicity="1" />
+          <End Role="invoice" Type="Self.invoice" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="rent">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="invoice">
+              <PropertyRef Name="id_rent" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_log_api_rent_api_rent">
+          <End Role="api_rent" Type="Self.api_rent" Multiplicity="1" />
+          <End Role="log_api_rent" Type="Self.log_api_rent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="api_rent">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="log_api_rent">
+              <PropertyRef Name="id_api_rent" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_ou_owner">
+          <End Role="owner" Type="Self.owner" Multiplicity="1" />
+          <End Role="owner_user" Type="Self.owner_user" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="owner">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="owner_user">
+              <PropertyRef Name="id_owner" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_owner_city">
+          <End Role="city" Type="Self.city" Multiplicity="1" />
+          <End Role="owner" Type="Self.owner" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="city">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="owner">
+              <PropertyRef Name="id_city" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_car">
+          <End Role="car" Type="Self.car" Multiplicity="0..1" />
+          <End Role="rent" Type="Self.rent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="car">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent">
+              <PropertyRef Name="id_car" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_car_model">
+          <End Role="car_model" Type="Self.car_model" Multiplicity="1" />
+          <End Role="rent" Type="Self.rent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="car_model">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent">
+              <PropertyRef Name="id_car_model" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_customer">
+          <End Role="customer" Type="Self.customer" Multiplicity="1" />
+          <End Role="rent" Type="Self.rent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="customer">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent">
+              <PropertyRef Name="id_customer" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_driver">
+          <End Role="driver" Type="Self.driver" Multiplicity="0..1" />
+          <End Role="rent" Type="Self.rent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="driver">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent">
+              <PropertyRef Name="id_driver" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_owner">
+          <End Role="owner" Type="Self.owner" Multiplicity="1" />
+          <End Role="rent" Type="Self.rent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="owner">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent">
+              <PropertyRef Name="id_owner" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_package_car_package">
+          <End Role="car_package" Type="Self.car_package" Multiplicity="1" />
+          <End Role="rent_package" Type="Self.rent_package" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="car_package">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent_package">
+              <PropertyRef Name="id_car_package" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_package_rent">
+          <End Role="rent" Type="Self.rent" Multiplicity="1" />
+          <End Role="rent_package" Type="Self.rent_package" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="rent">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent_package">
+              <PropertyRef Name="id_rent" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_position_rent">
+          <End Role="rent" Type="Self.rent" Multiplicity="1" />
+          <End Role="rent_position" Type="Self.rent_position" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="rent">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent_position">
+              <PropertyRef Name="id_rent" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="karentalModelStoreContainer">
+          <EntitySet Name="api_rent" EntityType="Self.api_rent" Schema="public" store:Type="Tables" />
+          <EntitySet Name="car" EntityType="Self.car" Schema="public" store:Type="Tables" />
+          <EntitySet Name="car_brand" EntityType="Self.car_brand" Schema="public" store:Type="Tables" />
+          <EntitySet Name="car_expense" EntityType="Self.car_expense" Schema="public" store:Type="Tables" />
+          <EntitySet Name="car_model" EntityType="Self.car_model" Schema="public" store:Type="Tables" />
+          <EntitySet Name="car_package" EntityType="Self.car_package" Schema="public" store:Type="Tables" />
+          <EntitySet Name="city" EntityType="Self.city" Schema="public" store:Type="Tables" />
+          <EntitySet Name="customer" EntityType="Self.customer" Schema="public" store:Type="Tables" />
+          <EntitySet Name="d_notification" EntityType="Self.d_notification" Schema="public" store:Type="Tables" />
+          <EntitySet Name="driver" EntityType="Self.driver" Schema="public" store:Type="Tables" />
+          <EntitySet Name="expense" EntityType="Self.expense" Schema="public" store:Type="Tables" />
+          <EntitySet Name="expense_item" EntityType="Self.expense_item" Schema="public" store:Type="Tables" />
+          <EntitySet Name="invoice" EntityType="Self.invoice" Schema="public" store:Type="Tables" />
+          <EntitySet Name="invoice_item" EntityType="Self.invoice_item" Schema="public" store:Type="Tables" />
+          <EntitySet Name="log_api_rent" EntityType="Self.log_api_rent" Schema="public" store:Type="Tables" />
+          <EntitySet Name="log_ws" EntityType="Self.log_ws" Schema="public" store:Type="Tables" />
+          <EntitySet Name="owner" EntityType="Self.owner" Schema="public" store:Type="Tables" />
+          <EntitySet Name="owner_user" EntityType="Self.owner_user" Schema="public" store:Type="Tables" />
+          <EntitySet Name="rent" EntityType="Self.rent" Schema="public" store:Type="Tables" />
+          <EntitySet Name="rent_code" EntityType="Self.rent_code" Schema="public" store:Type="Tables" />
+          <EntitySet Name="rent_package" EntityType="Self.rent_package" Schema="public" store:Type="Tables" />
+          <EntitySet Name="rent_position" EntityType="Self.rent_position" Schema="public" store:Type="Tables" />
+          <AssociationSet Name="fk_api_rent_rent" Association="Self.fk_api_rent_rent">
+            <End Role="rent" EntitySet="rent" />
+            <End Role="api_rent" EntitySet="api_rent" />
+          </AssociationSet>
+          <AssociationSet Name="fk_car_car_model" Association="Self.fk_car_car_model">
+            <End Role="car_model" EntitySet="car_model" />
+            <End Role="car" EntitySet="car" />
+          </AssociationSet>
+          <AssociationSet Name="fk_car_expense_car" Association="Self.fk_car_expense_car">
+            <End Role="car" EntitySet="car" />
+            <End Role="car_expense" EntitySet="car_expense" />
+          </AssociationSet>
+          <AssociationSet Name="fk_car_model_car_brand" Association="Self.fk_car_model_car_brand">
+            <End Role="car_brand" EntitySet="car_brand" />
+            <End Role="car_model" EntitySet="car_model" />
+          </AssociationSet>
+          <AssociationSet Name="fk_car_owner" Association="Self.fk_car_owner">
+            <End Role="owner" EntitySet="owner" />
+            <End Role="car" EntitySet="car" />
+          </AssociationSet>
+          <AssociationSet Name="fk_car_package_car_model" Association="Self.fk_car_package_car_model">
+            <End Role="car_model" EntitySet="car_model" />
+            <End Role="car_package" EntitySet="car_package" />
+          </AssociationSet>
+          <AssociationSet Name="fk_car_package_owner" Association="Self.fk_car_package_owner">
+            <End Role="owner" EntitySet="owner" />
+            <End Role="car_package" EntitySet="car_package" />
+          </AssociationSet>
+          <AssociationSet Name="fk_cost_item_cost" Association="Self.fk_cost_item_cost">
+            <End Role="expense" EntitySet="expense" />
+            <End Role="expense_item" EntitySet="expense_item" />
+          </AssociationSet>
+          <AssociationSet Name="fk_cost_rent" Association="Self.fk_cost_rent">
+            <End Role="rent" EntitySet="rent" />
+            <End Role="expense" EntitySet="expense" />
+          </AssociationSet>
+          <AssociationSet Name="fk_customer_owner" Association="Self.fk_customer_owner">
+            <End Role="owner" EntitySet="owner" />
+            <End Role="customer" EntitySet="customer" />
+          </AssociationSet>
+          <AssociationSet Name="fk_d_notification_owner" Association="Self.fk_d_notification_owner">
+            <End Role="owner" EntitySet="owner" />
+            <End Role="d_notification" EntitySet="d_notification" />
+          </AssociationSet>
+          <AssociationSet Name="fk_driver_owner" Association="Self.fk_driver_owner">
+            <End Role="owner" EntitySet="owner" />
+            <End Role="driver" EntitySet="driver" />
+          </AssociationSet>
+          <AssociationSet Name="fk_invoice_invoice_item" Association="Self.fk_invoice_invoice_item">
+            <End Role="invoice" EntitySet="invoice" />
+            <End Role="invoice_item" EntitySet="invoice_item" />
+          </AssociationSet>
+          <AssociationSet Name="fk_invoice_rent" Association="Self.fk_invoice_rent">
+            <End Role="rent" EntitySet="rent" />
+            <End Role="invoice" EntitySet="invoice" />
+          </AssociationSet>
+          <AssociationSet Name="fk_log_api_rent_api_rent" Association="Self.fk_log_api_rent_api_rent">
+            <End Role="api_rent" EntitySet="api_rent" />
+            <End Role="log_api_rent" EntitySet="log_api_rent" />
+          </AssociationSet>
+          <AssociationSet Name="fk_ou_owner" Association="Self.fk_ou_owner">
+            <End Role="owner" EntitySet="owner" />
+            <End Role="owner_user" EntitySet="owner_user" />
+          </AssociationSet>
+          <AssociationSet Name="fk_owner_city" Association="Self.fk_owner_city">
+            <End Role="city" EntitySet="city" />
+            <End Role="owner" EntitySet="owner" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_car" Association="Self.fk_rent_car">
+            <End Role="car" EntitySet="car" />
+            <End Role="rent" EntitySet="rent" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_car_model" Association="Self.fk_rent_car_model">
+            <End Role="car_model" EntitySet="car_model" />
+            <End Role="rent" EntitySet="rent" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_customer" Association="Self.fk_rent_customer">
+            <End Role="customer" EntitySet="customer" />
+            <End Role="rent" EntitySet="rent" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_driver" Association="Self.fk_rent_driver">
+            <End Role="driver" EntitySet="driver" />
+            <End Role="rent" EntitySet="rent" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_owner" Association="Self.fk_rent_owner">
+            <End Role="owner" EntitySet="owner" />
+            <End Role="rent" EntitySet="rent" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_package_car_package" Association="Self.fk_rent_package_car_package">
+            <End Role="car_package" EntitySet="car_package" />
+            <End Role="rent_package" EntitySet="rent_package" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_package_rent" Association="Self.fk_rent_package_rent">
+            <End Role="rent" EntitySet="rent" />
+            <End Role="rent_package" EntitySet="rent_package" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_position_rent" Association="Self.fk_rent_position_rent">
+            <End Role="rent" EntitySet="rent" />
+            <End Role="rent_position" EntitySet="rent_position" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="karentalModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="api_rent">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="id_rent" Type="Guid" Nullable="false" />
+          <Property Name="partner" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="status" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="cancellation_status" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="rent" Relationship="Self.fk_api_rent_rent" FromRole="api_rent" ToRole="rent" />
+          <NavigationProperty Name="log_api_rent" Relationship="Self.fk_log_api_rent_api_rent" FromRole="api_rent" ToRole="log_api_rent" />
+        </EntityType>
+        <EntityType Name="car">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="id_car_model" Type="Guid" Nullable="false" />
+          <Property Name="license_plate" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="capacity" Type="Int32" />
+          <Property Name="status" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="is_active" Type="Boolean" Nullable="false" />
+          <Property Name="id_owner" Type="Guid" Nullable="false" />
+          <Property Name="model_year" Type="Int32" />
+          <Property Name="transmission" Type="String" MaxLength="4" FixedLength="false" Unicode="true" />
+          <Property Name="fuel" Type="String" MaxLength="8" FixedLength="false" Unicode="true" />
+          <Property Name="color" Type="String" MaxLength="16" FixedLength="false" Unicode="true" />
+          <Property Name="photo" Type="String" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="vehicle_registration_file" Type="String" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="tax_file" Type="String" MaxLength="128" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="car_model" Relationship="Self.fk_car_car_model" FromRole="car" ToRole="car_model" />
+          <NavigationProperty Name="car_expense" Relationship="Self.fk_car_expense_car" FromRole="car" ToRole="car_expense" />
+          <NavigationProperty Name="owner" Relationship="Self.fk_car_owner" FromRole="car" ToRole="owner" />
+          <NavigationProperty Name="rents" Relationship="Self.fk_rent_car" FromRole="car" ToRole="rent" />
+        </EntityType>
+        <EntityType Name="car_brand">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="car_model" Relationship="Self.fk_car_model_car_brand" FromRole="car_brand" ToRole="car_model" />
+        </EntityType>
+        <EntityType Name="car_expense">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="expense_date" Type="DateTime" Precision="0" Nullable="false" />
+          <Property Name="id_car" Type="Guid" Nullable="false" />
+          <Property Name="expense_type" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="other" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
+          <Property Name="distance" Type="Int32" />
+          <Property Name="expense_value" Type="Int32" Nullable="false" />
+          <Property Name="attachment" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
+          <Property Name="notes" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
+          <Property Name="created_by" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="created_time" Type="DateTimeOffset" Precision="7" Nullable="false" />
+          <Property Name="updated_by" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="updated_time" Type="DateTimeOffset" Precision="7" />
+          <NavigationProperty Name="car" Relationship="Self.fk_car_expense_car" FromRole="car_expense" ToRole="car" />
+        </EntityType>
+        <EntityType Name="car_model">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="id_car_brand" Type="Guid" Nullable="false" />
+          <Property Name="capacity" Type="Int16" Nullable="false" />
+          <NavigationProperty Name="cars" Relationship="Self.fk_car_car_model" FromRole="car_model" ToRole="car" />
+          <NavigationProperty Name="car_brand" Relationship="Self.fk_car_model_car_brand" FromRole="car_model" ToRole="car_brand" />
+          <NavigationProperty Name="car_package" Relationship="Self.fk_car_package_car_model" FromRole="car_model" ToRole="car_package" />
+          <NavigationProperty Name="rents" Relationship="Self.fk_rent_car_model" FromRole="car_model" ToRole="rent" />
+        </EntityType>
+        <EntityType Name="car_package">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="id_car_model" Type="Guid" Nullable="false" />
+          <Property Name="name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="price" Type="Int32" Nullable="false" />
+          <Property Name="created_by" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="created_time" Type="DateTimeOffset" Precision="7" Nullable="false" />
+          <Property Name="updated_by" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="updated_time" Type="DateTimeOffset" Precision="7" />
+          <Property Name="is_active" Type="Boolean" Nullable="false" />
+          <Property Name="id_owner" Type="Guid" Nullable="false" />
+          <NavigationProperty Name="car_model" Relationship="Self.fk_car_package_car_model" FromRole="car_package" ToRole="car_model" />
+          <NavigationProperty Name="owner" Relationship="Self.fk_car_package_owner" FromRole="car_package" ToRole="owner" />
+          <NavigationProperty Name="rent_package" Relationship="Self.fk_rent_package_car_package" FromRole="car_package" ToRole="rent_package" />
+        </EntityType>
+        <EntityType Name="city">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="latitude" Type="Double" Nullable="false" />
+          <Property Name="longitude" Type="Double" Nullable="false" />
+          <NavigationProperty Name="owners" Relationship="Self.fk_owner_city" FromRole="city" ToRole="owner" />
+        </EntityType>
+        <EntityType Name="customer">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="customer_type" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="phone_number" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="address" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="city" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="email" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="id_owner" Type="Guid" Nullable="false" />
+          <Property Name="title" Type="String" MaxLength="4" FixedLength="false" Unicode="true" />
+          <Property Name="company" Type="String" MaxLength="32" FixedLength="false" Unicode="true" />
+          <Property Name="photo" Type="String" MaxLength="128" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="owner" Relationship="Self.fk_customer_owner" FromRole="customer" ToRole="owner" />
+          <NavigationProperty Name="rents" Relationship="Self.fk_rent_customer" FromRole="customer" ToRole="rent" />
+        </EntityType>
+        <EntityType Name="d_notification">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="message" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="is_read" Type="Boolean" Nullable="false" />
+          <Property Name="id_owner" Type="Guid" Nullable="false" />
+          <NavigationProperty Name="owner" Relationship="Self.fk_d_notification_owner" FromRole="d_notification" ToRole="owner" />
+        </EntityType>
+        <EntityType Name="driver">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="name" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="driver_type" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="phone_number" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="address" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="city" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="email" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="id_owner" Type="Guid" Nullable="false" />
+          <Property Name="work_start_date" Type="DateTime" Precision="0" />
+          <Property Name="photo" Type="String" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="username" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="device_id" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="driver_license_file" Type="String" MaxLength="128" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="owner" Relationship="Self.fk_driver_owner" FromRole="driver" ToRole="owner" />
+          <NavigationProperty Name="rents" Relationship="Self.fk_rent_driver" FromRole="driver" ToRole="rent" />
+        </EntityType>
+        <EntityType Name="expense">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="id_rent" Type="Guid" Nullable="false" />
+          <Property Name="date" Type="DateTime" Precision="0" Nullable="false" />
+          <Property Name="created_by" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="created_time" Type="DateTimeOffset" Precision="7" Nullable="false" />
+          <Property Name="updated_by" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="updated_time" Type="DateTimeOffset" Precision="7" />
+          <NavigationProperty Name="expense_item" Relationship="Self.fk_cost_item_cost" FromRole="expense" ToRole="expense_item" />
+          <NavigationProperty Name="rent" Relationship="Self.fk_cost_rent" FromRole="expense" ToRole="rent" />
+        </EntityType>
+        <EntityType Name="expense_item">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="id_expense" Type="Guid" Nullable="false" />
+          <Property Name="category" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="value" Type="Int32" Nullable="false" />
+          <Property Name="description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="expense" Relationship="Self.fk_cost_item_cost" FromRole="expense_item" ToRole="expense" />
+        </EntityType>
+        <EntityType Name="invoice">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="id_rent" Type="Guid" Nullable="false" />
+          <Property Name="price" Type="Int32" Nullable="false" />
+          <Property Name="code" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="invoice_date" Type="DateTime" Precision="0" Nullable="false" />
+          <Property Name="status" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="cancel_notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="created_by" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="created_time" Type="DateTimeOffset" Precision="7" Nullable="false" />
+          <Property Name="updated_by" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="updated_time" Type="DateTimeOffset" Precision="7" />
+          <Property Name="ppn" Type="Boolean" Nullable="false" />
+          <Property Name="total" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="invoice_item" Relationship="Self.fk_invoice_invoice_item" FromRole="invoice" ToRole="invoice_item" />
+          <NavigationProperty Name="rent" Relationship="Self.fk_invoice_rent" FromRole="invoice" ToRole="rent" />
+        </EntityType>
+        <EntityType Name="invoice_item">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="id_invoice" Type="Guid" Nullable="false" />
+          <Property Name="category" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="value" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="invoice" Relationship="Self.fk_invoice_invoice_item" FromRole="invoice_item" ToRole="invoice" />
+        </EntityType>
+        <EntityType Name="log_api_rent">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="id_api_rent" Type="Guid" Nullable="false" />
+          <Property Name="status" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="created_time" Type="DateTimeOffset" Precision="7" Nullable="false" />
+          <NavigationProperty Name="api_rent" Relationship="Self.fk_log_api_rent_api_rent" FromRole="log_api_rent" ToRole="api_rent" />
+        </EntityType>
+        <EntityType Name="log_ws">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="created_time" Type="DateTimeOffset" Precision="7" Nullable="false" />
+          <Property Name="request_body" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="response_body" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="url" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="request_header" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="response_header" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="id" Type="Guid" Nullable="false" />
+        </EntityType>
+        <EntityType Name="owner">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="code" Type="String" MaxLength="5" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="created_by" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="created_time" Type="DateTimeOffset" Precision="7" Nullable="false" />
+          <Property Name="updated_by" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="updated_time" Type="DateTimeOffset" Precision="7" />
+          <Property Name="logo" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="contact" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="terms" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="id_city" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="cars" Relationship="Self.fk_car_owner" FromRole="owner" ToRole="car" />
+          <NavigationProperty Name="car_package" Relationship="Self.fk_car_package_owner" FromRole="owner" ToRole="car_package" />
+          <NavigationProperty Name="city" Relationship="Self.fk_owner_city" FromRole="owner" ToRole="city" />
+          <NavigationProperty Name="customers" Relationship="Self.fk_customer_owner" FromRole="owner" ToRole="customer" />
+          <NavigationProperty Name="d_notification" Relationship="Self.fk_d_notification_owner" FromRole="owner" ToRole="d_notification" />
+          <NavigationProperty Name="drivers" Relationship="Self.fk_driver_owner" FromRole="owner" ToRole="driver" />
+          <NavigationProperty Name="owner_user" Relationship="Self.fk_ou_owner" FromRole="owner" ToRole="owner_user" />
+          <NavigationProperty Name="rents" Relationship="Self.fk_rent_owner" FromRole="owner" ToRole="rent" />
+        </EntityType>
+        <EntityType Name="owner_user">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id_owner" Type="Guid" Nullable="false" />
+          <Property Name="username" Type="String" MaxLength="250" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <NavigationProperty Name="owner" Relationship="Self.fk_ou_owner" FromRole="owner_user" ToRole="owner" />
+        </EntityType>
+        <EntityType Name="rent">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="id_customer" Type="Guid" Nullable="false" />
+          <Property Name="id_owner" Type="Guid" Nullable="false" />
+          <Property Name="pickup_location" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="id_driver" Type="Guid" />
+          <Property Name="id_car_model" Type="Guid" Nullable="false" />
+          <Property Name="id_car" Type="Guid" />
+          <Property Name="start_rent" Type="DateTimeOffset" Precision="7" Nullable="false" />
+          <Property Name="finish_rent" Type="DateTimeOffset" Precision="7" Nullable="false" />
+          <Property Name="price" Type="Int32" Nullable="false" />
+          <Property Name="notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="code" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="created_by" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="created_time" Type="DateTimeOffset" Precision="7" Nullable="false" />
+          <Property Name="updated_by" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="updated_time" Type="DateTimeOffset" Precision="7" />
+          <Property Name="status" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="cancel_notes" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="id_car_package" Type="Guid" />
+          <Property Name="discount" Type="Int32" />
+          <Property Name="package_price" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="api_rent" Relationship="Self.fk_api_rent_rent" FromRole="rent" ToRole="api_rent" />
+          <NavigationProperty Name="car" Relationship="Self.fk_rent_car" FromRole="rent" ToRole="car" />
+          <NavigationProperty Name="car_model" Relationship="Self.fk_rent_car_model" FromRole="rent" ToRole="car_model" />
+          <NavigationProperty Name="customer" Relationship="Self.fk_rent_customer" FromRole="rent" ToRole="customer" />
+          <NavigationProperty Name="driver" Relationship="Self.fk_rent_driver" FromRole="rent" ToRole="driver" />
+          <NavigationProperty Name="expenses" Relationship="Self.fk_cost_rent" FromRole="rent" ToRole="expense" />
+          <NavigationProperty Name="invoices" Relationship="Self.fk_invoice_rent" FromRole="rent" ToRole="invoice" />
+          <NavigationProperty Name="owner" Relationship="Self.fk_rent_owner" FromRole="rent" ToRole="owner" />
+          <NavigationProperty Name="rent_package" Relationship="Self.fk_rent_package_rent" FromRole="rent" ToRole="rent_package" />
+          <NavigationProperty Name="rent_position" Relationship="Self.fk_rent_position_rent" FromRole="rent" ToRole="rent_position" />
+        </EntityType>
+        <EntityType Name="rent_code">
+          <Key>
+            <PropertyRef Name="code" />
+          </Key>
+          <Property Name="code" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+        </EntityType>
+        <EntityType Name="rent_package">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id_rent" Type="Guid" Nullable="false" />
+          <Property Name="id_car_package" Type="Guid" Nullable="false" />
+          <Property Name="quantity" Type="Int32" Nullable="false" />
+          <Property Name="price_each" Type="Int32" Nullable="false" />
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <NavigationProperty Name="car_package" Relationship="Self.fk_rent_package_car_package" FromRole="rent_package" ToRole="car_package" />
+          <NavigationProperty Name="rent" Relationship="Self.fk_rent_package_rent" FromRole="rent_package" ToRole="rent" />
+        </EntityType>
+        <EntityType Name="rent_position">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Guid" Nullable="false" />
+          <Property Name="id_rent" Type="Guid" Nullable="false" />
+          <Property Name="created_by" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="created_time" Type="DateTimeOffset" Precision="7" Nullable="false" />
+          <Property Name="latitude" Type="Double" Nullable="false" />
+          <Property Name="longitude" Type="Double" Nullable="false" />
+          <NavigationProperty Name="rent" Relationship="Self.fk_rent_position_rent" FromRole="rent_position" ToRole="rent" />
+        </EntityType>
+        <Association Name="fk_api_rent_rent">
+          <End Role="rent" Type="Self.rent" Multiplicity="1" />
+          <End Role="api_rent" Type="Self.api_rent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="rent">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="api_rent">
+              <PropertyRef Name="id_rent" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_log_api_rent_api_rent">
+          <End Role="api_rent" Type="Self.api_rent" Multiplicity="1" />
+          <End Role="log_api_rent" Type="Self.log_api_rent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="api_rent">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="log_api_rent">
+              <PropertyRef Name="id_api_rent" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_car_car_model">
+          <End Role="car_model" Type="Self.car_model" Multiplicity="1" />
+          <End Role="car" Type="Self.car" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="car_model">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="car">
+              <PropertyRef Name="id_car_model" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_car_expense_car">
+          <End Role="car" Type="Self.car" Multiplicity="1" />
+          <End Role="car_expense" Type="Self.car_expense" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="car">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="car_expense">
+              <PropertyRef Name="id_car" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_car_owner">
+          <End Role="owner" Type="Self.owner" Multiplicity="1" />
+          <End Role="car" Type="Self.car" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="owner">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="car">
+              <PropertyRef Name="id_owner" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_car">
+          <End Role="car" Type="Self.car" Multiplicity="0..1" />
+          <End Role="rent" Type="Self.rent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="car">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent">
+              <PropertyRef Name="id_car" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_car_model_car_brand">
+          <End Role="car_brand" Type="Self.car_brand" Multiplicity="1" />
+          <End Role="car_model" Type="Self.car_model" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="car_brand">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="car_model">
+              <PropertyRef Name="id_car_brand" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_car_package_car_model">
+          <End Role="car_model" Type="Self.car_model" Multiplicity="1" />
+          <End Role="car_package" Type="Self.car_package" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="car_model">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="car_package">
+              <PropertyRef Name="id_car_model" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_car_model">
+          <End Role="car_model" Type="Self.car_model" Multiplicity="1" />
+          <End Role="rent" Type="Self.rent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="car_model">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent">
+              <PropertyRef Name="id_car_model" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_car_package_owner">
+          <End Role="owner" Type="Self.owner" Multiplicity="1" />
+          <End Role="car_package" Type="Self.car_package" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="owner">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="car_package">
+              <PropertyRef Name="id_owner" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_package_car_package">
+          <End Role="car_package" Type="Self.car_package" Multiplicity="1" />
+          <End Role="rent_package" Type="Self.rent_package" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="car_package">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent_package">
+              <PropertyRef Name="id_car_package" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_owner_city">
+          <End Role="city" Type="Self.city" Multiplicity="1" />
+          <End Role="owner" Type="Self.owner" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="city">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="owner">
+              <PropertyRef Name="id_city" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_customer_owner">
+          <End Role="owner" Type="Self.owner" Multiplicity="1" />
+          <End Role="customer" Type="Self.customer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="owner">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="customer">
+              <PropertyRef Name="id_owner" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_customer">
+          <End Role="customer" Type="Self.customer" Multiplicity="1" />
+          <End Role="rent" Type="Self.rent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="customer">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent">
+              <PropertyRef Name="id_customer" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_d_notification_owner">
+          <End Role="owner" Type="Self.owner" Multiplicity="1" />
+          <End Role="d_notification" Type="Self.d_notification" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="owner">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="d_notification">
+              <PropertyRef Name="id_owner" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_driver_owner">
+          <End Role="owner" Type="Self.owner" Multiplicity="1" />
+          <End Role="driver" Type="Self.driver" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="owner">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="driver">
+              <PropertyRef Name="id_owner" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_driver">
+          <End Role="driver" Type="Self.driver" Multiplicity="0..1" />
+          <End Role="rent" Type="Self.rent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="driver">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent">
+              <PropertyRef Name="id_driver" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_cost_item_cost">
+          <End Role="expense" Type="Self.expense" Multiplicity="1" />
+          <End Role="expense_item" Type="Self.expense_item" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="expense">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="expense_item">
+              <PropertyRef Name="id_expense" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_cost_rent">
+          <End Role="rent" Type="Self.rent" Multiplicity="1" />
+          <End Role="expense" Type="Self.expense" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="rent">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="expense">
+              <PropertyRef Name="id_rent" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_invoice_invoice_item">
+          <End Role="invoice" Type="Self.invoice" Multiplicity="1" />
+          <End Role="invoice_item" Type="Self.invoice_item" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="invoice">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="invoice_item">
+              <PropertyRef Name="id_invoice" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_invoice_rent">
+          <End Role="rent" Type="Self.rent" Multiplicity="1" />
+          <End Role="invoice" Type="Self.invoice" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="rent">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="invoice">
+              <PropertyRef Name="id_rent" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_ou_owner">
+          <End Role="owner" Type="Self.owner" Multiplicity="1" />
+          <End Role="owner_user" Type="Self.owner_user" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="owner">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="owner_user">
+              <PropertyRef Name="id_owner" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_owner">
+          <End Role="owner" Type="Self.owner" Multiplicity="1" />
+          <End Role="rent" Type="Self.rent" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="owner">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent">
+              <PropertyRef Name="id_owner" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_package_rent">
+          <End Role="rent" Type="Self.rent" Multiplicity="1" />
+          <End Role="rent_package" Type="Self.rent_package" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="rent">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent_package">
+              <PropertyRef Name="id_rent" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_rent_position_rent">
+          <End Role="rent" Type="Self.rent" Multiplicity="1" />
+          <End Role="rent_position" Type="Self.rent_position" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="rent">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="rent_position">
+              <PropertyRef Name="id_rent" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="Entities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="api_rent" EntityType="Self.api_rent" />
+          <EntitySet Name="cars" EntityType="Self.car" />
+          <EntitySet Name="car_brand" EntityType="Self.car_brand" />
+          <EntitySet Name="car_expense" EntityType="Self.car_expense" />
+          <EntitySet Name="car_model" EntityType="Self.car_model" />
+          <EntitySet Name="car_package" EntityType="Self.car_package" />
+          <EntitySet Name="cities" EntityType="Self.city" />
+          <EntitySet Name="customers" EntityType="Self.customer" />
+          <EntitySet Name="d_notification" EntityType="Self.d_notification" />
+          <EntitySet Name="drivers" EntityType="Self.driver" />
+          <EntitySet Name="expenses" EntityType="Self.expense" />
+          <EntitySet Name="expense_item" EntityType="Self.expense_item" />
+          <EntitySet Name="invoices" EntityType="Self.invoice" />
+          <EntitySet Name="invoice_item" EntityType="Self.invoice_item" />
+          <EntitySet Name="log_api_rent" EntityType="Self.log_api_rent" />
+          <EntitySet Name="log_ws" EntityType="Self.log_ws" />
+          <EntitySet Name="owners" EntityType="Self.owner" />
+          <EntitySet Name="owner_user" EntityType="Self.owner_user" />
+          <EntitySet Name="rents" EntityType="Self.rent" />
+          <EntitySet Name="rent_code" EntityType="Self.rent_code" />
+          <EntitySet Name="rent_package" EntityType="Self.rent_package" />
+          <EntitySet Name="rent_position" EntityType="Self.rent_position" />
+          <AssociationSet Name="fk_api_rent_rent" Association="Self.fk_api_rent_rent">
+            <End Role="rent" EntitySet="rents" />
+            <End Role="api_rent" EntitySet="api_rent" />
+          </AssociationSet>
+          <AssociationSet Name="fk_log_api_rent_api_rent" Association="Self.fk_log_api_rent_api_rent">
+            <End Role="api_rent" EntitySet="api_rent" />
+            <End Role="log_api_rent" EntitySet="log_api_rent" />
+          </AssociationSet>
+          <AssociationSet Name="fk_car_car_model" Association="Self.fk_car_car_model">
+            <End Role="car_model" EntitySet="car_model" />
+            <End Role="car" EntitySet="cars" />
+          </AssociationSet>
+          <AssociationSet Name="fk_car_expense_car" Association="Self.fk_car_expense_car">
+            <End Role="car" EntitySet="cars" />
+            <End Role="car_expense" EntitySet="car_expense" />
+          </AssociationSet>
+          <AssociationSet Name="fk_car_owner" Association="Self.fk_car_owner">
+            <End Role="owner" EntitySet="owners" />
+            <End Role="car" EntitySet="cars" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_car" Association="Self.fk_rent_car">
+            <End Role="car" EntitySet="cars" />
+            <End Role="rent" EntitySet="rents" />
+          </AssociationSet>
+          <AssociationSet Name="fk_car_model_car_brand" Association="Self.fk_car_model_car_brand">
+            <End Role="car_brand" EntitySet="car_brand" />
+            <End Role="car_model" EntitySet="car_model" />
+          </AssociationSet>
+          <AssociationSet Name="fk_car_package_car_model" Association="Self.fk_car_package_car_model">
+            <End Role="car_model" EntitySet="car_model" />
+            <End Role="car_package" EntitySet="car_package" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_car_model" Association="Self.fk_rent_car_model">
+            <End Role="car_model" EntitySet="car_model" />
+            <End Role="rent" EntitySet="rents" />
+          </AssociationSet>
+          <AssociationSet Name="fk_car_package_owner" Association="Self.fk_car_package_owner">
+            <End Role="owner" EntitySet="owners" />
+            <End Role="car_package" EntitySet="car_package" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_package_car_package" Association="Self.fk_rent_package_car_package">
+            <End Role="car_package" EntitySet="car_package" />
+            <End Role="rent_package" EntitySet="rent_package" />
+          </AssociationSet>
+          <AssociationSet Name="fk_owner_city" Association="Self.fk_owner_city">
+            <End Role="city" EntitySet="cities" />
+            <End Role="owner" EntitySet="owners" />
+          </AssociationSet>
+          <AssociationSet Name="fk_customer_owner" Association="Self.fk_customer_owner">
+            <End Role="owner" EntitySet="owners" />
+            <End Role="customer" EntitySet="customers" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_customer" Association="Self.fk_rent_customer">
+            <End Role="customer" EntitySet="customers" />
+            <End Role="rent" EntitySet="rents" />
+          </AssociationSet>
+          <AssociationSet Name="fk_d_notification_owner" Association="Self.fk_d_notification_owner">
+            <End Role="owner" EntitySet="owners" />
+            <End Role="d_notification" EntitySet="d_notification" />
+          </AssociationSet>
+          <AssociationSet Name="fk_driver_owner" Association="Self.fk_driver_owner">
+            <End Role="owner" EntitySet="owners" />
+            <End Role="driver" EntitySet="drivers" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_driver" Association="Self.fk_rent_driver">
+            <End Role="driver" EntitySet="drivers" />
+            <End Role="rent" EntitySet="rents" />
+          </AssociationSet>
+          <AssociationSet Name="fk_cost_item_cost" Association="Self.fk_cost_item_cost">
+            <End Role="expense" EntitySet="expenses" />
+            <End Role="expense_item" EntitySet="expense_item" />
+          </AssociationSet>
+          <AssociationSet Name="fk_cost_rent" Association="Self.fk_cost_rent">
+            <End Role="rent" EntitySet="rents" />
+            <End Role="expense" EntitySet="expenses" />
+          </AssociationSet>
+          <AssociationSet Name="fk_invoice_invoice_item" Association="Self.fk_invoice_invoice_item">
+            <End Role="invoice" EntitySet="invoices" />
+            <End Role="invoice_item" EntitySet="invoice_item" />
+          </AssociationSet>
+          <AssociationSet Name="fk_invoice_rent" Association="Self.fk_invoice_rent">
+            <End Role="rent" EntitySet="rents" />
+            <End Role="invoice" EntitySet="invoices" />
+          </AssociationSet>
+          <AssociationSet Name="fk_ou_owner" Association="Self.fk_ou_owner">
+            <End Role="owner" EntitySet="owners" />
+            <End Role="owner_user" EntitySet="owner_user" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_owner" Association="Self.fk_rent_owner">
+            <End Role="owner" EntitySet="owners" />
+            <End Role="rent" EntitySet="rents" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_package_rent" Association="Self.fk_rent_package_rent">
+            <End Role="rent" EntitySet="rents" />
+            <End Role="rent_package" EntitySet="rent_package" />
+          </AssociationSet>
+          <AssociationSet Name="fk_rent_position_rent" Association="Self.fk_rent_position_rent">
+            <End Role="rent" EntitySet="rents" />
+            <End Role="rent_position" EntitySet="rent_position" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="karentalModelStoreContainer" CdmEntityContainer="Entities">
+          <EntitySetMapping Name="api_rent">
+            <EntityTypeMapping TypeName="karentalModel.api_rent">
+              <MappingFragment StoreEntitySet="api_rent">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="id_rent" ColumnName="id_rent" />
+                <ScalarProperty Name="partner" ColumnName="partner" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="cancellation_status" ColumnName="cancellation_status" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="cars">
+            <EntityTypeMapping TypeName="karentalModel.car">
+              <MappingFragment StoreEntitySet="car">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="id_car_model" ColumnName="id_car_model" />
+                <ScalarProperty Name="license_plate" ColumnName="license_plate" />
+                <ScalarProperty Name="capacity" ColumnName="capacity" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="is_active" ColumnName="is_active" />
+                <ScalarProperty Name="id_owner" ColumnName="id_owner" />
+                <ScalarProperty Name="model_year" ColumnName="model_year" />
+                <ScalarProperty Name="transmission" ColumnName="transmission" />
+                <ScalarProperty Name="fuel" ColumnName="fuel" />
+                <ScalarProperty Name="color" ColumnName="color" />
+                <ScalarProperty Name="photo" ColumnName="photo" />
+                <ScalarProperty Name="vehicle_registration_file" ColumnName="vehicle_registration_file" />
+                <ScalarProperty Name="tax_file" ColumnName="tax_file" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="car_brand">
+            <EntityTypeMapping TypeName="karentalModel.car_brand">
+              <MappingFragment StoreEntitySet="car_brand">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="car_expense">
+            <EntityTypeMapping TypeName="karentalModel.car_expense">
+              <MappingFragment StoreEntitySet="car_expense">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="expense_date" ColumnName="expense_date" />
+                <ScalarProperty Name="id_car" ColumnName="id_car" />
+                <ScalarProperty Name="expense_type" ColumnName="expense_type" />
+                <ScalarProperty Name="other" ColumnName="other" />
+                <ScalarProperty Name="distance" ColumnName="distance" />
+                <ScalarProperty Name="expense_value" ColumnName="expense_value" />
+                <ScalarProperty Name="attachment" ColumnName="attachment" />
+                <ScalarProperty Name="notes" ColumnName="notes" />
+                <ScalarProperty Name="created_by" ColumnName="created_by" />
+                <ScalarProperty Name="created_time" ColumnName="created_time" />
+                <ScalarProperty Name="updated_by" ColumnName="updated_by" />
+                <ScalarProperty Name="updated_time" ColumnName="updated_time" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="car_model">
+            <EntityTypeMapping TypeName="karentalModel.car_model">
+              <MappingFragment StoreEntitySet="car_model">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="id_car_brand" ColumnName="id_car_brand" />
+                <ScalarProperty Name="capacity" ColumnName="capacity" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="car_package">
+            <EntityTypeMapping TypeName="karentalModel.car_package">
+              <MappingFragment StoreEntitySet="car_package">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="id_car_model" ColumnName="id_car_model" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="price" ColumnName="price" />
+                <ScalarProperty Name="created_by" ColumnName="created_by" />
+                <ScalarProperty Name="created_time" ColumnName="created_time" />
+                <ScalarProperty Name="updated_by" ColumnName="updated_by" />
+                <ScalarProperty Name="updated_time" ColumnName="updated_time" />
+                <ScalarProperty Name="is_active" ColumnName="is_active" />
+                <ScalarProperty Name="id_owner" ColumnName="id_owner" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="cities">
+            <EntityTypeMapping TypeName="karentalModel.city">
+              <MappingFragment StoreEntitySet="city">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="latitude" ColumnName="latitude" />
+                <ScalarProperty Name="longitude" ColumnName="longitude" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="customers">
+            <EntityTypeMapping TypeName="karentalModel.customer">
+              <MappingFragment StoreEntitySet="customer">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="customer_type" ColumnName="customer_type" />
+                <ScalarProperty Name="phone_number" ColumnName="phone_number" />
+                <ScalarProperty Name="address" ColumnName="address" />
+                <ScalarProperty Name="city" ColumnName="city" />
+                <ScalarProperty Name="email" ColumnName="email" />
+                <ScalarProperty Name="notes" ColumnName="notes" />
+                <ScalarProperty Name="id_owner" ColumnName="id_owner" />
+                <ScalarProperty Name="title" ColumnName="title" />
+                <ScalarProperty Name="company" ColumnName="company" />
+                <ScalarProperty Name="photo" ColumnName="photo" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="d_notification">
+            <EntityTypeMapping TypeName="karentalModel.d_notification">
+              <MappingFragment StoreEntitySet="d_notification">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="message" ColumnName="message" />
+                <ScalarProperty Name="is_read" ColumnName="is_read" />
+                <ScalarProperty Name="id_owner" ColumnName="id_owner" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="drivers">
+            <EntityTypeMapping TypeName="karentalModel.driver">
+              <MappingFragment StoreEntitySet="driver">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="driver_type" ColumnName="driver_type" />
+                <ScalarProperty Name="phone_number" ColumnName="phone_number" />
+                <ScalarProperty Name="address" ColumnName="address" />
+                <ScalarProperty Name="city" ColumnName="city" />
+                <ScalarProperty Name="email" ColumnName="email" />
+                <ScalarProperty Name="notes" ColumnName="notes" />
+                <ScalarProperty Name="id_owner" ColumnName="id_owner" />
+                <ScalarProperty Name="work_start_date" ColumnName="work_start_date" />
+                <ScalarProperty Name="photo" ColumnName="photo" />
+                <ScalarProperty Name="username" ColumnName="username" />
+                <ScalarProperty Name="device_id" ColumnName="device_id" />
+                <ScalarProperty Name="driver_license_file" ColumnName="driver_license_file" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="expenses">
+            <EntityTypeMapping TypeName="karentalModel.expense">
+              <MappingFragment StoreEntitySet="expense">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="id_rent" ColumnName="id_rent" />
+                <ScalarProperty Name="date" ColumnName="date" />
+                <ScalarProperty Name="created_by" ColumnName="created_by" />
+                <ScalarProperty Name="created_time" ColumnName="created_time" />
+                <ScalarProperty Name="updated_by" ColumnName="updated_by" />
+                <ScalarProperty Name="updated_time" ColumnName="updated_time" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="expense_item">
+            <EntityTypeMapping TypeName="karentalModel.expense_item">
+              <MappingFragment StoreEntitySet="expense_item">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="id_expense" ColumnName="id_expense" />
+                <ScalarProperty Name="category" ColumnName="category" />
+                <ScalarProperty Name="value" ColumnName="value" />
+                <ScalarProperty Name="description" ColumnName="description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="invoices">
+            <EntityTypeMapping TypeName="karentalModel.invoice">
+              <MappingFragment StoreEntitySet="invoice">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="id_rent" ColumnName="id_rent" />
+                <ScalarProperty Name="price" ColumnName="price" />
+                <ScalarProperty Name="code" ColumnName="code" />
+                <ScalarProperty Name="invoice_date" ColumnName="invoice_date" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="cancel_notes" ColumnName="cancel_notes" />
+                <ScalarProperty Name="created_by" ColumnName="created_by" />
+                <ScalarProperty Name="created_time" ColumnName="created_time" />
+                <ScalarProperty Name="updated_by" ColumnName="updated_by" />
+                <ScalarProperty Name="updated_time" ColumnName="updated_time" />
+                <ScalarProperty Name="ppn" ColumnName="ppn" />
+                <ScalarProperty Name="total" ColumnName="total" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="invoice_item">
+            <EntityTypeMapping TypeName="karentalModel.invoice_item">
+              <MappingFragment StoreEntitySet="invoice_item">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="id_invoice" ColumnName="id_invoice" />
+                <ScalarProperty Name="category" ColumnName="category" />
+                <ScalarProperty Name="value" ColumnName="value" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="log_api_rent">
+            <EntityTypeMapping TypeName="karentalModel.log_api_rent">
+              <MappingFragment StoreEntitySet="log_api_rent">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="id_api_rent" ColumnName="id_api_rent" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="created_time" ColumnName="created_time" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="log_ws">
+            <EntityTypeMapping TypeName="karentalModel.log_ws">
+              <MappingFragment StoreEntitySet="log_ws">
+                <ScalarProperty Name="created_time" ColumnName="created_time" />
+                <ScalarProperty Name="request_body" ColumnName="request_body" />
+                <ScalarProperty Name="response_body" ColumnName="response_body" />
+                <ScalarProperty Name="url" ColumnName="url" />
+                <ScalarProperty Name="request_header" ColumnName="request_header" />
+                <ScalarProperty Name="response_header" ColumnName="response_header" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="owners">
+            <EntityTypeMapping TypeName="karentalModel.owner">
+              <MappingFragment StoreEntitySet="owner">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="code" ColumnName="code" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="created_by" ColumnName="created_by" />
+                <ScalarProperty Name="created_time" ColumnName="created_time" />
+                <ScalarProperty Name="updated_by" ColumnName="updated_by" />
+                <ScalarProperty Name="updated_time" ColumnName="updated_time" />
+                <ScalarProperty Name="logo" ColumnName="logo" />
+                <ScalarProperty Name="contact" ColumnName="contact" />
+                <ScalarProperty Name="terms" ColumnName="terms" />
+                <ScalarProperty Name="id_city" ColumnName="id_city" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="owner_user">
+            <EntityTypeMapping TypeName="karentalModel.owner_user">
+              <MappingFragment StoreEntitySet="owner_user">
+                <ScalarProperty Name="id_owner" ColumnName="id_owner" />
+                <ScalarProperty Name="username" ColumnName="username" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="rents">
+            <EntityTypeMapping TypeName="karentalModel.rent">
+              <MappingFragment StoreEntitySet="rent">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="id_customer" ColumnName="id_customer" />
+                <ScalarProperty Name="id_owner" ColumnName="id_owner" />
+                <ScalarProperty Name="pickup_location" ColumnName="pickup_location" />
+                <ScalarProperty Name="id_driver" ColumnName="id_driver" />
+                <ScalarProperty Name="id_car_model" ColumnName="id_car_model" />
+                <ScalarProperty Name="id_car" ColumnName="id_car" />
+                <ScalarProperty Name="start_rent" ColumnName="start_rent" />
+                <ScalarProperty Name="finish_rent" ColumnName="finish_rent" />
+                <ScalarProperty Name="price" ColumnName="price" />
+                <ScalarProperty Name="notes" ColumnName="notes" />
+                <ScalarProperty Name="code" ColumnName="code" />
+                <ScalarProperty Name="created_by" ColumnName="created_by" />
+                <ScalarProperty Name="created_time" ColumnName="created_time" />
+                <ScalarProperty Name="updated_by" ColumnName="updated_by" />
+                <ScalarProperty Name="updated_time" ColumnName="updated_time" />
+                <ScalarProperty Name="status" ColumnName="status" />
+                <ScalarProperty Name="cancel_notes" ColumnName="cancel_notes" />
+                <ScalarProperty Name="id_car_package" ColumnName="id_car_package" />
+                <ScalarProperty Name="discount" ColumnName="discount" />
+                <ScalarProperty Name="package_price" ColumnName="package_price" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="rent_code">
+            <EntityTypeMapping TypeName="karentalModel.rent_code">
+              <MappingFragment StoreEntitySet="rent_code">
+                <ScalarProperty Name="code" ColumnName="code" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="rent_package">
+            <EntityTypeMapping TypeName="karentalModel.rent_package">
+              <MappingFragment StoreEntitySet="rent_package">
+                <ScalarProperty Name="id_rent" ColumnName="id_rent" />
+                <ScalarProperty Name="id_car_package" ColumnName="id_car_package" />
+                <ScalarProperty Name="quantity" ColumnName="quantity" />
+                <ScalarProperty Name="price_each" ColumnName="price_each" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="rent_position">
+            <EntityTypeMapping TypeName="karentalModel.rent_position">
+              <MappingFragment StoreEntitySet="rent_position">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="id_rent" ColumnName="id_rent" />
+                <ScalarProperty Name="created_by" ColumnName="created_by" />
+                <ScalarProperty Name="created_time" ColumnName="created_time" />
+                <ScalarProperty Name="latitude" ColumnName="latitude" />
+                <ScalarProperty Name="longitude" ColumnName="longitude" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

@@ -1,0 +1,523 @@
+@model WebUI.Models.Invoice.InvoiceFormStub
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    string currentController = (string)ViewContext.RouteData.Values["controller"];
+    string currentAction = (string)ViewContext.RouteData.Values["action"];
+    string backLink = "";
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+
+    if (currentAction == "Create")
+    {
+        ViewBag.Title = "Tambah Invoice";
+
+    }
+    else
+    {
+        ViewBag.Title = ViewBag.Name + " | Edit";
+    }
+
+    backLink = Url.Action("Index");
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+@using (@Html.BeginForm(currentAction, currentController, FormMethod.Post, new { @class = "form-horizontal", id = "form" }))
+{
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(model => model.Id)
+    @Html.Hidden("print", false);
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.IdRent, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            <div class="input-group">
+                @Html.HiddenFor(model => model.IdRent)
+                @Html.EditorFor(model => model.RentCode, new { htmlAttributes = new { @class = "form-control", style = "", placeholder = "Kode Booking", @readonly = "readonly" } })
+                @*@Html.EditorFor(model => model.IdRent, new { @class = "form-control" })*@
+                <span class="input-group-btn">
+                    <button id="SearchBooking" class="btn btn-default" type="button" data-toggle="modal" data-target="#DialogBooking"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                </span>
+            </div>
+            @Html.ValidationMessageFor(model => model.IdRent)
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.CustomerName, new { @class = "col-xs-2 control-label" })
+        <label class="col-xs-4 control-text" id="customer-name">@Model.CustomerName</label>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.StartRent, new { @class = "col-xs-2 control-label" })
+        <label class="col-xs-4 control-text" id="rent-date">@Model.StartRent</label>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="form-group">
+                @Html.LabelFor(model => model.Code, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.Code, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                    @Html.ValidationMessageFor(model => model.Code)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.InvoiceDate, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.InvoiceDate, new { @class = "" })
+                    @Html.ValidationMessageFor(model => model.InvoiceDate)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Price, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @readonly = "readonly", @class = "form-control-numeric kendo-disabled" } })
+                    @Html.ValidationMessageFor(model => model.Price)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.AdditionalItemText, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-12 grid-item-container">
+                    <div id="grid-item"></div>
+                    @Html.HiddenFor(model => model.AdditionalItemText, new { @class = "" })
+                    @Html.ValidationMessageFor(model => model.Status)
+                    <em class="text-info">*) Untuk hasil print yang maksimal disarankan tidak lebih dari 7 item.</em>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <div class="form-group">
+                @Html.LabelFor(model => model.Status, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.Status, new { @class = "" })
+                    @Html.ValidationMessageFor(model => model.Status)
+                </div>
+            </div>
+            <div id="cancel-note" class="form-group" style="display: none;">
+                <label class="col-xs-4 control-label" for="Notes">Catatan Pembatalan<span style="color:red"> *</span></label>
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.Notes, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                    @Html.ValidationMessageFor(model => model.Notes)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.PPN, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.EditorFor(model => model.PPN)
+            @Html.ValidationMessageFor(model => model.PPN)
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-xs-2 control-label">Total</label>
+        <div class="col-xs-4">
+            <p class="form-control-static" id="total-invoice-value"></p>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-xs-offset-2 col-xs-10">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-primary" onclick="savePrint()">Save &amp; Print</button>
+            <a href="@backLink" class="btn btn-link">Cancel</a>
+        </div>
+    </div>
+}
+
+<!-- Modal 2 For Plant 7-->
+<div class="modal fade" id="DialogBooking" role="dialog" aria-labelledby="ModalBookingLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel7">Daftar Booking</h4>
+            </div>
+            <div class="modal-body">
+                <div id="grid"></div>
+            </div>
+            <div class="modal-footer">
+                <span id="LoadingCompositionPlant7"></span>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+                <button id="BtnChoose" type="button" class="btn btn-primary" onclick="getBookingId(_ID_BOOKING)">Pilih Booking</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        //variabel
+        var initialData = [];
+        var _ID_BOOKING = "";
+        var currentAction = '@currentAction.ToLower()';
+
+        //fungsi
+        function setIdBookingGlobal(id){
+            _ID_BOOKING = id;
+
+        }
+
+        function getBookingId(id){
+            if(id == ""){
+                alert("Pilih satu booking terlebih dahulu");
+            }else{
+                setBookingField(id);
+                $('#DialogBooking').modal('toggle');
+            }
+        }
+
+        function savePrint(){
+            $("#print").val(true);
+            $("#form").submit();
+        }
+
+        function setBookingField(id, updatePrice){
+            updatePrice = typeof updatePrice !== 'undefined' ? updatePrice : true;
+            if(id !== 'undefined' && id !== null && id !== ''){
+                $.post( "@Url.Action("GetBooking")",{id : id} , function( data ) {
+                    $("#IdRent").val(id);
+                    $("#RentCode").val(data[3]);
+                    $( "#customer-name" ).html( data[0] );
+                    $( "#rent-date" ).html( data[1] );
+
+                    if(updatePrice){
+                        var price = $("#Price").data("kendoNumericTextBox");
+                        price.value(data[2]);
+                    }
+
+                    calculateTotalInvoice();
+                });
+            }
+        }
+
+        function comboBoxOnChange(e) {
+            if (this.value() && this.selectedIndex == -1) {   //or use this.dataItem to see if it has an object
+                this.text('');
+            }else{
+                setBookingField(this.value());
+            }
+        }
+
+        function checkBoxChange() {
+            var check = $("#ck-" + $("#IdRent").val());
+            check.prop("checked", true);
+        }
+
+        //status
+        function comboBoxOnChangeStatus(e) {
+            if (this.value() && this.selectedIndex == -1) {   //or use this.dataItem to see if it has an object
+                this.text('');
+            }else{
+                if(this.value() == '@Common.Enums.InvoiceStatus.CANCEL.ToString()')   {
+                    $( "#cancel-note" ).show();
+                }else{
+                    $( "#cancel-note" ).hide();
+                }
+            }
+        }
+
+        function calculateTotalInvoice(){
+            var grid = $('#grid-item').data('kendoGrid');
+            var price = $('#Price').data('kendoNumericTextBox').value();
+            var itemSum = grid.dataSource.aggregates().Value.sum;
+            var isPPN = $('#PPN').is(':checked');
+            var total = price + itemSum;
+
+            if(isPPN)
+                total = total * 1.1;
+            var currency = kendo.toString(total, 'n0');
+
+            $('#total-invoice-value').html(currency);
+        }
+
+        $(document).ready(function () {
+            $('#Status').kendoDropDownList({
+                optionLabel: "--Pilih Salah Satu--",
+                dataTextField: "Text",
+                dataValueField: "Value",
+                change: comboBoxOnChangeStatus,
+                dataSource: {
+                    data: @Html.Raw(Model.GetStatusOptions())
+                }
+            });
+
+            var statusOptions = $("#Status").data("kendoDropDownList");
+            if(statusOptions.value() == '@Common.Enums.InvoiceStatus.CANCEL.ToString()'){
+                $( "#cancel-note" ).show();
+            }
+
+            setBookingField('@Model.IdRent', (currentAction === 'create'));
+
+            //booking datasource & grid
+            var rentFilter = [{ field: 'without_invoice', operator: 'eq', value: 'true' }];
+            if(currentAction === 'edit')
+                rentFilter.push({ field: 'include_id', operator: 'eq', value: '@Model.IdRent' });
+
+            ds = new kendo.data.DataSource({
+                pageable: true,
+                pageSize: 5,
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                sortable:true,
+                transport: {
+                    read: {
+                        url: "@Url.Action("Binding", "Booking")",
+                        dataType: "json",
+                        type:"POST",
+                    },
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options != '') {
+                            return kendo.stringify(options);
+                        } else if (operation == "read") {
+                            var filter;
+
+                            if (options.filter) {
+                                filter = options.filter.filters;
+                                for (var i in filter) {
+                                    if (filter[i].field == "Name") {
+                                        var additional =
+                                            {
+                                                filters:
+                                                    [
+                                                        { field: "customer.name", operator: 'contains', value: filter[i].value },
+                                                        { field: "customer.phone_number", operator: 'contains', value: filter[i].value }
+                                                    ],
+                                                logic: 'or',
+                                            };
+
+                                        filter[i] = additional;
+                                    } else if (filter[i].field == "CarModelName") {
+                                        var additional =
+                                            {
+                                                filters:
+                                                    [
+                                                        { field: "car.license_plate", operator: 'contains', value: filter[i].value },
+                                                        { field: "car_model.name", operator: 'contains', value: filter[i].value }
+                                                    ],
+                                                logic: 'or',
+                                            };
+
+                                        filter[i] = additional;
+                                    } else if (filter[i].field == 'DriverName') {
+                                        filter[i].field = 'driver.name';
+                                    } else if (filter[i].field == 'Code') {
+                                        filter[i].field = 'code';
+                                    } else if (filter[i].field == 'CreatedTime') {
+                                        var date = filter[i].value;
+                                        filter[i].value = kendo.toString(date, "yyyy-MM-dd");
+                                    }
+                                }
+                            }
+
+                            if (options.sort) {
+                                sort = options.sort;
+                                for (var i in sort) {
+                                    if (sort[i].field == "CarModelName") {
+                                        sort[i].field = "car_model.name";
+                                    } else if (sort[i].field == "DriverName") {
+                                        sort[i].field = "driver.name";
+                                    } else if (sort[i].field == "Name") {
+                                        sort[i].field = "customer.name";
+                                    }
+                                }
+                            }
+                            return options;
+                        }
+                    }
+                },
+                schema: {
+                    data: "data",
+                    total: "total",
+                    model: {
+                        fields: {
+                            "Id" : { type: "text"},
+                            "Price": { type: "number" },
+                            "StartRent": { type: "date" },
+                            "FinishRent": { type: "date" },
+                            "CreatedTime": { type: "date" },
+                        }
+                    }
+                },
+                sort: { field: "CreatedTime", dir: "desc" },
+                filter: rentFilter,
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: ds,
+                dataBound: function (e) {
+                    checkBoxChange();
+                },
+                filterable: kendoGridFilterable,
+                pageable: true,
+                sortable: true,
+                resizable: true,
+                columns: [
+                    {
+                        field: "Id",
+                        title: " ",
+                        template: "<input type='radio' id='ck-#=Id#' name='action' onClick='setIdBookingGlobal(\"#=Id#\")'>",
+                        filterable: false,
+                        sortable:false,
+                        width: 30
+                    },
+                    {
+                        field: "CreatedTime",
+                        title: "Book Date",
+                        format: "@dfh.JsCompactDateFormat",
+                        width: 130,
+                    },
+                    {
+                        field: "Code",
+                        title: "Kode Booking",
+                        width: 150,
+                    },
+                    {
+                        field: "Name",
+                        title: "Tamu",
+                        template: '#= Name + "<br />" + PhoneNumber #',
+                        encoded: false,
+                        width: 130,
+                        filterable: false,
+                    },
+                    {
+                        field: "StartRent",
+                        title: "Tanggal",
+                        template: '#= "Jemput: " + kendo.toString(StartRent, "@dfh.JsShortDateTimeFormat2") + "<br />Selesai: " + kendo.toString(FinishRent, "@dfh.JsShortDateTimeFormat2") #',
+                        encoded: false,
+                        //width: 200,
+                        filterable: false,
+                    },
+                    //{
+                    //    field: "PickupLocation",
+                    //    title: "Penjemputan",
+                    //    width: 170,
+                    //},
+                    //{
+                    //    field: "DriverName",
+                    //    title: "Supir",
+                    //    template: '#= (DriverName === null ? \'<span class="glyphicon glyphicon-warning-sign"></span>\' : DriverName) #',
+                    //    width: 100,
+                    //},
+                ],
+            });
+
+            //additional invoice items
+            @if (Model.AdditionalItemText != null && Model.AdditionalItemText != "")
+            {
+                <text>
+                    initialData = @Html.Raw(Model.AdditionalItemText);
+                </text>
+            }
+
+            $("#grid-item").kendoGrid({
+                dataSource: {
+                    data: initialData,
+                    schema: {
+                        model: {
+                            id: 'Id',
+                            fields: {
+                                Id: { type: "string", defaultValue: null },
+                                IdInvoice: { type: "string", defaultValue: null },
+                                Category: { type: "string", validation: { required: { message: "Kategori wajib diisi." } } },
+                                Value: { type: "number", validation: { min: -1000000000000000, max: 1000000000000000, required: { message: "Nilai wajib diisi." } } },
+                            }
+                        }
+                    },
+                    aggregate: [{ field: "Value", aggregate: "sum" }],
+                    sort: { field: 'Category', dir: 'asc' },
+                },
+                filterable: kendoGridFilterable,
+                sortable: true,
+                scrollable: true,
+                resizable: true,
+                editable: 'inline',
+                toolbar: [{ name: "create", text: " Tambah" }],
+                columns: [
+                    {
+                        command: [
+                            {
+                                name: "edit",
+                                text: "Edit",
+                                imageClass: "glyphicon glyphicon-edit",
+                                template: '<a class="k-button-icon #=className#" #=attr# href="\\#" title="#=text#"><span class="#=imageClass#"></span></a>'
+                            },
+                            {
+                                name: "destroy",
+                                text: "Hapus",
+                                imageClass: "glyphicon glyphicon-remove",
+                                template: '<a class="k-button-icon #=className#" #=attr# href="\\#" title="#=text#"><span class="#=imageClass#"></span></a>'
+                            }
+                        ],
+                        width: 75
+                    },
+                    {
+                        field: "Id",
+                        title: "Id",
+                        hidden: true
+                    },
+                    {
+                        field: "Category",
+                        title: "Keterangan",
+                    },
+                    {
+                        field: "Value",
+                        title: "Nilai",
+                        format: '{0:n0}',
+                        attributes: { 'class': 'text-right' }
+                    },
+                ],
+                save: function (e) {
+                    calculateTotalInvoice();
+                },
+                edit: function(e) {
+                    var commandCell = e.container.find("td:first");
+                    commandCell.html('<a class="k-button-icon k-grid-update" href="\\#" title="Simpan"><span class="glyphicon glyphicon-floppy-saved"></span></a>');
+                }
+            });
+
+            var numerictextbox = $("#Price").data("kendoNumericTextBox");
+
+            numerictextbox.bind("change", function() {
+                calculateTotalInvoice();
+            });
+
+            $('#SearchBooking').click(function(){
+                checkBoxChange();
+                setIdBookingGlobal($('#IdRent').val());
+            });
+
+            $('#PPN').change(function(){
+                calculateTotalInvoice();
+            });
+
+            $('#form').submit(function(e){
+                var grid = $('#grid-item').data('kendoGrid');
+                grid.saveRow();
+                var data = grid.dataSource.data();
+                console.log(data);
+
+                $('#AdditionalItemText').val(JSON.stringify(data));
+
+                //e.preventDefault();
+                //return false;
+            });
+
+            $('#DialogBooking').on('shown', function() {
+                $(document).off('focusin.modal');
+            });
+
+            calculateTotalInvoice();
+        });
+
+        function setId(id) {
+
+        }
+
+    </script>
+}

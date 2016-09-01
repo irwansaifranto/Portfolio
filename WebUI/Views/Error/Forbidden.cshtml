@@ -1,0 +1,11 @@
+﻿@model WebUI.Models.ErrorPageViewModel
+@{
+    ViewBag.Title = "Akses Terbatas";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+<p>Maaf, Anda tidak memiliki akses ke halaman ini. Silakan menghubungi customer service kami.</p>
+<a href="@Model.ReferrerUrl" class="btn btn-primary">kembali</a>

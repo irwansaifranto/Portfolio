@@ -1,0 +1,166 @@
+@using WebUI.Extension
+@model WebUI.Areas.Report.Models.DailyFilterModel
+@{
+    ViewBag.Title = "Laporan Supir | " + ViewBag.DriverName;
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentController = (WebUI.Areas.Report.Controllers.DriverReportController)ViewContext.Controller;
+    Guid driverId = ViewBag.DriverId;
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+}
+<div class="page-header">
+    <div class="btn-group pull-right">
+        @Html.ActionLink("Kembali", "Index", null, new { @class = "btn btn-default" })
+    </div>
+    <h1>@ViewBag.Title</h1>
+</div>
+
+@Html.Raw(currentController.GetMessage())
+
+<div class="form-inline">
+    <div class="form-group">
+        @Html.EditorFor(m => m.StartDate, new { htmlAttributes = new { placeholder = "Tanggal Awal" } })
+    </div>
+    <div class="form-group">
+        <label>s/d</label>
+        @Html.EditorFor(m => m.EndDate, new { htmlAttributes = new { placeholder = "Tanggal Akhir" } })
+    </div>
+    <button type="submit" class="btn btn-default" onclick="reloadGrid()">Tampilkan</button>
+</div><br />
+
+<div id="grid"></div>
+
+@section scripts
+{
+<script type="text/javascript">
+    var ds;
+
+    function reloadGrid() {
+        //kamus
+        var start = $('#StartDate').data('kendoDatePicker').value();
+        var end = $('#EndDate').data('kendoDatePicker').value();
+        var strStart = kendo.toString(start, 'yyyy-MM-dd');
+        var strEnd = kendo.toString(end, 'yyyy-MM-dd');
+        var filter = { StartDate: strStart, EndDate: strEnd, Id: '@driverId' };
+
+        //algoritma
+        filter = {
+            filters: [
+                { field: 'expense.date', operator: 'gte', value: strStart },
+                { field: 'expense.date', operator: 'lte', value: strEnd },
+            ],
+            logic: 'and'
+        };
+        ds.filter(filter);
+        @*$.post('@Url.Action("Binding")', filter, function (data) {
+            ds.data(data);
+        }, 'json');*@
+    }
+
+    $(document).ready(function () {
+        ds = new kendo.data.DataSource({
+            pageable: true,
+            pageSize: 10,
+            serverFiltering: true,
+            serverPaging: true,
+            serverSorting: true,
+            transport: {
+                read: {
+                    url: "@Url.Action("BindingDetail")",
+                    dataType: "json",
+                    type: "POST",
+                },
+                parameterMap: function (options, operation) {
+                    if (operation !== "read" && options.models) {
+
+                    } else {
+
+                        if (options.filter) {
+                            filter = options.filter.filters;
+                            for (var i in filter) {
+                                if (filter[i].field == "Date") {
+                                    var date = new Date(filter[i].value);
+                                    filter[i].field = "expense.date";
+                                    filter[i].operator = "eq";
+                                    filter[i].value = kendo.toString(date, "yyyy-MM-dd");
+                                } else if (filter[i].field == "IdRent") {
+                                    filter[i].field = "expense.rent.code";
+                                }
+                            }
+
+                            var fil = { field: "expense.rent.id_driver", operator: "eq", value: '@driverId' };
+                            filter.push(fil);
+
+                            fil = { field: "category", operator: "eq", value: '@Common.Enums.ExpenseItemCategory.DRIVER.ToString()' };
+                            filter.push(fil);
+                        }
+
+                        if (options.sort) {
+                            sort = options.sort;
+                            for (var i in sort) {
+                                if (sort[i].field == "Date") {
+                                    sort[i].field = "expense.date";
+                                } else if (sort[i].field == "IdRent") {
+                                    sort[i].field = "expense.rent.code";
+                                }
+                            }
+                        }
+
+                        return options;
+                    }
+                },
+            },
+            schema: {
+                data: "data",
+                total: "total",
+                model: {
+                    fields: {
+                        "Date": { type: "date" },
+                        "Amount": { type: "number" },
+                    }
+                }
+            },
+            aggregate: [
+                { field: "Amount", aggregate: "sum" },
+            ],
+            sort: { field: 'Date', dir: 'asc' },
+        });
+
+        $("#grid").kendoGrid({
+            dataSource: ds,
+            autoBind: false,
+            filterable: kendoGridFilterable,
+            pageable: true,
+            sortable: true,
+            columns: [
+                {
+                    field: "Date",
+                    title: "Tanggal",
+                    format: '@dfh.JsFullDateFormat',
+                },
+                {
+                    field: "IdRent",
+                    title: "Kode Booking",
+                    template: kendo.template($("#detail-booking").html()),
+                },
+                {
+                    field: "Amount",
+                    title: "Pemasukan",
+                    format: "{0:n0}",
+                    footerTemplate: "<div>Total Pemasukan: #=kendo.toString(sum, \"n0\")#</div>",
+                    attributes: {
+                        'class': 'text-right'
+                    },
+                    filterable: false,
+                    sortable: false
+                },
+            ],
+        });
+
+        reloadGrid();
+    });
+</script>
+<script type="text/x-kendo-template" id="detail-booking">
+    <a href='@Url.Action("Detail", "Booking", new { area = "" })?id=#=IdRent#' target="_blank">#= RentCode #</a>
+</script>
+}
+

@@ -1,0 +1,154 @@
+@using WebUI.Extension;
+@using MvcSiteMapProvider.Web.Html;
+@{
+    ViewBag.Title = "Car Model";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentController = (WebUI.Controllers.CarModelController)ViewContext.Controller;
+}
+<div class="page-header">
+    <div class="btn-group pull-right">
+        @Html.ActionLink("Add Car Model", "Create", new { area = "" }, new { @class = "btn btn-default" })
+    </div>
+    <h1>@ViewBag.Title</h1>
+</div>
+@Html.Raw(currentController.GetMessage())
+<div id="grid"></div>
+
+@section scripts
+    {
+    <script type="text/javascript">
+
+        function deleteItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            goToDeletePage('@Url.Action("Delete")' + "?id=" + data.Id,this.dataSource);
+        }
+
+        function editItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            window.location.href = "@Url.Action("Edit")" + "?id=" + data.Id;
+        }
+
+        function ListBrand(element) {
+            element.kendoDropDownList({
+                dataTextField: "Text",
+                dataValueField: "Value",
+                dataSource: {
+                    data: @Html.Raw(ViewBag.ListBrand)
+                },
+                optionLabel: "--Pilih--",
+            });
+        }
+
+        $(document).ready(function () {
+
+            var ds = {
+                pageable: true,
+                pageSize: 10,
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                sortable:true,
+                transport: {
+                    read: {
+                        url: "@Url.Action("Binding")",
+                        dataType: "json",
+                        type:"POST",
+                    },
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options != '') {
+                            return kendo.stringify(options);
+                        }
+                        else if (operation == "read") {
+							if (options.filter) {
+                                filter = options.filter.filters;
+                                for (var i in filter) {
+									if (filter[i].field == "CarBrandName") {
+                                        filter[i].field = "car_brand.id";
+                                    }
+                                }
+                            }
+
+                            if (options.sort) {
+                                sort = options.sort;
+                                for (var i in sort) {
+									if (sort[i].field == "CarBrandName") {
+                                        sort[i].field = "car_brand.name";
+                                    }
+                                }
+                            }
+                            return options;
+                        }
+                    }
+                },
+				schema: {
+                    data: "data",
+                    total: "total",
+                    model: {
+                        fields: {
+							"Id": { type: "string" },
+							"Name": { type: "string" },
+							"IdCarBrand": { type: "string" },
+							"CarBrandName": { type: "string" },
+							"Capacity": {type:"number"},
+                        }
+                    }
+				},
+				sort: { field: "car_brand.name", dir: "asc" }
+            };
+
+            $("#grid").kendoGrid({
+                dataSource: ds,
+                filterable: kendoGridFilterable,
+                pageable: true,
+                sortable: true,
+                resizable: true,
+                columns: [
+                    {
+                        command: [
+                            {
+                                name: "edit",
+                                text: "edit",
+                                click: editItem,
+                                imageClass: "glyphicon glyphicon-edit",
+                                template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=imageClass#"></span></a>'
+                            },
+                            //{
+                            //    name: "delete",
+                            //    text: "delete",
+                            //    click: deleteItem,
+                            //    imageClass: "glyphicon glyphicon-remove",
+                            //    template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=iconClass# #=imageClass#"></span></a>'
+                            //}
+                        ],
+                        width: "90px"
+                    },
+					{
+                        field: "Name",
+                        title: "Nama",
+                    },
+					{
+                        field: "CarBrandName",
+                        title: "Merek",
+                        filterable: {
+                            ui: ListBrand,
+                            operators: {
+                                string: {
+                                    eq: "Sama Dengan",
+                                }
+                            },
+                            extra: false,
+                        },
+					},
+                    {
+                        field: "Capacity",
+                        title: "Kapasitas",                        
+                    },
+                    
+                ],
+            });
+        });
+    </script>
+}
+

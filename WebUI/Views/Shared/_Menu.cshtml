@@ -1,0 +1,57 @@
+﻿<ul class="nav navbar-nav">
+@{
+    //kamus
+    string currentArea, currentController, currentAction, currentClass;
+
+    //algoritma
+    //init
+    currentArea = (string)ViewContext.RouteData.DataTokens["area"];
+    currentController = (string)ViewContext.RouteData.Values["controller"];
+    currentAction = ViewContext.RouteData.GetRequiredString("action");
+    
+    //menus
+    currentClass = "";
+    if(currentController == "Home")
+    {
+        currentClass = "active";
+    }
+	<li class="@currentClass">
+		@Html.ActionLink("Home", "Index", "Home", new { area = "" }, null )
+	</li>
+    
+    if((User as WebUI.Infrastructure.Concrete.CustomPrincipal).HasAccess("Dashboard"))
+    {
+        currentClass = "";
+        if((currentController == "Home") && (currentAction == "TestAuthorize"))
+        {
+            currentClass = "active";
+        }
+	<li class="@currentClass">
+		@Html.ActionLink("Test Authorize", "TestAuthorize", "Home", new { area = "" }, null )
+	</li>
+    }
+
+    currentClass = "";
+    if (currentController == "Financial")
+    {
+        currentClass = "active";
+    }
+	<li class="@currentClass">
+		<a data-toggle="dropdown" href="#">Dashboard <span class="caret"></span></a>
+		<ul class="dropdown-menu" role="menu">
+			<li>@Html.ActionLink("Finansial", "Index", "Contractor", new { area = "" }, null)</li>
+			@*<li>@Html.ActionLink("Operasi", "Index", "Company", new { area = "" }, null)</li>
+			<li>@Html.ActionLink("Investasi", "Index", "RCATemplate", new { area = "" }, null)</li>*@
+		</ul>
+	</li>
+    
+    currentClass = "";
+    if(currentController == "Log")
+    {
+        currentClass = "active";
+    }
+	<li class="@currentClass">
+		@Html.ActionLink("Log", "Index", "Log", new { area = "" }, null )
+	</li>
+}
+</ul>

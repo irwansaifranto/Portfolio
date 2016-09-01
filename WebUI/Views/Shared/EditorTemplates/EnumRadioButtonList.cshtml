@@ -1,0 +1,25 @@
+﻿@model Enum
+@{
+    Common.Enums.EnumHelper enumHelper = new Common.Enums.EnumHelper();
+}
+
+<div class="row">
+@foreach (Enum value in Enum.GetValues(Model.GetType()))
+{
+    <div class="@ViewData["cssClass"]">
+        <div class="radio">
+          <label>
+    @if (Model.Equals(value))
+    {
+              @Html.RadioButtonFor(m => m, value, new { @checked = "checked" })
+    }
+    else
+    {
+              @Html.RadioButtonFor(m => m, value)
+    }
+              @enumHelper.GetEnumDescription(value)
+          </label>
+        </div>
+    </div>
+}
+</div>

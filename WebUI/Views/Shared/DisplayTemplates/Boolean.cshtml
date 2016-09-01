@@ -1,0 +1,21 @@
+﻿@model Boolean
+@{
+    RouteValueDictionary htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(ViewData["htmlAttributes"]);
+
+    if (htmlAttributes == null)
+    {
+        htmlAttributes = new RouteValueDictionary();
+    }
+    if (htmlAttributes.ContainsKey("class") == false)
+    {
+        htmlAttributes.Add("class", "checkbox");
+    }
+}
+
+@if (Model != null){
+    <div class="@htmlAttributes["class"]">
+        <label>
+            @Html.CheckBox("", Model, new { @disabled = "disabled" })
+        </label>
+    </div>
+}

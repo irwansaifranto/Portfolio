@@ -1,0 +1,28 @@
+﻿ 
+<!DOCTYPE html>
+<html moznomarginboxes>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/bootstrapcss/css")
+    @Styles.Render("~/Content/kendo/css")
+    @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/printcss")
+    @Scripts.Render("~/bundles/modernizr")
+   
+</head>
+<body>
+    @RenderBody()
+   
+    <script type="text/javascript">
+        var FILEMANAGERPATH = '@Url.Content("~/Scripts/Filemanager/index.html?Type=Images")';
+    </script>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/kendo")
+    @Scripts.Render("~/bundles/webapp")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

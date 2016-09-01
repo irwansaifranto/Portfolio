@@ -1,0 +1,14 @@
+﻿@model Int32?
+@{
+    var htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(ViewData["htmlAttributes"]);
+
+    if (htmlAttributes == null)
+    {
+        htmlAttributes = new RouteValueDictionary();
+    }
+    if (htmlAttributes.ContainsKey("class") == false)
+    {
+        htmlAttributes.Add("class", "form-control-numeric");
+    }
+}
+@Html.TextBox("", Model, htmlAttributes)

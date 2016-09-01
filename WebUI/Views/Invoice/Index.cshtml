@@ -1,0 +1,258 @@
+@using WebUI.Extension
+@using Common.Enums
+@using MvcSiteMapProvider.Web.Html
+@model WebUI.Models.Invoice.StatisticPresentationStub
+@{
+    ViewBag.Title = "Invoice";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentController = (WebUI.Controllers.InvoiceController)ViewContext.Controller;
+    string BarPaid = Model.PersentasePaid.ToString("n1").Replace(',', '.');
+    string BarUnpaid = Model.PersentaseUnpaid.ToString("n1").Replace(',', '.');
+
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+}
+<div class="page-header">
+    <div class="btn-group pull-right">
+        @Html.ActionLink("Tambah Invoice", "Create", new { area = "" }, new { @class = "btn btn-default" })
+    </div>
+    <h1>@ViewBag.Title</h1>
+</div>
+@Html.Raw(currentController.GetMessage())
+<div class="panel panel-info">
+    <div class="panel-heading">
+        <h3 class="panel-title">Statistik</h3>
+    </div>
+    <div class="panel-body">
+        <div id="statistic" class="progress">
+            <div class="progress-bar progress-bar-success" style="width: @BarPaid%; position:initial;">
+                <span>@Model.PersentasePaid.ToString("n1")%</span>
+            </div>
+            <div class="progress-bar progress-bar-danger" style="width: @BarUnpaid%; position:initial;">
+                <span>@Model.PersentaseUnpaid.ToString("n1")%</span>
+            </div>
+        </div>
+        <div class="form-horizontal form-display">
+            <div class="form-group">
+                <label class="col-xs-2 control-label"><b>Sudah Dibayar</b></label>
+                <label class="col-xs-10 control-text">Rp @Model.TotalPaid.ToString("n2"),- (@Model.PersentasePaid.ToString("n2")%)</label>
+            </div>
+            <div class="form-group">
+                <label class="col-xs-2 control-label"><b>Belum Dibayar</b></label>
+                <label class="col-xs-10 control-text">Rp @Model.TotalUnpaid.ToString("n2"),- (@Model.PersentaseUnpaid.ToString("n2")%)</label>
+            </div>
+        </div>
+        <small><em>*) Data yang ditampilkan adalah data yang sudah dibayar pada bulan @DateTime.Now.ToString("MMMM") dan data yang belum dibayar sampai saat ini</em></small>
+    </div>
+</div>
+<div id="grid"></div>
+
+@*@using (@Html.BeginForm("PrintInvoice", "Invoice", FormMethod.Post, new { @class = "form-horizontal", id = "form" }))
+{ 
+    @Html.Hidden("id");
+}*@
+
+@section scripts
+{
+    <script type="text/javascript">
+
+        function detailItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            window.location.href = "@Url.Action("Detail")" + "?id=" + data.Id;
+        }
+
+        function editItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            window.location.href = "@Url.Action("Edit")" + "?id=" + data.Id;
+        }
+
+        function ListStatus (element) {
+            element.kendoDropDownList({
+                dataTextField: "Text",
+                dataValueField: "Value",
+                dataSource: {
+                    data: @Html.Raw(ViewBag.ListStatus)
+                    },
+                optionLabel: "--Pilih--",
+            });
+        }
+    
+        //function PrintInvoice(Id){
+        //    $("#id").val(Id);
+        //    $("#form").attr("target", '_blank');
+        //    $("#form").submit();  
+        //}
+
+        function PrintInvoice(id) {
+            var url = '@Url.Action("PrintInvoice")?id=' + id;
+            var windowName = "invoice";
+
+            openPrintWindow(url, windowName);
+        }
+
+        $(document).ready(function () {
+            @{
+                if (ViewBag.PrintId != null) { 
+                    <text>
+                    PrintInvoice('@ViewBag.PrintId');
+                    </text>
+                }
+            }
+
+            var ds = {
+                pageable: true,
+                pageSize: 10,
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                sortable:true,
+                transport: {
+                    read: {
+                        url: "@Url.Action("Binding")",
+                        dataType: "json",
+                        type:"POST",
+                    },
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options != '') {
+                            return kendo.stringify(options);
+                        }
+                        else if (operation == "read") {
+                            if (options.filter) {
+                                filter = options.filter.filters;
+                                for (var i in filter) {
+                                    if (filter[i].field == "RentCode") {
+                                        filter[i].field = "rent.code";
+                                    }
+                                    else if (filter[i].field == "CustomerName") {
+                                        filter[i].field = "rent.customer.name";
+                                    }
+                                    if (filter[i].field == "InvoiceDate") {
+                                        var date = filter[i].value;
+                                        filter[i].value = kendo.toString(date, "yyyy-MM-dd");
+                                    }
+                                }
+                            }
+
+                            if (options.sort) {
+                                sort = options.sort;
+                                for (var i in sort) {
+                                    if (sort[i].field == "RentCode") {
+                                        sort[i].field = "rent.code";
+                                    }
+                                    if (sort[i].field == "CustomerName") {
+                                        sort[i].field = "rent.customer.name";
+                                    }
+                                }
+                            }
+                            return options;
+                        }
+                    }
+                },
+                schema: {
+                    data: "data",
+                    total: "total",
+                    model: {
+                        fields: {
+                            "Id": { type: "string" },
+                            "IdRent": { type: "string" },
+                            "Code": { type: "string" },
+                            "InvoiceDate": { type: "date" },
+                            "RentCode": { type: "string" },
+                            "CustomerName": { type: "string" },
+                            "Total": { type: "number" },
+                            "Status": { type: "string" },
+                            "CreatedTime": { type: "date" },
+                        }
+                    }
+                },
+                sort: { field: "CreatedTime", dir: "desc" }
+            };
+
+            $("#grid").kendoGrid({
+                dataSource: ds,
+                filterable: kendoGridFilterable,
+                pageable: true,
+                sortable: true,
+                resizable: true,
+                columns: [
+                    {
+                        command: [
+                            {
+                                name: "view",
+                                text: "view",
+                                click: detailItem,
+                                imageClass: "glyphicon glyphicon-list-alt",
+                                template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=imageClass#"></span></a>'
+                            },
+                            {
+                                name: "edit",
+                                text: "edit",
+                                click: editItem,
+                                imageClass: "glyphicon glyphicon-edit",
+                                template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=imageClass#"></span></a>'
+                            },
+                        ],
+                        width: 65
+                    },
+                    {
+                        field: "Code",
+                        title: "#Invoice Num",
+                        template: kendo.template($("#code-template").html()),
+                    },
+                    {
+                        field: "InvoiceDate",
+                        title: "Tanggal Invoice",
+                        format: '@dfh.JsFullDateFormat',
+                    },
+                    {
+                        field: "RentCode",
+                        title: "Kode Booking",
+                        template: kendo.template($("#detail-booking").html()),
+                    },
+                    {
+                        field: "CustomerName",
+                        title: "Tamu",
+                    },
+                    {
+                        field: "Total",
+                        title: "Nilai",
+                        format: '{0:n0}',
+                        attributes: {
+                            'class': 'text-right'
+                        },
+                    },
+                    {
+                        field: "Status",
+                        title: "Status Invoice",
+                        filterable: {
+                            ui: ListStatus,
+                            operators: {
+                                string: {
+                                    eq: "Sama Dengan",
+                                }
+                            },
+                            extra: false,
+                        },
+                    }
+                ],
+            });
+        });
+    </script>
+    <script type="text/x-kendo-template" id="detail-booking">
+        <a href='@Url.Action("Detail", "Booking")?id=#=IdRent#' target="_blank">#= RentCode #</a>
+    </script>
+
+    <script type="text/x-kendo-template" id="code-template">
+        # if(StatusEnum == '@InvoiceStatus.CANCEL.ToString()') { #
+        <span class="text-cancel">#= Code #</span>
+        # } else if(StatusEnum == '@InvoiceStatus.UNPAID.ToString()') { #
+        <span class="text-new">#= Code #</span>
+        # } else if(StatusEnum == '@InvoiceStatus.PAID.ToString()') { #
+        <span class="text-finish">#= Code #</span>
+        # } else { #
+        <span class="">#= Code #</span>
+        # } #
+    </script>
+}
+

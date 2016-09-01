@@ -1,0 +1,15 @@
+﻿@model string
+@{
+    var htmlAttributes = ViewData["htmlAttributes"];
+    System.Type type = htmlAttributes.GetType();
+    string css = (string)type.GetProperty("class").GetValue(htmlAttributes, null);
+}
+
+@if (string.IsNullOrEmpty(Model)) {
+    
+}
+else {
+    <label class="@css">
+    @Html.Raw(Model.Replace("\\r\\n", "<br>"))
+    </label>
+}

@@ -1,0 +1,32 @@
+﻿@model MvcSiteMapProvider.Web.Html.Models.SiteMapPathHelperModel
+@using System.Web.Mvc.Html
+@using System.Linq
+@using MvcSiteMapProvider.Web.Html.Models
+ 
+
+@{
+    if(Model.Nodes.Count != 1)
+    {
+    @Html.Raw("<ul class='breadcrumb'>");
+        foreach (var node in Model.Nodes)
+        {
+            if (node == Model.Nodes.First())
+            {
+                continue;
+                
+            }
+            if (node != Model.Nodes.Last())
+            {
+                string url = node.IsClickable ? node.Url : "#";
+                @Html.Raw(String.Format("<li><a href='{0}'>{1}</a><span class='divider'></span></li>",url,node.Title))
+                
+            }   
+            else
+            {
+                @Html.Raw(String.Format("<li class='active'>{0}</li>",node.Title))
+            }
+        }
+        
+    }    
+    @Html.Raw("</ul>")
+}

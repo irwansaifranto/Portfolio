@@ -1,0 +1,1045 @@
+<#@ template language="C#" HostSpecific="True"  inherits="DynamicTransform" #>
+<#@ assembly name="System.Data.Entity" #>
+<#@ assembly name="System.ComponentModel.DataAnnotations" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data.Linq" #>
+<#@ assembly name="RekadiaPS" #>
+<#@ import namespace="EnvDTE" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.ComponentModel.DataAnnotations" #>
+<#@ import namespace="System.Data.Linq.Mapping" #>
+<#@ import namespace="System.Data.Objects.DataClasses" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Reflection" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ Output Extension="cs" #>
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Script.Serialization;
+using WebUI.Models;
+using WebUI.Controllers;
+using WebUI.Infrastructure;
+using WebUI.Extension;
+using MvcSiteMapProvider;
+using MvcSiteMapProvider.Web.Mvc.Filters;
+using Business.Abstract;
+using NPOI.XSSF.UserModel;
+using NPOI.SS.UserModel;
+using NPOI.SS.Util;
+using System.IO;
+using System.Threading;
+<# foreach(var ns in new[] { Model.ModelTypeNamespace, Model.DbContextNamespace, Model.ModelStubNamespace }.Where(x => !string.IsNullOrEmpty(x) && (x != Model.RepositoryNamespace)).Distinct()) { #>
+using <#= ns #>;
+<# } #>
+
+namespace <#= Model.ControllerNamespace #>
+{
+<# 
+    var modelType = (CodeType)Model.ModelType; 
+    var modelName = modelType.Name; 
+    var modelNamePlural = Model.ModelTypePluralized; 
+    var contextName = ((CodeType)Model.DbContextType).Name; 
+    var primaryKeyProperty = modelType.VisibleMembers().OfType<CodeProperty>().Single(x => x.Name == Model.PrimaryKey);
+    var isObjectContext = ((CodeType)Model.DbContextType).IsAssignableTo<System.Data.Objects.ObjectContext>();
+	var modelProperties = GetModelProperties(modelType, true);
+	var countForeignItem = 0;
+	var count = 0;
+	var displayName = Regex.Replace(Regex.Replace(modelName, @"_(\p{Ll})",m => " " + m.Groups[1].Value.ToUpper()), @"\b(\p{Ll})",m => m.Groups[1].Value.ToUpper());
+#>
+    public class <#= Model.ModelNamePascalCase #>Controller : MyController
+    {
+		private I<#= Model.ModelNamePascalCase #>Repository Repo<#= Model.ModelNamePascalCase #>;
+<#
+foreach (ModelProperty property in modelProperties) {
+	if (property.IsForeignItem) {
+		countForeignItem++;
+#>
+		private I<#= property.NamePascalCase #>Repository Repo<#= property.NamePascalCase #>;
+<#	
+	}
+}
+#>
+		private ILogRepository RepoLog;
+
+        public <#= Model.ModelNamePascalCase #>Controller(I<#= Model.ModelNamePascalCase #>Repository repo<#= Model.ModelNamePascalCase #>, ILogRepository repoLog<#= countForeignItem > 0 ? ", " : "" #><#
+count = 0;
+foreach (ModelProperty property in modelProperties) {
+	if (property.IsForeignItem) {
+		count++;
+#>I<#= property.NamePascalCase #>Repository repo<#= property.NamePascalCase #><#= count != countForeignItem ? "," : "" #><#
+	}
+}
+#>)
+			: base(repoLog)
+        {
+            Repo<#= Model.ModelNamePascalCase #> = repo<#= Model.ModelNamePascalCase #>;
+<#
+	count = 0;
+	foreach (ModelProperty property in modelProperties) {
+		if (property.IsForeignItem) {
+			count++;
+#>
+			Repo<#= property.NamePascalCase #> = repo<#= property.NamePascalCase #>;
+<#
+		}
+	}
+#>
+        }
+
+		[MvcSiteMapNode(Title = "<#= displayName #>", ParentKey = "Dashboard",Key="Index<#= Model.ModelNamePascalCase #>")]
+		[SiteMapTitle("Breadcrumb")]
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+        public string Binding()
+        {
+            //kamus
+            GridRequestParameters param = GridRequestParameters.Current;
+
+            List<<#= modelName #>> items = Repo<#= Model.ModelNamePascalCase #>.FindAll(param.Skip, param.Take, (param.Sortings != null ? param.Sortings.ToList() : null), param.Filters);
+            int total = Repo<#= Model.ModelNamePascalCase #>.Count(param.Filters);
+
+            return new JavaScriptSerializer().Serialize(new { total = total, data = new <#= Model.ModelNamePascalCase #>PresentationStub().MapList(items) });
+        }
+
+		[MvcSiteMapNode(Title = "Create", ParentKey = "Index<#= Model.ModelNamePascalCase #>")]
+		[SiteMapTitle("Breadcrumb")]
+        public ActionResult Create()
+        {
+<#
+	count = 0;
+	foreach (ModelProperty property in modelProperties) {
+		if (property.IsForeignItem) {
+			count++;
+#>
+			List<<#= property.Type.AsString #>> list<#= property.NamePascalCase #> = Repo<#= property.NamePascalCase #>.FindAll();
+<#
+		}
+	}
+#>			
+            <#= Model.ModelNamePascalCase #>FormStub formStub = new <#= Model.ModelNamePascalCase #>FormStub(<#
+count = 0;
+foreach (ModelProperty property in modelProperties) {
+	if (property.IsForeignItem) {
+		count++;
+#>list<#= property.NamePascalCase #><#= count != countForeignItem ? "," : "" #><#
+	}
+}
+#>);
+
+            return View("Form", formStub);
+        }
+
+        [HttpPost]
+		[SiteMapTitle("Breadcrumb")]
+        public ActionResult Create(<#= Model.ModelNamePascalCase #>FormStub model)
+        {
+            //bool isNameExist = Repo<#= Model.ModelNamePascalCase #>.Find().Where(p => p.name == model.Name).Count() > 0;
+            
+            if (ModelState.IsValid)
+            {
+                <#= modelName #> dbItem = new <#= modelName #>();
+                dbItem = model.GetDbObject(dbItem);
+
+                try
+                {
+                    Repo<#= Model.ModelNamePascalCase #>.Save(dbItem);
+                }
+                catch (Exception e)
+                {
+<#
+count = 0;
+foreach (ModelProperty property in modelProperties) {
+	if (property.IsForeignItem) {
+		count++;
+#>
+				model.Fill<#= property.NamePascalCase #>Options(Repo<#= property.NamePascalCase #>.FindAll());
+<#
+	}
+}
+#>
+                    return View("Form", model);
+                }
+
+                //message
+                string template = HttpContext.GetGlobalResourceObject("MyGlobalMessage", "CreateSuccess").ToString();
+                this.SetMessage(model.Name, template);
+
+                return RedirectToAction("Index");
+            }
+            else
+            {
+<#
+count = 0;
+foreach (ModelProperty property in modelProperties) {
+	if (property.IsForeignItem) {
+		count++;
+#>
+				model.Fill<#= property.NamePascalCase #>Options(Repo<#= property.NamePascalCase #>.FindAll());
+<#
+	}
+}
+#>
+                return View("Form", model);
+            }
+        }
+
+		[MvcSiteMapNode(Title = "Edit", ParentKey = "Index<#= Model.ModelNamePascalCase #>", Key = "Edit<#= Model.ModelNamePascalCase #>", PreservedRouteParameters = "id")]
+		[SiteMapTitle("Breadcrumb")]
+        public ActionResult Edit(int id)
+        {
+            <#= modelName #> <#= modelName #> = Repo<#= Model.ModelNamePascalCase #>.FindByPk(id);
+<#
+	count = 0;
+	foreach (ModelProperty property in modelProperties) {
+		if (property.IsForeignItem) {
+			count++;
+#>
+			List<<#= property.Type.AsString #>> list<#= property.NamePascalCase #> = Repo<#= property.NamePascalCase #>.FindAll();
+<#
+		}
+	}
+#>
+            <#= Model.ModelNamePascalCase #>FormStub formStub = new <#= Model.ModelNamePascalCase #>FormStub(<#= modelName #><#= countForeignItem > 0 ? "," : "" #><#
+count = 0;
+foreach (ModelProperty property in modelProperties) {
+	if (property.IsForeignItem) {
+		count++;
+#>list<#= property.NamePascalCase #><#= count != countForeignItem ? "," : "" #><#
+	}
+}
+#>);
+            return View("Form", formStub);
+        }
+
+        [HttpPost]
+		[SiteMapTitle("Breadcrumb")]
+        public ActionResult Edit(<#= Model.ModelNamePascalCase #>FormStub model)
+        {
+            //bool isNameExist = RepoKompetitor.Find().Where(p => p.name == model.Name && p.id != model.Id).Count() > 0;
+
+            if (ModelState.IsValid)
+            {
+                <#= modelName #> dbItem = Repo<#= Model.ModelNamePascalCase #>.FindByPk(model.Id);
+                dbItem = model.GetDbObject(dbItem);
+
+                try
+                {
+                    Repo<#= Model.ModelNamePascalCase #>.Save(dbItem);
+                }
+                catch (Exception e)
+                { 
+<#
+count = 0;
+foreach (ModelProperty property in modelProperties) {
+	if (property.IsForeignItem) {
+		count++;
+#>
+				model.Fill<#= property.NamePascalCase #>Options(Repo<#= property.NamePascalCase #>.FindAll());
+<#
+	}
+}
+#>
+                    return View("Form", model);
+                }
+
+                //message
+                string template = HttpContext.GetGlobalResourceObject("MyGlobalMessage", "CreateSuccess").ToString();
+                this.SetMessage(model.Name, template);
+
+                return RedirectToAction("Index");
+            }
+            else
+            {
+<#
+count = 0;
+foreach (ModelProperty property in modelProperties) {
+	if (property.IsForeignItem) {
+		count++;
+#>
+				model.Fill<#= property.NamePascalCase #>Options(Repo<#= property.NamePascalCase #>.FindAll());
+<#
+	}
+}
+#>
+                return View("Form", model);
+            }
+        }
+
+		[HttpPost]
+		public JsonResult Delete(int id)
+        {
+			string template = "";
+			ResponseModel response = new ResponseModel(true);
+			<#= modelName #> dbItem = Repo<#= Model.ModelNamePascalCase #>.FindByPk(id);
+
+            Repo<#= Model.ModelNamePascalCase #>.Delete(dbItem);
+
+            return Json(response);
+        }
+
+		#region ImportExcel
+
+		public ViewResult ImportExcel()
+        {
+            <#= Model.ModelNamePascalCase #>ImportExcelStub model = new <#= Model.ModelNamePascalCase #>ImportExcelStub();
+
+            return View("ImportExcelForm",model);
+        }
+
+
+		[HttpPost]
+        public ActionResult ImportExcel(<#= Model.ModelNamePascalCase #>ImportExcelStub model)
+        {
+            if (ModelState.IsValid)
+            {
+
+                XSSFSheet sheet; int colCount; int rowCount; int startRow = 3; int colNum; int id;
+                List<string> messageList = new List<string>();
+
+                string currentFilePathInServer = Server.MapPath(model.ExcelFilePath);
+                XSSFWorkbook book;
+                try
+                {
+                    using (FileStream file = new FileStream(currentFilePathInServer, FileMode.Open, FileAccess.Read))
+                    {
+                        book = new XSSFWorkbook(file);
+                    }
+
+                    sheet = (XSSFSheet)book.GetSheet("Data");
+                    rowCount = sheet.LastRowNum;
+                    colNum = 0;
+                    id = 0;
+                    bool allowSave = true;
+                    for (int row = startRow; row <= rowCount; row++)
+                    {
+                        colNum = 0;
+                        var dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+                        if (dt != null)
+                        {
+                            allowSave = true;
+                            sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+                            if (sheet.GetRow(row).GetCell(colNum).StringCellValue != "")
+                            {
+                                    <#= modelName #> insertData = new <#= modelName #>();
+
+                                    <#= modelName #> filledData = this.FillDataFromExcel(insertData, sheet, row, colNum,ref messageList, ref allowSave);
+
+                                    if (allowSave == true)
+                                    {
+                                        Repo<#= Model.ModelNamePascalCase #>.Save(filledData);
+                                    }
+                            }
+                        }
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    messageList.Add("An error has occurred. Please contact administrator.");
+                }
+                ViewBag.MessageList = messageList;
+                return View("ImportExcelForm", model);
+                //return ret;
+            }
+            else
+            {
+                ViewBag.MessageList = null;
+                return View("ImportExcelForm", model);
+            }
+        }
+
+
+		public ActionResult GetExcelTemplate()
+        {
+<#
+count = 0;
+foreach (ModelProperty property in modelProperties) {
+	if (property.IsForeignItem) {
+		count++;
+#>List<<#= property.Type.AsString #>> list<#= property.NamePascalCase #> = Repo<#= property.NamePascalCase#>.FindAll();
+<#
+	}
+}
+#>
+
+
+            string filename = "Template <#= displayName #>.xlsx";
+            byte[] excel =<#= Model.ModelNamePascalCase #>ImportExcelStub.GenerateTemplate(<#
+count = 0;
+foreach (ModelProperty property in modelProperties) {
+	if (property.IsForeignItem) {
+		count++;
+#>list<#= property.NamePascalCase #><#= count != countForeignItem ? "," : "" #><#
+	}
+}
+#>); //"~/App_Data/template/licensor.xls"
+            return File(excel, "application/x-msexcel", filename);
+        }
+
+
+		private <#= modelName #> FillDataFromExcel(<#= modelName #> insertData,XSSFSheet sheet, int row, int colNum,ref List<string> messageList, ref bool allowSave)
+        {
+            bool test;
+            var dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+
+			<# count=0;
+foreach (ModelProperty property in modelProperties) {
+	if (!property.IsChildItem && !property.IsForeignItem) { 
+	if(property.IsRequired)
+    {
+		if(property.DisplayName.Contains("Id"))
+        { 
+			string displayNameColumnList = property.DisplayName.Replace("Id","").Trim();
+			string displayNamePascalCase = property.NamePascalCase.Replace("Id","").Trim();
+			if(displayNameColumnList != "")
+            {
+		#>
+				//required foreign key <#= property.DisplayName #>
+				colNum = <#= count-1#>;
+            dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+            if (dt != null)
+            {
+                sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+                if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+                {
+                    insertData.<#= property.Name #> = Repo<#= displayNamePascalCase #>.GetIdByNameAndInsert(sheet.GetRow(row).GetCell(colNum).StringCellValue);
+					if(insertData.<#= property.Name #> == 0)
+					{
+						allowSave = false;
+						messageList.Add(GetExcelMessage(row, "<#= displayNameColumnList #>", "Does not exist"));
+					}
+				}
+                else
+                {
+                    allowSave = false;
+                    messageList.Add(GetExcelMessage(row, "<#= displayNameColumnList #>", "Must be filled"));
+                }
+            }
+        <# }
+			}
+		else
+        { #>
+				//required non-foreign key <#= property.DisplayName #> (<#= property.Type.AsString #>)
+				<#
+					switch(property.Type.AsString)
+					{
+						case "string": #>
+								colNum=<#= count-1 #>;
+								dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+								if (dt != null)
+								{
+									sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+									if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+									{
+										insertData.<#= property.Name #> = sheet.GetRow(row).GetCell(colNum).StringCellValue;
+									}
+									else
+									{
+										allowSave = false;
+										messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Must be filled"));
+									}
+                
+								}
+							<# break;
+						case "bool": #>
+							colNum=<#= count-1 #>;
+							dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+							if (dt != null)
+							{
+								sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+								if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+								{
+									string boolValue = sheet.GetRow(row).GetCell(colNum).StringCellValue;
+									if(boolValue.ToLower() != "yes" && boolValue.ToLower() != "no")
+									{
+										allowSave = false;
+										messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Must be filled with Yes or No"));
+									}
+									else
+									{
+										bool val = false;
+										if(boolValue.ToLower() == "yes")
+										{
+											val = true;
+										}
+										insertData.<#= property.Name #> = val;
+									} 
+									
+								}
+								else
+								{
+									allowSave = false;
+									messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Must be filled"));
+								}
+                
+							}
+						<# break;
+						case "byte" : #>
+									colNum=<#= count-1 #>;
+									dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+									if (dt != null)
+									{
+										sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+										if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+										{
+											int val = 0;
+											test = Int32.TryParse(sheet.GetRow(row).GetCell(colNum).StringCellValue, out val);
+											if (test == false)
+											{
+												allowSave = false;
+												messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Invalid value"));
+											}
+											else
+											{
+												insertData.<#= property.Name #>= (byte)val;
+											}
+                    
+										}
+										else
+										{
+											allowSave = false;
+											messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Must be filled"));
+										}
+                
+									}
+									<# break;
+									case "int" : #>
+									colNum=<#= count-1 #>;
+									dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+									if (dt != null)
+									{
+										sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+										if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+										{
+											int val = 0;
+											test = Int32.TryParse(sheet.GetRow(row).GetCell(colNum).StringCellValue, out val);
+											if (test == false)
+											{
+												allowSave = false;
+												messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Invalid value"));
+											}
+											else
+											{
+												insertData.<#= property.Name #>= val;
+											}
+                    
+										}
+										else
+										{
+											allowSave = false;
+											messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Must be filled"));
+										}
+                
+									}
+									<# break;
+						case "long" : #>
+									colNum=<#= count-1 #>;
+									dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+									if (dt != null)
+									{
+										sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+										if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+										{
+											long val = 0;
+											test = Int64.TryParse(sheet.GetRow(row).GetCell(colNum).StringCellValue, out val);
+											if (test == false)
+											{
+												allowSave = false;
+												messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Invalid value"));
+											}
+											else
+											{
+												insertData.<#= property.Name #>= val;
+											}
+                    
+										}
+										else
+										{
+											allowSave = false;
+											messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Must be filled"));
+										}
+                
+									}
+									<# break;
+						case "System.DateTime" :  #>
+									colNum=<#= count-1 #>;
+									dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+									if (dt != null)
+									{
+										sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+										if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+										{
+											DateTime dateVal;
+											double dateOA;
+
+											test = Double.TryParse(sheet.GetRow(row).GetCell(colNum).StringCellValue, out dateOA);
+											if (test == false)
+											{
+												allowSave = false;
+												messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Invalid value"));
+											}
+											else
+											{
+												test = DateTime.TryParse(DateTime.FromOADate(dateOA).ToString(), out dateVal);
+												insertData.<#= property.Name #> = dateVal;
+											}
+                    
+										}
+										else
+										{
+											allowSave = false;
+											messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Must be filled"));
+										}
+                
+									}
+
+									<# break;
+						case "double" : #>
+									colNum=<#= count-1 #>;
+									dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+									if (dt != null)
+									{
+										sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+										if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+										{
+											double val = 0;
+											test = Double.TryParse(sheet.GetRow(row).GetCell(colNum).StringCellValue, out val);
+											if (test == false)
+											{
+												allowSave = false;
+												messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Invalid value"));
+											}
+											else
+											{
+												insertData.<#= property.Name #>= val;
+											}
+                    
+										}
+										else
+										{
+											allowSave = false;
+											messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Must be filled"));
+										}
+                
+									}
+									<# break;
+						case "decimal" : #>
+									colNum=<#= count-1 #>;
+									dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+									if (dt != null)
+									{
+										sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+										if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+										{
+											decimal val = 0;
+											test = Decimal.TryParse(sheet.GetRow(row).GetCell(colNum).StringCellValue, out val);
+											if (test == false)
+											{
+												allowSave = false;
+												messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Invalid value"));
+											}
+											else
+											{
+												insertData.<#= property.Name #>= val;
+											}
+                    
+										}
+										else
+										{
+											allowSave = false;
+											messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Must be filled"));
+										}
+                
+									}
+									<# break; 
+					}
+				
+				#>
+       <# }
+    count ++;
+	}
+	else
+    {
+		if(property.DisplayName.Contains("Id"))
+        { 
+			string displayNameColumnList = property.DisplayName.Replace("Id","").Trim();
+			string displayNamePascalCase = property.NamePascalCase.Replace("Id","").Trim();
+			if(displayNameColumnList != "")
+            {
+		#>
+				//optional foreign key <#= property.DisplayName #>
+				colNum = <#= count-1#>;
+            dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+            if (dt != null)
+            {
+                sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+                if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+                {
+                    insertData.<#= property.Name #> = Repo<#= displayNamePascalCase #>.GetIdByNameAndInsert(sheet.GetRow(row).GetCell(colNum).StringCellValue);
+					if(insertData.<#= property.Name #> == 0)
+					{
+						allowSave = false;
+						messageList.Add(GetExcelMessage(row, "<#= displayNameColumnList #>", "Does not exist"));
+					}
+				}
+            }
+        <# }
+			}
+		else
+        { #>
+				//optional non-foreign key <#= property.DisplayName #> (<#= property.Type.AsString #>)
+				<#
+					switch(property.Type.AsString)
+					{
+						case "string": #>
+								colNum=<#= count-1 #>;
+								dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+								if (dt != null)
+								{
+									sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+									if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+									{
+										insertData.<#= property.Name #> = sheet.GetRow(row).GetCell(colNum).StringCellValue;
+									}
+                
+								}
+							<# break;
+						case "bool?": #>
+							colNum=<#= count-1 #>;
+							dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+							if (dt != null)
+							{
+								sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+								if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+								{
+									string boolValue = sheet.GetRow(row).GetCell(colNum).StringCellValue;
+									if(boolValue.ToLower() != "yes" && boolValue.ToLower() != "no")
+									{
+										allowSave = false;
+										messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Must be filled with Yes or No"));
+									}
+									else
+									{
+										bool val = false;
+										if(boolValue.ToLower() == "yes")
+										{
+											val = true;
+										}
+										insertData.<#= property.Name #> = val;
+									} 
+									
+								}
+                
+							}
+						<# break;
+						case "byte?" : #>
+									colNum=<#= count-1 #>;
+									dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+									if (dt != null)
+									{
+										sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+										if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+										{
+											int val = 0;
+											test = Int32.TryParse(sheet.GetRow(row).GetCell(colNum).StringCellValue, out val);
+											if (test == false)
+											{
+												allowSave = false;
+												messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Invalid value"));
+											}
+											else
+											{
+												insertData.<#= property.Name #>= (byte)val;
+											}
+                    
+										}
+                
+									}
+									<# break;
+						case "int?" : #>
+									colNum=<#= count-1 #>;
+									dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+									if (dt != null)
+									{
+										sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+										if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+										{
+											int val = 0;
+											test = Int32.TryParse(sheet.GetRow(row).GetCell(colNum).StringCellValue, out val);
+											if (test == false)
+											{
+												allowSave = false;
+												messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Invalid value"));
+											}
+											else
+											{
+												insertData.<#= property.Name #>= val;
+											}
+                    
+										}
+                
+									}
+									<# break;
+
+						case "long?" : #>
+									colNum=<#= count-1 #>;
+									dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+									if (dt != null)
+									{
+										sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+										if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+										{
+											long val = 0;
+											test = Int64.TryParse(sheet.GetRow(row).GetCell(colNum).StringCellValue, out val);
+											if (test == false)
+											{
+												allowSave = false;
+												messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Invalid value"));
+											}
+											else
+											{
+												insertData.<#= property.Name #>= val;
+											}
+                    
+										}
+                
+									}
+									<# break;
+						case "System.DateTime?" :  #>
+									colNum=<#= count-1 #>;
+									dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+									if (dt != null)
+									{
+										sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+										if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+										{
+											DateTime dateVal;
+											double dateOA;
+
+											test = Double.TryParse(sheet.GetRow(row).GetCell(colNum).StringCellValue, out dateOA);
+											if (test == false)
+											{
+												allowSave = false;
+												messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Invalid value"));
+											}
+											else
+											{
+												test = DateTime.TryParse(DateTime.FromOADate(dateOA).ToString(), out dateVal);
+												insertData.<#= property.Name #> = dateVal;
+											}
+                    
+										}
+                
+									}
+
+									<# break;
+						case "double?" : #>
+									colNum=<#= count-1 #>;
+									dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+									if (dt != null)
+									{
+										sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+										if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+										{
+											double val = 0;
+											test = Double.TryParse(sheet.GetRow(row).GetCell(colNum).StringCellValue, out val);
+											if (test == false)
+											{
+												allowSave = false;
+												messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Invalid value"));
+											}
+											else
+											{
+												insertData.<#= property.Name #>= val;
+											}
+                    
+										}
+                
+									}
+									<# break;
+						case "decimal?" : #>
+									colNum=<#= count-1 #>;
+									dt = (XSSFCell)sheet.GetRow(row).GetCell(colNum);
+									if (dt != null)
+									{
+										sheet.GetRow(row).GetCell(colNum).SetCellType(CellType.String);
+										if (sheet.GetRow(row).GetCell(colNum).StringCellValue != String.Empty)
+										{
+											decimal val = 0;
+											test = Decimal.TryParse(sheet.GetRow(row).GetCell(colNum).StringCellValue, out val);
+											if (test == false)
+											{
+												allowSave = false;
+												messageList.Add(GetExcelMessage(row, "<#= property.DisplayName #>", "Invalid value"));
+											}
+											else
+											{
+												insertData.<#= property.Name #>= val;
+											}
+                    
+										}
+                
+									}
+									<# break; 
+					}
+				
+				#>
+       <# }
+		count++;
+    }
+	#>
+    <# }
+}
+#>
+
+            return insertData;
+        }
+
+		 private static string GetExcelMessage(int rowNumber, string columnName, string message)
+        {
+            string msg = String.Format("Row {0}. Column {1}. {2}", rowNumber + 1, columnName, message);
+
+            return msg;
+        }
+
+		#endregion
+	}
+}
+
+<#+
+// Describes the information about a property on the model
+// Product
+class ModelProperty {
+    public string Name { get; set; }
+    public string NamePascalCase { get; set; }
+    public string DisplayName { get; set; }
+    public string ValueExpression { get; set; }
+	public EnvDTE.CodeTypeRef Type { get; set; }
+    public bool IsPrimaryKey { get; set; }
+	public bool IsForeignKey { get; set; }
+	public bool IsReadOnly { get; set; }
+	public bool IsForeignItem { get; set; }
+	public bool IsChildItem { get; set; }
+		public bool IsRequired { get; set; }
+	public EnvDTE.CodeProperty SubProperty { get; set; }
+}
+
+// Change this list to include any non-primitive types you think should be eligible to be edited using a textbox
+static Type[] bindableNonPrimitiveTypes = new[] {
+    typeof(string),
+    typeof(decimal),
+    typeof(Guid),
+    typeof(DateTime),
+    typeof(DateTimeOffset),
+    typeof(TimeSpan),
+};
+
+// Call this to get the list of properties in the model. Change this to modify or add your
+// own default formatting for display values.
+List<ModelProperty> GetModelProperties(EnvDTE.CodeType typeInfo, bool includeUnbindableProperties) {
+    List<ModelProperty> results = GetEligibleProperties(typeInfo, includeUnbindableProperties);
+    
+    foreach (ModelProperty prop in results) {
+		prop.DisplayName = Regex.Replace(Regex.Replace(prop.Name, @"_(\p{Ll})",m => " " + m.Groups[1].Value.ToUpper()), @"\b(\p{Ll})",m => m.Groups[1].Value.ToUpper());
+		if (!prop.IsPrimaryKey)
+		{
+			prop.DisplayName = Regex.Replace(prop.DisplayName, @"\s(Id)\s", "");
+		}
+
+
+        if (prop.Type.UnderlyingTypeIs<double>() || prop.Type.UnderlyingTypeIs<decimal>()) {
+            prop.ValueExpression = "String.Format(\"{0:F}\", " + prop.ValueExpression + ")";
+        }
+        else if (prop.Type.UnderlyingTypeIs<DateTime>()) {
+            prop.ValueExpression = "String.Format(\"{0:g}\", " + prop.ValueExpression + ")";
+        }
+		else if (!IsBindableType(prop.Type)) {
+			prop.ValueExpression = GetValueExpression("Model." + prop.Name, (EnvDTE.CodeType)prop.Type.CodeType);
+			var subProperty = GetDbItemExpression((EnvDTE.CodeType)prop.Type.CodeType);
+			if (subProperty != null) {
+				prop.IsForeignItem = true;
+				prop.SubProperty = subProperty;
+			} else {
+				prop.IsForeignItem = false;
+				prop.IsChildItem = true;
+			}
+
+		}
+    }
+
+    return results;
+}
+
+// Change this list to include the names of properties that should be selected to represent an entity as a single string
+static string[] displayPropertyNames = new[] { "Name", "Title", "LastName", "Surname", "Subject", "Count" };
+
+string GetValueExpression(string propertyExpression, EnvDTE.CodeType propertyType) {
+	if (propertyType != null) {
+		var chosenSubproperty = propertyType.DisplayColumnProperty() ?? propertyType.FindProperty(displayPropertyNames);
+		if (chosenSubproperty != null) {
+			var toStringSuffix = chosenSubproperty.Type.AsFullName == "System.String" ? "" : ".ToString()";
+			return String.Format("({0} == null ? \"None\" : {0}.{1}{2})", propertyExpression, chosenSubproperty.Name, toStringSuffix);
+		}
+	}
+	return "Html.DisplayTextFor(_ => " + propertyExpression + ").ToString()";
+}
+
+// Change this list to include the names of properties that should be selected to represent an entity as a single string
+static string[] dbItemPropertyNames = new[] { "name", "title", "last_name", "surname", "subject", "count" };
+
+EnvDTE.CodeProperty GetDbItemExpression(EnvDTE.CodeType propertyType) {
+	if (propertyType != null) {
+		var chosenSubproperty = propertyType.DisplayColumnProperty() ?? propertyType.FindProperty(dbItemPropertyNames);
+		if (chosenSubproperty != null) {
+			return chosenSubproperty;
+		}
+	}
+	return null;
+}
+
+// Helper
+List<ModelProperty> GetEligibleProperties(EnvDTE.CodeType typeInfo, bool includeUnbindableProperties) {
+    List<ModelProperty> results = new List<ModelProperty>();
+	if (typeInfo != null) {
+		foreach (var prop in typeInfo.VisibleMembers().OfType<EnvDTE.CodeProperty>()) {
+			if (prop.IsReadable() && !prop.HasIndexParameters() && (includeUnbindableProperties || IsBindableType(prop.Type))) {
+				results.Add(new ModelProperty {
+					Name = prop.Name,
+					NamePascalCase =  Regex.Replace(Regex.Replace(prop.Name, @"_(\p{Ll})",m => m.Groups[1].Value.ToUpper()), @"\b(\p{Ll})",m => m.Groups[1].Value.ToUpper()),
+					ValueExpression = "Model." + prop.Name,
+					Type = prop.Type,
+					IsPrimaryKey = Model.PrimaryKeyName == prop.Name,
+					IsForeignKey = ParentRelations.Any(x => x.RelationProperty == prop),
+					IsReadOnly = !prop.IsWriteable(),
+					IsRequired = !IsNullable(prop.Type)
+				});
+			}
+		}
+	}
+
+    return results;
+}
+
+IEnumerable<RelatedEntityInfo> ParentRelations {
+	get { return ((IEnumerable)Model.RelatedEntities).OfType<RelatedEntityInfo>().Where(x => x.RelationType == RelationType.Parent); }
+}
+
+// Helper
+bool IsBindableType(EnvDTE.CodeTypeRef type) {
+    return type.UnderlyingIsPrimitive() || bindableNonPrimitiveTypes.Any(x => type.UnderlyingTypeIs(x));
+}
+
+bool IsNullable(EnvDTE.CodeTypeRef propType) {
+  return propType.AsFullName.Contains(".Nullable<");
+}
+#>

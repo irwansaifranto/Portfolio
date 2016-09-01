@@ -1,0 +1,191 @@
+﻿@using WebUI.Extension;
+@using MvcSiteMapProvider.Web.Html;
+@using Common.Enums
+@{
+    ViewBag.Title = "Semua Booking";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentController = (WebUI.Areas.Administrator.Controllers.RentController)ViewContext.Controller;
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+}
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+<div id="grid"></div>
+
+@section scripts
+    {
+    <script type="text/javascript">
+        //variables
+        var ds;
+
+        //functions
+        function deleteItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            goToDeletePage('@Url.Action("Delete")' + "?id=" + data.Id,this.dataSource);
+        }
+
+        function editItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            window.location.href = "@Url.Action("Edit")" + "?id=" + data.Id;
+        }
+
+        function viewItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            window.location.href = "@Url.Action("Detail")" + "?id=" + data.Id;
+        }
+
+        function listStatus(element) {
+            element.kendoDropDownList({
+                dataTextField: "Text",
+                dataValueField: "Value",
+                dataSource: {
+                    data: @Html.Raw(ViewBag.ListStatus)
+                    },
+                optionLabel: "--Pilih--",
+            });
+        }
+
+        $(document).ready(function () {
+            ds = new kendo.data.DataSource({
+                pageable: true,
+                pageSize: 10,
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                sortable:true,
+                transport: {
+                    read: {
+                        url: "@Url.Action("Binding")",
+                        dataType: "json",
+                        type:"POST",
+                    },
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options != '') {
+                            return kendo.stringify(options);
+                        }
+                        else if (operation == "read") {
+                            if (options.filter) {
+                                filter = options.filter.filters;
+                                for (var i in filter) {
+                                    if (filter[i].field == "OwnerName") {
+                                        filter[i].field = "owner.name";
+                                    }
+                                    if (filter[i].field == "CreatedTime") {
+                                        filter[i].field = "created_time";
+                                        var date = filter[i].value;
+                                        filter[i].value = kendo.toString(date, "yyyy-MM-dd");
+                                    }
+                                    if (filter[i].field == "Base.Status") {
+                                        filter[i].field = "status";
+                                    }
+                                    if (filter[i].field == "Base.CreatedBy") {
+                                        filter[i].field = "created_by";
+                                    }
+                                }
+                            }
+
+                            if (options.sort) {
+                                sort = options.sort;
+                                for (var i in sort) {
+                                    if (sort[i].field == "OwnerName") {
+                                        sort[i].field = "owner.name";
+                                    }
+                                    if (sort[i].field == "CreatedTime") {
+                                        sort[i].field = "created_time";
+                                    }
+                                    if (sort[i].field == "Base.Status") {
+                                        sort[i].field = "status";
+                                    }
+                                    if (sort[i].field == "Base.CreatedBy") {
+                                        sort[i].field = "created_by";
+                                    }
+                                   
+                                }
+                            }
+                            return options;
+                        }
+                    }
+                },
+                schema: {
+                    data: "data",
+                    total: "total",
+                    model: {
+                        fields: {
+                            "OwnerName": {type: "string"},
+                            "CreatedTime": { type: "date" },
+                            "Status": {type: "string"},
+                            "CreatedBy": {type: "string"},
+                        }
+                    }
+                },
+                sort: { field: "CreatedTime", dir: "desc" }
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: ds,
+                filterable: kendoGridFilterable,
+                pageable: true,
+                sortable: true,
+                resizable: true,                
+                columns: [
+                    //{
+                    //    command: [
+                    //        {
+                    //            name: "detail",
+                    //            text: "detail",
+                    //            click: viewItem,
+                    //            imageClass: "glyphicon glyphicon-list-alt",
+                    //            template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=iconClass# #=imageClass#"></span></a>'
+                    //        },
+                    //        {
+                    //            name: "edit",
+                    //            text: "edit",
+                    //            click: editItem,
+                    //            imageClass: "glyphicon glyphicon-edit",
+                    //            template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=imageClass#"></span></a>'
+                    //        },
+                    //    ],
+                    //    width: 65,
+                    //    locked: true
+                    //},
+					{
+					    field: "OwnerName",
+					    title: "Partners",
+					    width: 250,
+					},
+                    {
+                        field: "CreatedTime",
+                        title: "Tanggal Input",
+                        format: "{0:d MMMM yyyy}",
+                        width: 250,
+                    },
+					{
+					    field: "Base.Status",
+                        title: "Status",
+					    width: 250,
+					    sortable: true,
+					    filterable: {
+					        ui: listStatus,
+					        operators: {
+					            string: {
+					                eq: "Sama Dengan",
+					            }
+					        },
+					        extra: false,
+					    },
+					},
+					{
+					    field: "Base.CreatedBy",
+					    title: "Bookers Id",
+					    width: 250,
+					},
+                ],
+            });       
+            
+         });
+
+    </script>
+}

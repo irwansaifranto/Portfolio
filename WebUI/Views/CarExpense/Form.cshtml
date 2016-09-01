@@ -1,0 +1,442 @@
+﻿@model WebUI.Models.CarExpense.CarExpenseFormStub
+@{
+    //...
+
+    string fileTypeErrMsg = HttpContext.GetGlobalResourceObject("MyGlobalMessage", "FileUploadImageTypeError").ToString();
+    string template = HttpContext.GetGlobalResourceObject("MyGlobalMessage", "FileUploadSizeError").ToString();
+    string fileSizeErrMsg = string.Format(template, System.Configuration.ConfigurationManager.AppSettings["maxImageWord"]);
+}
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    string currentController = (string)ViewContext.RouteData.Values["controller"];
+    string currentAction = (string)ViewContext.RouteData.Values["action"];
+    string backLink = "";
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+
+    if (currentAction == "Create")
+    {
+        ViewBag.Title = "Tambah Biaya Kendaraan";
+
+    }
+    else
+    {
+        ViewBag.Title = ViewBag.Name + " | Edit";
+    }
+    
+    backLink = Url.Action("Index");
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+@using (@Html.BeginForm(currentAction, currentController, FormMethod.Post, new { @class = "form-horizontal", id = "form" }))
+{
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(model => model.Id)
+    @Html.ValidationMessageFor(model => model.Id)
+    
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="form-group">
+                @Html.LabelFor(model => model.ExpenseDate, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.ExpenseDate)
+                    @Html.ValidationMessageFor(model => model.ExpenseDate)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.LicensePlate, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.HiddenFor(model => model.IdCar)
+                    <div class="input-group">
+                        @Html.EditorFor(model => model.LicensePlate, new { htmlAttributes = new { @class = "form-control", placeholder = "Plat Nomor", @readonly = "readonly" } })
+                        <span class="input-group-btn">
+                            <button id="SearchBooking" class="btn btn-default" type="button" data-toggle="modal" data-target="#dialog-car"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                        </span>
+                    </div>
+                    @Html.ValidationMessageFor(model => model.IdCar)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.ExpenseType, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DropDownListFor(model => model.ExpenseType, new SelectList(Model.CarExpenseTypeOptions, "Value", "Text"), new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.ExpenseType)
+                </div>
+            </div>
+            <div class="form-group" id="cancel-section">
+                @Html.LabelFor(model => model.Other, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.Other, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                    @Html.ValidationMessageFor(model => model.Other)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Distance, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.Distance)
+                    @Html.ValidationMessageFor(model => model.Distance)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.ExpenseValue, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.ExpenseValue)
+                    @Html.ValidationMessageFor(model => model.ExpenseValue)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Notes, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.Notes)
+                    @Html.ValidationMessageFor(model => model.Notes)
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <div class="form-group ">
+                @Html.LabelFor(model => model.Attachment, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.HiddenFor(model => model.Attachment)
+                    @Html.TextBox("files", "", new { type = "file", id = "kendo-upload" })
+                    <br />
+                    <em class="text-info">*) ukuran file maksimal 1 Mb dan bertipe (Microsoft Word, PDF, image)</em>
+                    @*<em class="text-info">**saran : untuk ukuran lebar x tinggi (100px s/d 150px)</em><br />*@
+                    <br />
+
+                    @if ((Model.Attachment == null) || (Model.IsAttachmentImage() == false))
+                    {
+                        <img id="uploaded-image" src="" class="img-responsive" alt="" />
+                    }
+                    else
+                    {
+                        <img id="uploaded-image" src="@Url.Content(Model.Attachment)" class="img-responsive" alt="" />
+                    }
+                    @Html.ValidationMessageFor(model => model.Attachment)
+
+                    <br />
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-xs-offset-2 col-xs-10">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="@backLink" class="btn btn-link">Cancel</a>
+        </div>
+    </div>
+}
+
+<div class="modal fade" id="dialog-car" role="dialog" aria-labelledby="ModalBookingLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel7">Daftar Kendaraan</h4>
+            </div>
+            <div class="modal-body">
+                <div id="grid"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button id="BtnChoose" type="button" class="btn btn-primary" onclick="getCarId()">Pilih Kendaraan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+    var fileInputSelector = '#Attachment';
+    var imageContainerSelector = '#uploaded-image';
+    var _ID_CAR = "";
+    var _LICENSE_PLATE = "";
+    var dsCar;
+
+    //functions
+    function onRemove(e) {
+        $(fileInputSelector).val("");
+        $(imageContainerSelector).hide();
+    }
+
+    function onSelectFile(e) {
+        var flagExtension = 0;
+        var flagSize = 0;
+        var allowedExtension = ['.docx', '.doc', '.pdf', '.jpg', '.jpeg', '.png', '.bmp'];
+        var file = e.files;
+        var maxImage = '@System.Configuration.ConfigurationManager.AppSettings["maxImage"]';
+
+        if (file[0].size > maxImage) {
+            flagSize = 1;
+        }
+
+        if ($.inArray((file[0].extension).toLowerCase(), allowedExtension) === -1) {
+            flagExtension = 1;
+        }
+        if (flagExtension == 1) {
+            alert("@fileTypeErrMsg");
+            e.preventDefault();
+        }
+        if (flagSize == 1) {
+            alert("@fileSizeErrMsg");
+            e.preventDefault();
+
+        }
+    }
+
+    function onSuccessFile(e) {
+        if (e.operation == "upload") {
+            var file = e.response;
+            var fileType;
+            var isImage = false;
+
+            $(fileInputSelector).val(file.filepath);
+
+            fileType = getFileType(file.filename);
+            if ((fileType === 'jpg') || (fileType === 'png') || (fileType === 'jpeg') || (fileType === 'bmp')) {
+                isImage = true;
+            }
+
+            if (isImage === true) {
+                $(imageContainerSelector).attr('src', file.absolutepath);
+                $(imageContainerSelector).show();
+            } else {
+                $(imageContainerSelector).hide();
+            }
+        }
+    }
+
+    function setGlobalCarData(id, licensePlate) {
+        _ID_CAR = id;
+        _LICENSE_PLATE = licensePlate;
+    }
+
+    function getCarId() {
+        if (_ID_CAR == "") {
+            alert("Pilih satu mobil terlebih dahulu");
+        }
+        else {
+            setCarField();
+            $('#dialog-car').modal('toggle');
+        }
+    }
+
+    function setCarField() {
+        @*if (id != "00000000-0000-0000-0000-000000000000") {
+                $.post("@Url.Action("GetCar")", { id: id }, function (data) {
+                    $("#IdCar").val(id);
+                    $("#LicensePlate").val(data[0]);
+                });
+            }*@
+
+        $("#IdCar").val(_ID_CAR);
+        $("#LicensePlate").val(_LICENSE_PLATE);
+    }
+
+    function checkBoxChange() {
+        var check = $("#ck-" + $("#IdCar").val());       
+        check.prop("checked", true);
+    }
+
+    function categoryOnChange() {
+        //kamus
+        var stat = $('#ExpenseType').val();
+        var expenseCategoryDetailOther = $('#Other');
+        var expenseCategoryDetailKm = $('#Distance').data("kendoNumericTextBox");
+
+        //algoritma
+        if (stat == '@Common.Enums.CarExpenseType.OTHER.ToString()') {
+            expenseCategoryDetailOther.prop('disabled', false)
+        } else {
+            expenseCategoryDetailOther.val("");
+            expenseCategoryDetailOther.prop('disabled', true)
+        }
+
+        if (stat == '@Common.Enums.CarExpenseType.MAINTENANCE.ToString()') {
+            expenseCategoryDetailKm.enable();
+            $("#form").find('label[for="Distance"]').children().show();
+        } else {
+            expenseCategoryDetailKm.enable(false);
+            expenseCategoryDetailKm.value("");
+            $("#form").find('label[for="Distance"]').children().hide();
+        }
+    }
+
+
+    //function getRadioValue() {
+    //    //if ($('input[name=action]:radio:checked').length > 0) {
+    //    //    return $('input[name=action]:radio:checked').val();
+    //    //}
+    //    //else {
+    //    //    return 0;
+    //    //}
+    //}
+
+    //function onDataBound(e) {
+    //    var grid = $("#grid").data("kendoGrid");
+    //    var gridData = grid.dataSource.view();
+
+    //    for (var i = 0; i < gridData.length; i++) {
+    //        var currentUid = gridData[i].uid;
+    //        if (gridData[i].ProcessedDate != null) {
+    //            var currenRow = grid.table.find("tr[data-uid='" + currentUid + "']");
+    //            var editButton = $(currenRow).find(".k-grid-edit");
+    //            editButton.hide();
+    //        }
+    //    }
+    //}
+    $(document).ready(function () {
+        categoryOnChange();
+        checkBoxChange();
+        //onDataBound();
+        if ($(imageContainerSelector).attr('src') === '') {
+            $(imageContainerSelector).hide();
+        }
+
+        $("#kendo-upload").kendoUpload({
+            multiple: false,
+            async: {
+                saveUrl: '@Url.Action("Save", "FileManagement", new { area = "" })',
+                removeUrl: '@Url.Action("Remove", "FileManagement", new { area = "" })',
+                autoUpload: true
+            },
+            //files: initialFilesContent,
+            select: onSelectFile,
+            success: onSuccessFile,
+            remove: onRemove,
+            showFileList: true,
+        });
+
+        //grid car
+        dsCar = new kendo.data.DataSource({
+            pageable: true,
+            pageSize: 10,
+            serverFiltering: true,
+            serverPaging: true,
+            serverSorting: true,
+            sortable: true,
+            transport: {
+                read: {
+                    @*//url: "@Url.Action("BindingAtCarExpense", "Car", new { idCar = @Model.IdCar})",*@
+                    url: "@Url.Action("Binding", "Car")",
+                        dataType: "json",
+                        type: "POST",
+                    },
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options != '') {
+                            return kendo.stringify(options);
+                        }
+                        else if (operation == "read") {
+                            if (options.filter) {
+                                filter = options.filter.filters;
+                                for (var i in filter) {
+                                    if (filter[i].field == "CarModelName") {
+                                        filter[i].field = "car_model.name";
+                                    }
+                                    else if (filter[i].field == "CarBrandName") {
+                                        filter[i].field = "car_model.car_brand.name";
+                                    }
+                                }
+                            }
+
+                            if (options.sort) {
+                                sort = options.sort;
+                                for (var i in sort) {
+                                    if (sort[i].field == "CarModelName") {
+                                        sort[i].field = "car_model.name";
+                                    }
+                                    if (sort[i].field == "CarBrandName") {
+                                        sort[i].field = "car_model.car_brand.name";
+                                    }
+
+                                }
+                            }
+                            return options;
+                        }
+                    }
+                },
+                schema: {
+                    data: "data",
+                    total: "total",
+                    model: {
+                        fields: {
+                            "Id": { type: "string" },
+                            "IdCarModel": { type: "string" },
+                            "LicensePlate": { type: "string" },
+                            "IsActive": { type: "boolean" },
+                            "CarModelName": { type: "string" },
+                            "ModelYear": { type: "number" },
+                            "Transmission": { type: "string" },
+                        }
+                    }
+                },
+                sort: { field: "license_plate", dir: "asc" },
+                filter: { field: 'is_active', operator: 'eq', value: 'true' }
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: dsCar,
+                filterable: kendoGridFilterable,
+                pageable: true,
+                sortable: true,
+                resizable: true,
+                columns: [
+                    {
+                        field: "Id",
+                        title: " ",
+                        template: "<input type='radio' id='ck-#=Id#' name='action' onClick='setGlobalCarData(\"#=Id#\", \"#=LicensePlate#\")'>",
+                        filterable: false,
+                        sortable: false,
+                        width: 30
+                    },
+                    {
+                        field: "LicensePlate",
+                        title: "Plat Nomor",
+                        width: 150,
+                        //locked: true
+                    },
+                    {
+                        field: "CarBrandName",
+                        title: "Merek",
+                        width: 130,
+                    },
+                    {
+                        field: "CarModelName",
+                        title: "Tipe",
+                        width: 200,
+                    },
+                ],
+                //databound: function (e) {
+                //    var grid = $("#grid").data("kendoGrid");
+                //    var gridData = grid.dataSource.view();
+
+                //    for (var i = 0; i < gridData.length; i++) {
+                //        var currentUid = gridData[i].uid;
+                //        if (gridData[i].ProcessedDate != null) {
+                //            var currenRow = grid.table.find("tr[data-uid='" + currentUid + "']");
+                //            var editButton = $(currenRow).find("#action");
+                //            editButton.hide();
+                //        }
+                //    }
+                //}
+            });
+
+            $('#SearchBooking').click(function () {
+                checkBoxChange();
+                setGlobalCarData($("#IdCar").val(),$("#LicensePlate").val());
+            });
+
+            $('#ExpenseType').change(function () {
+                categoryOnChange();
+            });
+
+            $('#dialog-car').on('shown', function () {
+                $(document).off('focusin.modal');
+            });
+        });
+    </script>
+}

@@ -1,0 +1,102 @@
+﻿ 
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/jqueryui/css")
+    @Styles.Render("~/Content/bootstrapcss/css")
+    @Styles.Render("~/Content/kendo/css")
+    @Styles.Render("~/Content/jqplot/css")
+    @Styles.Render("~/Content/jQueryGantt/css")
+    @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/sweetalert")
+    @Scripts.Render("~/bundles/modernizr")
+
+</head>
+<body>
+    <header>
+        <div class="container">
+            @*<h1><a href="@FormsAuthentication.LoginUrl"><img src="@Url.Content("~/Content/theme/TPD-dashboard-pmo-title.png")" /></a></h1>*@
+            @*<h1><a href="@Url.Action("Index", "Dashboard")"><img src="@Url.Content("~/Content/theme/TPD-dashboard-pmo-title.png")" /></a></h1>*@
+            <h1><a href="http://intra.pertamina.com/mobidig"><img src="@Url.Content("~/Content/theme/TPD-dashboard-pmo-title.png")" /></a></h1>
+            <div class="pull-right"><img src="@Url.Content("~/Content/theme/header-right.jpg")" /></div>
+        </div>
+    </header>
+    <div class="navbar" role="navigation">
+		<div class="container">
+            @{
+                if (Request.IsAuthenticated)
+                {
+                    Html.RenderPartial("_Menu");
+                <text>
+			<div class="usermenu pull-right">
+                <div class="greeting">Hi @Session["username"]</div>
+                <ul class="nav pull-right navbar-nav">
+                    <li class="">
+		                <a data-toggle="dropdown" href="javascript:"><span class="glyphicon glyphicon-cog"></span></a>
+		                <ul class="dropdown-menu pull-right" role="menu">
+                            @{
+                                if(User.IsInRole("SecurityGuard")){
+							<li>@Html.ActionLink("Security Guard", "Index", "Dashboard", new { area = "SecurityGuard" }, null)</li>
+                                }
+                            }
+							<li>@Html.ActionLink("Change Password", "ChangePassword", "SGAccount", new { area = "" }, null)</li>
+			                <li class="#">                                
+                                @using (Html.BeginForm("LogOff", "SGAccount", new { area = "" }, FormMethod.Post, new { id = "logoutForm" }))
+                                {
+                                @Html.AntiForgeryToken()
+                                }
+                                <a href="javascript:document.getElementById('logoutForm').submit()">Log off</a>
+			                </li>
+                        </ul>
+                    </li>
+                </ul>
+                </text>
+                }
+            }
+                @*<form method="post" action="#">
+				    <button type="submit" class="btn btn-plain navbar-btn">Logout</button>
+				</form>
+                <form method="post" action="../index.php">
+					<button type="submit" class="btn btn-plain navbar-btn">Login</button>
+				</form>*@
+			</div>
+		</div>
+	</div>
+    
+	<div class="container">
+        @Html.MvcSiteMap().SiteMapPath("BootstrapSiteMapHelper")
+        @RenderBody()
+	</div>
+		
+	<footer>
+		<div class="container">
+            <div class="row">
+                <div class="col-md-6 text-left">
+                    © 2014 PT Rekadia Solusi Teknologi<br />
+                    Grand Slipi Tower Lantai 42, Jl. S. Parman Kav 22-24, Jakarta 10110, Indonesia<br/>
+                    Phone +62 21 3049 0220
+                </div>
+                <div class="col-md-6 text-right">
+                    Contact Us<br />
+                    <a href="mailto:contact@rekadia.co.id">contact@rekadia.co.id</a>
+                </div>
+            </div>
+		</div>
+	</footer>
+    <script type="text/javascript">
+        var FILEMANAGERPATH = '@Url.Content("~/Scripts/Filemanager/index.html?Type=Images")';
+    </script>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/kendo")
+    @Scripts.Render("~/bundles/sweet-alert")
+    @Scripts.Render("~/bundles/webapp")
+    @*@Scripts.Render("~/bundles/jqueryval")*@
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

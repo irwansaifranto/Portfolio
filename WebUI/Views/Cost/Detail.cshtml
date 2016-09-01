@@ -1,0 +1,113 @@
+@model WebUI.Models.Cost.CostPresentationStub
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    string currentController = (string)ViewContext.RouteData.Values["controller"];
+    string currentAction = (string)ViewContext.RouteData.Values["action"];
+    string backLink = "";
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+
+    ViewBag.Title = "Rincian Booking | " + Model.CustomerName;
+
+    backLink = Url.Action("Index");
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+<div class="form-horizontal form-display">
+    <div class="form-group">
+        @*@Html.LabelFor(model => model.IdRent, new { @class = "col-xs-2 control-label" })
+            <div class="col-xs-4">
+                @Html.DisplayFor(model => model.IdRent)
+            </div>*@
+    </div>
+
+    <div class="row">
+        <div class="col-xs-6">
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.IdRent, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    <a target="_blank" href="@Url.Action("Detail","Booking", new { id = Model.IdRent})">@Html.DisplayFor(model => Model.RentCode)</a>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Date, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.Date)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Car, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.ValueVehicle)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Driver, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.ValueDriver)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Gas, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.ValueGas)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Toll, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.ValueToll)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Parking, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.ValueParking)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Other, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.ValueOther)
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Description, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.Description)
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <div class="col-xs-offset-2 col-xs-10">
+            <a href="@backLink" class="btn btn-link">Kembali</a>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        @*function printQuotation(id) {
+            var url = '@Url.Action("PrintQuotation", new { id = Model.Id })';
+            var windowName = "quotation";
+
+            openPrintWindow(url, windowName);
+        }*@
+    </script>
+}

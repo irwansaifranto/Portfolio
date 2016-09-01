@@ -1,0 +1,232 @@
+@using WebUI.Extension
+@using Common.Enums
+@model WebUI.Areas.Report.Models.DailyMonthlyFilterModel
+
+@{
+    ViewBag.Title = "Laporan Penjualan";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentController = (WebUI.Areas.Report.Controllers.SalesReportController)ViewContext.Controller;
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+@Html.Raw(currentController.GetMessage())
+
+<div class="form-horizontal">
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="form-group">
+                @Html.LabelFor(m => m.ReportType, new { @class = "col-xs-12 col-md-4" })
+                <div class="col-xs-12 col-md-8">
+                    @Html.DropDownListFor(m => m.ReportType, new SelectList(Model.GetReportTypeOptions(), "Value", "Text"), new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(m => m.StartDate, new { @class = "col-xs-12 col-md-4" })
+                <div class="col-xs-12 col-md-8" id="daily-filter">
+                    <div class="row">
+                        <div class="col-xs-12 col-md-5">
+                            @Html.EditorFor(m => m.StartDate, new { htmlAttributes = new { autocomplete = "off" } })
+                        </div>
+                        <div class="col-xs-12 col-md-2">
+                            <p class="form-control-static text-center">s/d</p>
+                        </div>
+                        <div class="col-xs-12 col-md-5">
+                            @Html.EditorFor(m => m.EndDate, new { htmlAttributes = new { autocomplete = "off" } })
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-md-8" id="monthly-filter">
+                    <div class="row">
+                        <div class="col-xs-12 col-md-5">
+                            @Html.EditorFor(m => m.StartMonth, new { htmlAttributes = new { autocomplete = "off" } })
+                        </div>
+                        <div class="col-xs-12 col-md-2">
+                            <p class="form-control-static text-center">s/d</p>
+                        </div>
+                        <div class="col-xs-12 col-md-5">
+                            @Html.EditorFor(m => m.EndMonth, new { htmlAttributes = new { autocomplete = "off" } })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-4 col-xs-offset-4">
+                    <button type="submit" class="btn btn-default" onclick="redisplayChart()">Tampilkan</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <div class="alert alert-info">Data Penjualan diambil dari data invoice yang tidak "Batal"</div>
+        </div>
+    </div>
+</div>
+
+<div id="chart" class="chart"></div>
+
+@*<img src="@Url.Content("~/Content/theme/mockup/sales-report.jpg")" />*@
+
+@section scripts
+{
+    <script type="text/javascript">
+        var ds;
+
+        function createChart() {
+            ds = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: '@Url.Action("Binding")',
+                        dataType: "json"
+                    }
+                },
+                sort: {
+                    field: "year",
+                    dir: "asc"
+                },
+                schema: {
+                    model: {
+                        fields: {
+                            Category: { type: "date" }
+                        }
+                    }
+                },
+                serverFiltering: true,
+            });
+
+            $("#chart").kendoChart({
+                dataSource: ds,
+                autoBind: false,
+                legend: {
+                    position: "top",
+                    visible: false
+                },
+                seriesDefaults: {
+                    type: "line"
+                },
+                series: [{
+                    field: "Value",
+                    name: "Value"
+                }],
+                categoryAxis: {
+                    field: "Category",
+                    crosshair: {
+                        visible: true
+                    }
+                },
+                valueAxis: {
+                    labels: {
+                        format: "N0"
+                    },
+                    //majorUnit: 1000000
+                },
+                tooltip: {
+                    visible: true,
+                    //shared: true,
+                    //format: "N0",
+                    template: '#: kendo.toString(value, \'N0\') #',
+                }
+            });
+        }
+
+        function redisplayFilter() {
+            var filter = $('#ReportType').val();
+            var mSelector = '#monthly-filter';
+            var dSelector = '#daily-filter';
+
+            if (filter === '@ReportType.DAILY.ToString()') {
+                $(mSelector).hide();
+                $(dSelector).show();
+            } else {
+                $(mSelector).show();
+                $(dSelector).hide();
+            }
+        }
+
+        function redisplayChart() {
+            //kamus
+            var repType, sSelector, eSelector, start, end;
+
+            //algoritma
+            repType = $('#ReportType').val();
+            if (repType === '@ReportType.DAILY.ToString()') {
+                sSelector = '#StartDate';
+                eSelector = '#EndDate';
+            } else {
+                sSelector = '#StartMonth';
+                eSelector = '#EndMonth';
+            }
+
+            start = $(sSelector).data('kendoDatePicker').value();
+            end = $(eSelector).data('kendoDatePicker').value();
+
+            ds.filter({
+                filters: [
+                    { field: 'ReportType', operator: 'eq', value: repType },
+                    { field: 'StartDate', operator: 'eq', value: kendo.toString(start, "yyyy-MM-dd") },
+                    { field: 'EndDate', operator: 'eq', value: kendo.toString(end, "yyyy-MM-dd") },
+                ]
+            });
+
+
+            //console.log('asdasd');
+        }
+
+        $(document).ready(function () {
+            createChart();
+
+            //datepicker
+            var dpSD = $('#StartDate').data('kendoDatePicker');
+            dpSD.setOptions({
+                max: new Date()
+            });
+
+            var dpED = $('#EndDate').data('kendoDatePicker');
+            dpED.setOptions({
+                max: new Date()
+            });
+            dpED.bind('change', function () {
+                var value = this.value();
+                dpSD.setOptions({
+                    max: value
+                });
+                if (dpSD.value() > value) {
+                    dpSD.value(value);
+                }
+            });
+
+            var dpSM = $('#StartMonth').data('kendoDatePicker');
+            dpSM.setOptions({
+                start: 'year',
+                depth: 'year',
+                format: 'MMMM yyyy',
+                max: new Date()
+            });
+
+            var dpEM = $('#EndMonth').data('kendoDatePicker');
+            dpEM.setOptions({
+                start: 'year',
+                depth: 'year',
+                format: 'MMMM yyyy',
+                max: new Date()
+            });
+            dpEM.bind('change', function () {
+                var value = this.value();
+                dpSM.setOptions({
+                    max: value
+                });
+                if (dpSM.value() > value) {
+                    dpSM.value(value);
+                }
+            });
+
+            //report type
+            $('#ReportType').change(redisplayFilter);
+            redisplayFilter();
+
+            //chart
+            redisplayChart();
+        });
+    </script>
+}

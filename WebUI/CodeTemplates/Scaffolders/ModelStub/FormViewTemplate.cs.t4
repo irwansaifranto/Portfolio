@@ -1,0 +1,238 @@
+<#@ Template Language="C#" HostSpecific="True" Inherits="DynamicTransform" #>
+<#@ Output extension="cshtml" #>
+<#@ assembly name="System.Data.Entity" #>
+<#@ assembly name="System.ComponentModel.DataAnnotations" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data.Linq" #>
+<#@ assembly name="RekadiaPS" #>
+<#@ import namespace="EnvDTE" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.ComponentModel.DataAnnotations" #>
+<#@ import namespace="System.Data.Linq.Mapping" #>
+<#@ import namespace="System.Data.Objects.DataClasses" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Reflection" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<# 
+    var modelType = (CodeType)Model.ModelType; 
+    var modelName = modelType.Name; 
+    var modelNamePlural = Model.ModelTypePluralized; 
+    var contextName = ((CodeType)Model.DbContextType).Name; 
+    var primaryKeyProperty = modelType.VisibleMembers().OfType<CodeProperty>().Single(x => x.Name == Model.PrimaryKey);
+    var primaryKeyNamePascalCase = Regex.Replace(Regex.Replace(primaryKeyProperty.Name, @"_(\p{Ll})",m => m.Groups[1].Value.ToUpper()), @"\b(\p{Ll})",m => m.Groups[1].Value.ToUpper());
+    var isObjectContext = ((CodeType)Model.DbContextType).IsAssignableTo<System.Data.Objects.ObjectContext>();
+	var modelProperties = GetModelProperties(modelType, true);
+	var countForeignItem = modelProperties.Count(p => p.IsForeignItem);
+	var count = 0;
+	var displayName = Regex.Replace(Regex.Replace(modelName, @"_(\p{Ll})",m => " " + m.Groups[1].Value.ToUpper()), @"\b(\p{Ll})",m => m.Groups[1].Value.ToUpper());
+#>
+@model <#= Model.ModelStubNamespace #>.<#= Model.ModelNamePascalCase #>FormStub
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string currentController = (string)ViewContext.RouteData.Values["controller"];
+    string currentAction = (string)ViewContext.RouteData.Values["action"];
+    string backLink = "";
+
+    if (currentAction == "Create")
+    {
+        ViewBag.Title = "Add <#= displayName #>";
+    }
+    else
+    {
+        ViewBag.Title = ViewBag.name + " | Edit";
+    }
+    backLink = Url.Action("Index");
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+@using (@Html.BeginForm(currentAction, currentController, FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(model => model.<#= primaryKeyNamePascalCase #>)
+
+<#
+foreach (ModelProperty property in modelProperties) {
+	if (!property.IsPrimaryKey && !property.IsForeignKey && !property.IsForeignItem && !property.IsChildItem) {
+#>
+	<div class="form-group">
+	    @Html.LabelFor(model => model.<#= property.NamePascalCase #>, new { @class = "col-xs-2 control-label" })
+	    <div class="col-xs-6">
+            @Html.EditorFor(model => model.<#= property.NamePascalCase #>, new { htmlAttributes = new { @class = "form-control<#= property.KendoType=="date"?"-datepicker":(property.KendoType=="number"?"-numeric":"") #>", style = "<#= property.KendoType=="date"?"width:100%":(property.KendoType=="number"?"width:100%":"") #>" } })
+            @Html.ValidationMessageFor(model => model.<#= property.NamePascalCase #>)
+	    </div>
+    </div>
+<#	
+	} else if (property.IsForeignKey) {
+#>
+	<div class="form-group">
+	    @Html.LabelFor(model => model.<#= property.NamePascalCase #>, new { @class = "col-xs-2 control-label" })
+	    <div class="col-xs-6">
+            @Html.DropDownListFor(model => model.<#= property.NamePascalCase #>, new SelectList(Model.<#= property.RelationNamePascalCase #>Options, "Value", "Text"), new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.<#= property.NamePascalCase #>)
+	    </div>
+    </div>
+
+<#	
+	}
+}
+#>
+
+    <div class="form-group">
+		<div class="col-xs-offset-2 col-xs-10">
+			<button type="submit" class="btn btn-primary">Save</button>
+			<a href="@backLink" class="btn btn-link">Cancel</a>
+		</div>
+	</div>
+}
+
+@section scripts
+    {
+    <script type="text/javascript">
+		// scripts here
+    </script>
+}
+
+<#+
+// Describes the information about a property on the model
+// Product
+class ModelProperty {
+    public string Name { get; set; }
+    public string NamePascalCase { get; set; }
+    public string DisplayName { get; set; }
+    public string ValueExpression { get; set; }
+	public EnvDTE.CodeTypeRef Type { get; set; }
+    public bool IsPrimaryKey { get; set; }
+	public bool IsForeignKey { get; set; }
+	public bool IsReadOnly { get; set; }
+	public bool IsForeignItem { get; set; }
+	public bool IsChildItem { get; set; }
+	public EnvDTE.CodeProperty SubProperty { get; set; }
+	public string KendoType { get; set; }
+	public string DbItemExpression { get; set; }
+	public string RelationNamePascalCase { get; set; }
+}
+
+// Change this list to include any non-primitive types you think should be eligible to be edited using a textbox
+static Type[] bindableNonPrimitiveTypes = new[] {
+    typeof(string),
+    typeof(decimal),
+    typeof(byte),
+    typeof(long),
+    typeof(Guid),
+    typeof(DateTime),
+    typeof(DateTimeOffset),
+    typeof(TimeSpan),
+};
+
+// Call this to get the list of properties in the model. Change this to modify or add your
+// own default formatting for display values.
+List<ModelProperty> GetModelProperties(EnvDTE.CodeType typeInfo, bool includeUnbindableProperties) {
+    List<ModelProperty> results = GetEligibleProperties(typeInfo, includeUnbindableProperties);
+    
+    foreach (ModelProperty prop in results) {
+		prop.DisplayName = Regex.Replace(Regex.Replace(prop.Name, @"_(\p{Ll})",m => " " + m.Groups[1].Value.ToUpper()), @"\b(\p{Ll})",m => m.Groups[1].Value.ToUpper());
+		if (!prop.IsPrimaryKey)
+		{
+			prop.DisplayName = Regex.Replace(prop.DisplayName, @"\s(Id)\s", "");
+		}
+
+		if (prop.IsForeignKey) {
+			prop.RelationNamePascalCase = Regex.Replace(Regex.Replace(prop.RelationNamePascalCase, @"_(\p{Ll})",m => m.Groups[1].Value.ToUpper()), @"\b(\p{Ll})",m => m.Groups[1].Value.ToUpper());
+		}
+
+		prop.KendoType = "string";
+        if (prop.Type.UnderlyingTypeIs<double>() || prop.Type.UnderlyingTypeIs<decimal>() || prop.Type.UnderlyingTypeIs<int>() || prop.Type.UnderlyingTypeIs<byte>() || prop.Type.UnderlyingTypeIs<long>()) {
+            prop.KendoType = "number";
+        }
+        else if (prop.Type.UnderlyingTypeIs<DateTime>()) {
+            prop.KendoType = "date";
+        }
+        else if (prop.Type.UnderlyingTypeIs<bool>()) {
+            prop.KendoType = "boolean";
+        }
+		else if (!IsBindableType(prop.Type)) {
+			prop.ValueExpression = GetValueExpression("Model." + prop.Name, (EnvDTE.CodeType)prop.Type.CodeType);
+			var subProperty = GetDbItemExpression((EnvDTE.CodeType)prop.Type.CodeType);
+			if (subProperty != null) {
+				prop.IsForeignItem = true;
+				prop.SubProperty = subProperty;
+				prop.DisplayName += Regex.Replace(Regex.Replace(subProperty.Name, @"_(\p{Ll})",m => " " + m.Groups[1].Value.ToUpper()), @"\b(\p{Ll})",m => m.Groups[1].Value.ToUpper());
+				prop.NamePascalCase += Regex.Replace(Regex.Replace(subProperty.Name, @"_(\p{Ll})",m => m.Groups[1].Value.ToUpper()), @"\b(\p{Ll})",m => m.Groups[1].Value.ToUpper());
+				prop.DbItemExpression = prop.Name + "." + subProperty.Name;
+				prop.Type = subProperty.Type;
+			} else {
+				prop.IsForeignItem = false;
+				prop.IsChildItem = true;
+				prop.DbItemExpression = null;
+			}
+
+		}
+    }
+
+    return results;
+}
+
+// Change this list to include the names of properties that should be selected to represent an entity as a single string
+static string[] displayPropertyNames = new[] { "Name", "Title", "LastName", "Surname", "Subject", "Count" };
+
+string GetValueExpression(string propertyExpression, EnvDTE.CodeType propertyType) {
+	if (propertyType != null) {
+		var chosenSubproperty = propertyType.DisplayColumnProperty() ?? propertyType.FindProperty(displayPropertyNames);
+		if (chosenSubproperty != null) {
+			var toStringSuffix = chosenSubproperty.Type.AsFullName == "System.String" ? "" : ".ToString()";
+			return String.Format("({0} == null ? \"None\" : {0}.{1}{2})", propertyExpression, chosenSubproperty.Name, toStringSuffix);
+		}
+	}
+	return "Html.DisplayTextFor(_ => " + propertyExpression + ").ToString()";
+}
+
+// Change this list to include the names of properties that should be selected to represent an entity as a single string
+static string[] dbItemPropertyNames = new[] { "name", "title", "last_name", "surname", "subject", "count" };
+
+EnvDTE.CodeProperty GetDbItemExpression(EnvDTE.CodeType propertyType) {
+	if (propertyType != null) {
+		var chosenSubproperty = propertyType.DisplayColumnProperty() ?? propertyType.FindProperty(dbItemPropertyNames);
+		if (chosenSubproperty != null) {
+			return chosenSubproperty;
+		}
+	}
+	return null;
+}
+
+// Helper
+List<ModelProperty> GetEligibleProperties(EnvDTE.CodeType typeInfo, bool includeUnbindableProperties) {
+    List<ModelProperty> results = new List<ModelProperty>();
+	if (typeInfo != null) {
+		foreach (var prop in typeInfo.VisibleMembers().OfType<EnvDTE.CodeProperty>()) {
+			if (prop.IsReadable() && !prop.HasIndexParameters() && (includeUnbindableProperties || IsBindableType(prop.Type))) {
+				results.Add(new ModelProperty {
+					Name = prop.Name,
+					NamePascalCase =  Regex.Replace(Regex.Replace(prop.Name, @"_(\p{Ll})",m => m.Groups[1].Value.ToUpper()), @"\b(\p{Ll})",m => m.Groups[1].Value.ToUpper()),
+					ValueExpression = "Model." + prop.Name,
+					Type = prop.Type,
+					DbItemExpression = prop.Name,
+					IsPrimaryKey = Model.PrimaryKey == prop.Name,
+					IsForeignKey = ParentRelations.Any(x => x.RelationProperty.Name == prop.Name),
+					RelationNamePascalCase = ParentRelations.Any(x => x.RelationProperty.Name == prop.Name) ? ParentRelations.Where(x => x.RelationProperty == prop).First().RelationName : "",
+					IsReadOnly = !prop.IsWriteable()
+				});
+			}
+		}
+	}
+
+    return results;
+}
+
+IEnumerable<RekadiaPS.RelatedEntityLocators.RelatedEntityInfo> ParentRelations {
+	get { return ((IEnumerable)Model.RelatedEntities).OfType<RekadiaPS.RelatedEntityLocators.RelatedEntityInfo>().Where(x => x.RelationType == RekadiaPS.RelatedEntityLocators.RelationType.Parent); }
+}
+
+// Helper
+bool IsBindableType(EnvDTE.CodeTypeRef type) {
+    return type.UnderlyingIsPrimitive() || bindableNonPrimitiveTypes.Any(x => type.UnderlyingTypeIs(x));
+}
+#>

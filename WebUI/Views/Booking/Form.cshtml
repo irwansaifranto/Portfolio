@@ -1,0 +1,791 @@
+@using System.Web.Script.Serialization;
+@using WebUI.Models.Booking;
+@model WebUI.Models.Booking.BookingFormStub
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    string currentController = (string)ViewContext.RouteData.Values["controller"];
+    string currentAction = (string)ViewContext.RouteData.Values["action"];
+    string backLink = "";
+
+    if (currentAction == "Create")
+    {
+        ViewBag.Title = "Tambah Booking";
+    }
+    else
+    {
+        ViewBag.Title = ViewBag.name + " | Edit";
+    }
+    backLink = Url.Action("Index");
+}
+
+<div>
+    <h1 class="page-title">@ViewBag.Title</h1>
+</div>
+
+<div class="jarviswidget well">
+    <div class="widget-body">
+        @using (@Html.BeginForm(currentAction, currentController, FormMethod.Post, new { @class = "form-horizontal", id = "main-form" }))
+        {
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.Id)
+            @Html.Hidden("print", false);
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Code, new { @class = "col-xs-2 control-label" })
+                <div class="col-xs-4">
+                    @Html.DisplayFor(model => model.Code, new { htmlAttributes = new { @class = "form-control-static" } })
+                    @Html.ValidationMessageFor(model => model.Code)
+                </div>
+            </div>
+
+            <ul class="nav nav-tabs bordered">
+                <li role="presentation" class="active"><a href="#tab-guest" data-toggle="tab">Informasi Tamu</a></li>
+                <li role="presentation"><a href="#tab-booking" data-toggle="tab">Informasi Booking</a></li>
+                <li role="presentation"><a href="#tab-price" data-toggle="tab">Paket Rental</a></li>
+            </ul>
+
+            <div class="tab-content padding-10 margin-bottom-15">
+                <div id="tab-guest" class="tab-pane fade in active">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Name, new { @class = "col-xs-2 control-label" })
+                        <div class="col-xs-3">
+                            @Html.HiddenFor(model => model.IdCustomer)
+                            @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.Name)
+                        </div>
+                        <div class="col-xs-1 no-gutter-left">
+                            @Html.DropDownListFor(model => model.CustomerTitle, new SelectList(Model.GetCustomerTitleOptions(), "Value", "Text"), "Pilih", new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.PhoneNumber, new { @class = "col-xs-2 control-label" })
+                        <div class="col-xs-4">
+                            @Html.EditorFor(model => model.PhoneNumber)
+                            @Html.ValidationMessageFor(model => model.PhoneNumber)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.PhoneNumber2, new { @class = "col-xs-2 control-label" })
+                        <div class="col-xs-4">
+                            @Html.EditorFor(model => model.PhoneNumber2)
+                            @Html.ValidationMessageFor(model => model.PhoneNumber2)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Address, new { @class = "col-xs-2 control-label" })
+                        <div class="col-xs-4">
+                            @Html.EditorFor(model => model.Address, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.Address)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.PickupLocation, new { @class = "col-xs-2 control-label" })
+                        <div class="col-xs-4">
+                            @Html.EditorFor(model => model.PickupLocation, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.PickupLocation)
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-booking" class="tab-pane fade">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.StartRent, new { @class = "col-xs-2 control-label" })
+                        <div class="col-xs-4">
+                            @Html.EditorFor(model => model.StartRent, new { htmlAttributes = new { @class = "form-control-datetimepicker" } })
+                            @Html.ValidationMessageFor(model => model.StartRent)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.FinishRent, new { @class = "col-xs-2 control-label" })
+                        <div class="col-xs-4">
+                            @Html.EditorFor(model => model.FinishRent, new { htmlAttributes = new { @class = "form-control-datetimepicker" } })
+                            @Html.ValidationMessageFor(model => model.FinishRent)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.IdCarModel, new { @class = "col-xs-2 control-label" })
+                        <div class="col-xs-4">
+                            @Html.EditorFor(model => model.IdCarModel, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.IdCarModel)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.IdCar, new { @class = "col-xs-2 control-label" })
+                        <div class="col-xs-4">
+                            @Html.EditorFor(model => model.IdCar, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.IdCar)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.IdDriver, new { @class = "col-xs-2 control-label" })
+                        <div class="col-xs-4">
+                            @Html.EditorFor(model => model.IdDriver, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.ValidationMessageFor(model => model.IdDriver)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Notes, new { @class = "col-xs-2 control-label" })
+                        <div class="col-xs-4">
+                            @Html.EditorFor(model => model.Notes)
+                            @Html.ValidationMessageFor(model => model.Notes)
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-price" class="tab-pane fade">
+                    <div class="form-group">
+                        <div class="col-xs-12 grid-item-container">
+                            @Html.HiddenFor(model => model.IdCarPackage, new { @class = "" })
+                            @*@Html.LabelFor(model => model.ListCarPackage, new { @class = "col-xs-4 control-label" })*@
+                            <div id="grid-paket"></div>
+                            @Html.HiddenFor(model => model.ListRentPackageText, new { @class = "" })
+
+
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.PackagePrice, new { @class = "col-xs-2 control-label" })
+                        <div class="col-xs-4">
+                            @Html.EditorFor(model => model.PackagePrice, new { htmlAttributes = new { placeholder = "", @readonly = "readonly", @class = "form-control-numeric kendo-disabled" } })
+                            @Html.ValidationMessageFor(model => model.PackagePrice)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Discount, new { @class = "col-xs-2 control-label" })
+                        <div class="col-xs-4">
+                            @Html.EditorFor(model => model.Discount)
+                            @Html.ValidationMessageFor(model => model.Discount)
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.Price, new { @class = "col-xs-2 control-label" })
+                        <div class="col-xs-4">
+                            @Html.EditorFor(model => model.Price, new { htmlAttributes = new { placeholder = "", @readonly = "readonly", @class = "form-control-numeric kendo-disabled" } })
+                            @Html.ValidationMessageFor(model => model.Price)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Status, new { @class = "col-xs-2 control-label" })
+                <div class="col-xs-4">
+                    @Html.DropDownListFor(model => model.Status, new SelectList(Model.GetStatusOptions(), "Value", "Text"), new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Status)
+                </div>
+            </div>
+
+            <div class="form-group" id="cancel-section">
+                @Html.LabelFor(model => model.CancelNotes, new { @class = "col-xs-2 control-label" })
+                <div class="col-xs-4">
+                    @Html.EditorFor(model => model.CancelNotes)
+                    @Html.ValidationMessageFor(model => model.CancelNotes)
+                </div>
+            </div>
+
+            <div class="form-group margin-bottom-0">
+                <div class="col-xs-offset-2 col-xs-10">
+                    <button type="button" class="btn btn-primary" onclick="Submit()">Save</button>
+                    <button type="button" onclick="savePrint()" class="btn btn-primary">Save & Print</button>
+                    <a href="@backLink" class="btn btn-link">Cancel</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+@section scripts
+{
+    <script type="text/javascript">
+        var _ID_PACKAGE = "";
+        var _PRICE = "";
+        var initialData = [];
+
+        //MENGISI VARIABLE GLOBAL
+        function setGlobalPriceData(id, price){
+            _ID_PACKAGE = id;
+            _PRICE = price;
+
+            gridOnchange(_ID_PACKAGE, _PRICE);
+        }
+
+        //GRID ONCHANGE SECTION
+        //function gridOnchange(id, price){
+        //    if($("#ck-"+ id +":checked").length > 0){
+        //        $("#qty-"+ id).prop('disabled', false);
+        //        $("#qty-"+ id).val(1);
+        //        $("#subtotal-"+ id ).text(price.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1."));
+        //    }else {
+        //        $("#qty-"+ id).prop('disabled', true);
+        //        resetValue(id);
+        //    }
+        //    calculatePrice();
+        //}
+
+        function gridOnchange(id, price){
+            var quantity = $("#qty-" + id).data("kendoNumericTextBox");
+            if($("#ck-"+ id +":checked").length > 0){
+                quantity.enable(true);
+                quantity.value(1);
+                $("#subtotal-"+ id ).text(price.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1."));
+                spinValueSub(id, price)
+            }else {
+                quantity.enable(false);
+                resetValue(id);
+            }
+            calculatePrice();
+        }
+
+        //QUANTITY GRID SECTION
+        function changeValueSub(id, price){
+            var quantity = $("#qty-" + id).data("kendoNumericTextBox");
+            var value = $("#qty-" + id).data("kendoNumericTextBox").value();
+            quantity.bind("change", function(){
+                if(value > 1){
+                    $("#subtotal-"+ id ).text((price * value).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.")); //merubah ke culture IDR
+                    calculatePrice();
+                }
+                else{
+                    $("#subtotal-"+ id ).text(price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1."));
+                    calculatePrice();
+                }
+            });
+        }
+
+        function spinValueSub(id, price){
+            var quantity = $("#qty-" + id).data("kendoNumericTextBox");
+            var value = $("#qty-" + id).data("kendoNumericTextBox").value();
+            quantity.bind("spin", function(){
+                if(value > 1){
+                    $("#subtotal-" + id).text((price * value).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1."));
+                    calculatePrice();
+                }else {
+                    $("#subtotal-" + id).text(price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1."));
+                    calculatePrice();
+                }
+            });
+        }
+
+        //PACKAGE PRICE SECTION
+        function calculatePrice(){
+            //kamus
+            var packagePrice = 0, subTotal = 0, subtotalGrid = 0, discount, price;
+
+            //algoritma
+            $("input:checkbox.ck").each(function() {
+                if($(this).is(':checked'))
+                {
+                    subtotalGrid = parseFloat($("#subtotal-"+ this.value).text().replace(/\./g, '')); //mereset value subtotal menghilangkan titik dari kendoGrid
+                    subTotal += subtotalGrid;
+                    packagePrice = subTotal;
+                }
+            });
+
+            discount = $('#Discount').data('kendoNumericTextBox').value();
+            price = packagePrice - discount;
+            if (price < 0)
+                price = 0;
+            $('#PackagePrice').data('kendoNumericTextBox').value(packagePrice);
+            $('#Price').data('kendoNumericTextBox').value(price);
+        }
+
+        //RESET VALUE GRID
+        function resetValue(id){
+            var quantity = $("#qty-" + id).data("kendoNumericTextBox");
+            quantity.value("");
+            $("#subtotal-"+ id).text("");
+        }
+
+        function savePrint() {
+            $("#print").val(true);
+            $("#main-form").submit();
+        }
+
+        function modifyCustomerDetail() {
+            var txt = $('#Name').data('kendoComboBox').text();
+            var customerDetail = $('#PhoneNumber, #PhoneNumber2, #Address, #CustomerTitle');
+
+            if (txt === '') {
+                customerDetail.prop('disabled', true);
+            } else {
+                customerDetail.prop('disabled', false);
+            }
+        }
+
+        function customerOnChange() {
+            modifyCustomerDetail();
+
+            if (this.value() && this.selectedIndex == -1) {   //or use this.dataItem to see if it has an object
+                $('#IdCustomer, #PhoneNumber, #PhoneNumber2, #Address, #CustomerTitle').val('');
+            }
+        }
+
+        function comboBoxOnChange(e) {
+            if (this.value() && this.selectedIndex == -1) {   //or use this.dataItem to see if it has an object
+                this.text('');
+            }
+        }
+
+        function statusOnChange() {
+            var stat = $('#Status').val();
+            if (stat == '@Common.Enums.RentStatus.CANCEL.ToString()') {
+                $('#cancel-section').show();
+            } else {
+                $('#cancel-section').hide();
+            }
+        }
+
+        @*//CAR PACKAGE SECTION
+        function modifyPackageDetail() {
+            var txt = $('#IdCarPackage').data('kendoDropDownList').text();
+            var packagePrice = $('#PackagePrice');
+            if (txt === '') {
+                packagePrice.prop('disabled', true);
+            } else {
+                packagePrice.val('@Model.Price');
+            }
+        }*@
+
+        // AUTOMATIC CHANGE FINISH BOOKING
+        function changeFinishDatetime(){
+            var start = $('#StartRent').data('kendoDateTimePicker').value();
+            var dateStart = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+            var finish = $('#FinishRent').data('kendoDateTimePicker').value();
+            var dateFinish = new Date(finish.getFullYear(), finish.getMonth(), finish.getDate());
+
+            var diffPlus = new Date(
+                    start.getFullYear(),
+                    start.getMonth(),
+                    start.getDate() + 1,
+                    start.getHours(),
+                    start.getMinutes(),
+                    start.getSeconds()
+                );
+
+            if(start >= finish){
+                $('#FinishRent').data('kendoDateTimePicker').value(diffPlus);
+            }
+        }
+
+        // AUTOMATIC CHANGE START BOOKING
+        function changeStartDatetime(){
+            var start = $('#StartRent').data('kendoDateTimePicker').value();
+            var dateStart = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+            var finish = $('#FinishRent').data('kendoDateTimePicker').value();
+            var dateFinish = new Date(finish.getFullYear(), finish.getMonth(), finish.getDate());
+
+            var diffMinus = new Date(
+                    finish.getFullYear(),
+                    finish.getMonth(),
+                    finish.getDate() - 1,
+                    finish.getHours(),
+                    finish.getMinutes(),
+                    finish.getSeconds()
+                )
+
+            if(finish <= start){
+                $('#StartRent').data('kendoDateTimePicker').value(diffMinus);
+            }
+        }
+
+        //function resetPrice(){
+        //    $('#PackagePrice').data('kendoNumericTextBox').value(0);
+        //    $('#Price').data('kendoNumericTextBox').value(0);
+        //}
+
+        function Submit(){
+            $("input:checkbox.ck").each(function() {
+                var subTotal = 0;
+                if($(this).is(':checked'))
+                {
+                    subTotal = ($("#subtotal-"+ this.value ).text().replace(/\./g, ''));
+                    var quantity = $("#qty-" + this.value).data("kendoNumericTextBox").value();
+                    packagePrice = subTotal;
+                    //kalau gak ada ini maka save akan error karena tipe data default int 1
+                    var qty = 1;
+                    if(quantity != null)
+                    {
+                        qty = quantity;
+                    }
+
+                    initialData.push({
+                        IdRent : $('#Id').val(),
+                        IdCarPackage : this.value,
+                        Quantity : qty,
+                        PriceEach : subTotal,
+                    });
+                    console.log(quantity);
+                }
+            });
+
+
+            $('#ListRentPackageText').val(JSON.stringify(initialData));
+            console.log($('#ListRentPackageText').val());
+            $('#main-form').submit();
+        }
+
+        $(document).ready(function () {
+            //INITIATE ELEMENTS
+            $("#PhoneNumber").kendoMaskedTextBox({
+                mask: "000000000000"
+            });
+
+            $("#PhoneNumber2").kendoMaskedTextBox({
+                mask: "000000000000"
+            });
+
+            $('#Name').kendoComboBox({
+                placeholder: "Masukan Nama Lengkap",
+                dataTextField: "Name",
+                dataValueField: "name",
+                change: customerOnChange,
+                minLength: 3,
+                filter: 'contains',
+                autoBind: @((Model.Name != null).ToString().ToLower()),
+                dataSource: {
+                    serverFiltering: true,
+                    serverSorting: true,
+                    transport: {
+                        read: {
+                            url: '@Url.Action("Binding", "Customer")',
+                            dataType: "json",
+                            type: "POST",
+                        },
+                        parameterMap: function (options, operation) {
+                            if (operation !== "read" && options.models) {
+
+                            } else {
+
+                                if (options.filter) {
+                                    filter = options.filter.filters;
+                                    for (var i in filter) {
+                                        if (filter[i].field == "Name") {
+                                            filter[i].field = "name";
+                                        }
+                                    }
+                                }
+
+                                if (options.sort) {
+                                    sort = options.sort;
+                                }
+
+                                return options;
+                            }
+                        },
+                    },
+                    schema: {
+                        data: "data",
+                        total: "total",
+                    },
+                    sort: { field: 'name', dir: 'asc' }
+                },
+                select: function (e) {
+                    if (e.item == null) return;
+
+                    //kamus
+                    var dataItem = this.dataItem(e.item.index());
+                    var phoneNumber, phoneNumber2, address, customerTitle;
+
+                    //algoritma
+                    phoneNumber = dataItem.PhoneNumber;
+                    phoneNumber2 = dataItem.PhoneNumber2;
+                    address = dataItem.Address;
+                    customerTitle = dataItem.CustomerTitleEnum;
+
+                    $('#IdCustomer').val(dataItem.Id);
+                    $('#PhoneNumber').val(phoneNumber);
+                    $('#PhoneNumber2').val(phoneNumber2);
+                    $('#Address').val(address);
+                    $('#CustomerTitle').val(customerTitle);
+
+                    if ($('#PickupLocation').val() == '')
+                        $('#PickupLocation').val(address);
+                }
+            });
+
+            $('#IdDriver').kendoComboBox({
+                //placeholder: "",
+                dataTextField: "Name",
+                dataValueField: "Id",
+                change: comboBoxOnChange,
+                minLength: 3,
+                filter: 'contains',
+                dataSource: {
+                    serverFiltering: true,
+                    transport: {
+                        read: {
+                            url: '@Url.Action("BindingDriver")',
+                            dataType: "json",
+                            type: "POST",
+                        },
+                    },
+                    schema: {
+                        data: "data",
+                        total: "total",
+                    }
+                },
+            });
+
+            $('#IdCarModel').kendoDropDownList({
+                optionLabel: 'Pilih Model Mobil',
+                dataTextField: "Name",
+                dataValueField: "Id",
+                minLength: 3,
+                filter: 'contains',
+                dataSource: {
+                    serverFiltering: true,
+                    transport: {
+                        read: {
+                            url: '@Url.Action("BindingCarModel")',
+                            dataType: "json",
+                            type: "POST",
+                        },
+                    },
+                    schema: {
+                        data: "data",
+                        total: "total",
+                    }
+                },
+            });
+
+            $('#IdCar').kendoDropDownList({
+                optionLabel: "Pilih Mobil",
+                dataTextField: "LicensePlate",
+                dataValueField: "Id",
+                minLength: 3,
+                filter: 'contains',
+                cascadeFrom: 'IdCarModel',
+                dataSource: {
+                    serverFiltering: true,
+                    serverSorting: true,
+                    transport: {
+                        read: {
+                            url: '@Url.Action("Binding", "Car", new { idCar = Model.IdCar } )',
+                            dataType: "json",
+                            type: "POST",
+                        },
+                        parameterMap: function (options, operation) {
+                            if (operation !== "read" && options.models) {
+
+                            } else {
+                                if (options.filter) {
+                                    filter = options.filter.filters;
+                                    for (var i in filter) {
+                                        if (filter[i].field == "Id") {
+                                            filter[i].field = "id_car_model";
+                                        }
+                                    }
+                                }
+                                return options;
+                            }
+                        }
+                    },
+                    schema: {
+                        data: "data",
+                        total: "total",
+                    },
+                    filter: { field: 'is_active', operator: 'eq', value: 'true' },
+                    sort: { field: 'license_plate', dir: 'asc' },
+                },
+            });
+
+            var ds = {
+                pageable: true,
+                pageSize: 10,
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                sortable: true,
+                transport: {
+                    read: {
+                        url: "@Url.Action("Binding", "CarPackage")",
+                        dataType: "json",
+                        type: "POST",
+                    },
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options != '') {
+                            return kendo.stringify(options);
+                        }
+                        else if (operation == "read") {
+                            var filter;
+                            if (options.filter) {
+                                filter = options.filter.filters;
+                                for (var i in filter) {
+                                    if (filter[i].field == "CarBrandName") {
+                                        filter[i].field = "car_model.car_brand.name"
+                                    } else if (filter[i].field == "CarModelName") {
+                                        filter[i].field = "car_model.name";
+                                    }
+                                }
+                            }
+
+                            if (options.sort) {
+                                sort = options.sort;
+                                for (var i in sort) {
+                                    if (sort[i].field == "CarBrandName") {
+                                        sort[i].field = "car_model.car_brand.name";
+                                    }
+                                    if (sort[i].field == "CarModelName") {
+                                        sort[i].field = "car_model.name";
+                                    }
+
+                                }
+
+                            }
+                            return options;
+                        }
+                    }
+                },
+                schema: {
+                    data: "data",
+                    total: "total",
+                    model: {
+                        fields: {
+                            "Id": { type: "string" },
+                            "IdCarBrand": { type: "string" },
+                            "IdCarName": { type: "string" },
+                            "CarModelName": { type: "string" },
+                            "CarBrandName": { type: "string" },
+                            "Name": { type: "string" },
+                            "Price": { type: "number" },
+                            "IsActive": { type: "boolean" },
+                        }
+                    }
+                },
+                aggregate: [
+                    { field: "", aggregate: "sum" },
+                ],
+                sort: { field: "created_time", dir: "desc" }
+            };
+
+            $("#grid-paket").kendoGrid({
+                dataSource: ds,
+                dataBound: function (e) {
+                    this.tbody.find(".numeric").each(function(){
+                        $(this).kendoNumericTextBox({
+                            format: '{0:n0}',
+                            spin: function(e){
+                                spinValueSub();
+                            }
+                        });
+                    });
+                    loadData();
+                },
+                filterable: kendoGridFilterable,
+                pageable: true,
+                sortable: true,
+                resizable: true,
+                columns: [
+                    {
+                        field: "Id",
+                        title: " ",
+                        template: "<input type='checkbox' id='ck-#=Id#' class='ck' value='#=Id#' name='action' onClick='setGlobalPriceData(\"#=Id#\", \"#=Price#\")'>",
+                        filterable: false,
+                        sortable: false,
+                        width: 30
+                    },
+                    {
+                        field: "Name",
+                        title: "Paket",
+                        width: 130,
+                    },
+					{
+					    field: "Quantity",
+					    title: "Quantity",
+					    width: 150,
+					    type:"number",
+					    format: "{0:n0}",
+					    //template: "<input type='number' disabled=true min=1 id='qty-#=Id#' onChange='changeValueSub(\"#=Id#\", \"#=Price#\")'/>",
+					    template: "<input id='qty-#=Id#' type='number' class='numeric' disabled='disabled' onChange='changeValueSub(\"#=Id#\", \"#=Price#\")'></input>",
+					    editable: true,
+					    filterable: false,
+					},
+					{
+					    field: "Price",
+					    title: "Harga",
+					    template: "<div id='prc-#=Id#' align='right'>#=kendo.toString(Price, \"n0\")#</div>",
+					    width: 130,
+					},
+					{
+					    field: "SubTotal",
+					    title: "Sub Total",
+					    template: "<div id='subtotal-#=Id#' align='right'></div>",
+					    filterable: false,
+					    width: 130,
+					},
+
+                ],
+            });
+
+            function loadData(){
+                @if(Model.ListRentPackageText != null)
+                {
+                    JavaScriptSerializer js = new JavaScriptSerializer();
+                    List<RentPackageFormStub> list = js.Deserialize<List<RentPackageFormStub>>(Model.ListRentPackageText);
+
+                    foreach (RentPackageFormStub item in list)
+                    {
+                        <text>
+                            console.log($("#ck-"+ '@item.IdCarPackage'))
+                            var quantity = $("#qty-" + '@item.IdCarPackage').data('kendoNumericTextBox');
+                            $("#ck-"+ '@item.IdCarPackage').prop("checked", true);
+                            quantity.value('@item.Quantity');
+                            quantity.enable(true);
+                            $("#qty-"+ '@item.IdCarPackage').prop('disabled', false);
+                            $("#subtotal-"+ '@item.IdCarPackage').text('@item.PriceEach'.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1."));
+                        </text>
+                    }
+                }
+            }
+
+            //var gridDataArray = $('#grid-paket').data('kendoGrid').dataSource.data();
+            //console.log(gridDataArray);
+            //ATTACH EVENT
+            var discountTB = $("#Discount").data("kendoNumericTextBox");
+            discountTB.bind("change", function() {
+
+                calculatePrice();
+            });
+            discountTB.bind("spin", function() {
+                calculatePrice();
+            });
+
+            //var idCarModelTB = $('#IdCarModel').data('kendoDropDownList');
+            //idCarModelTB.bind('change', function(){
+            //    resetPrice();
+            //});
+
+            $('#StartRent').change(function (){
+                changeFinishDatetime();
+            });
+
+            $('#FinishRent').change(function (){
+                changeStartDatetime();
+            });
+
+            $('#Status').change(function () {
+                statusOnChange();
+            });
+
+            //INIT FUNCTION
+            modifyCustomerDetail();
+            statusOnChange();
+
+        });
+    </script>
+
+}
+

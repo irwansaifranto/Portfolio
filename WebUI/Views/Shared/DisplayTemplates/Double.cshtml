@@ -1,0 +1,5 @@
+﻿@model double?
+
+@if (Model != null){
+    @Html.Label("", string.Format("{0:N}", Model), ViewData["htmlAttributes"])
+}

@@ -1,0 +1,467 @@
+<#@ template language="C#" HostSpecific="True"  inherits="DynamicTransform" #>
+<#@ assembly name="System.Data.Entity" #>
+<#@ assembly name="System.ComponentModel.DataAnnotations" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data.Linq" #>
+<#@ assembly name="RekadiaPS" #>
+<#@ import namespace="EnvDTE" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.ComponentModel.DataAnnotations" #>
+<#@ import namespace="System.Data.Linq.Mapping" #>
+<#@ import namespace="System.Data.Objects.DataClasses" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Reflection" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ Output Extension="cs" #>
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using NPOI.XSSF.UserModel;
+using NPOI.SS.UserModel;
+using NPOI.SS.Util;
+using NPOI.XSSF.Util;
+using System.IO;
+using System.Threading;
+using Common.Enums;
+<# foreach(var ns in new[] { Model.ModelTypeNamespace, Model.DbContextNamespace }.Where(x => !string.IsNullOrEmpty(x) && (x != Model.RepositoryNamespace)).Distinct()) { #>
+using <#= ns #>;
+<# } #>
+
+namespace <#= Model.ModelStubNamespace #>
+{
+<# 
+    var modelType = (CodeType)Model.ModelType; 
+    var modelName = modelType.Name; 
+    var modelNamePlural = Model.ModelTypePluralized; 
+    var contextName = ((CodeType)Model.DbContextType).Name; 
+    var primaryKeyProperty = modelType.VisibleMembers().OfType<CodeProperty>().Single(x => x.Name == Model.PrimaryKey);
+    var isObjectContext = ((CodeType)Model.DbContextType).IsAssignableTo<System.Data.Objects.ObjectContext>();
+	var modelProperties = GetModelProperties(modelType, true);
+	var countForeignItem = 0;
+	var count = 0;
+	var displayName = Regex.Replace(Regex.Replace(modelName, @"_(\p{Ll})",m => " " + m.Groups[1].Value.ToUpper()), @"\b(\p{Ll})",m => m.Groups[1].Value.ToUpper());
+#>
+    public class <#= Model.ModelNamePascalCase #>ImportExcelStub
+    {
+		[DisplayName("File Excel")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(Resources.MyGlobalErrors))]
+        public string ExcelFilePath { get; set; }
+
+		public <#= Model.ModelNamePascalCase #>ImportExcelStub() { }
+<#
+   foreach (ModelProperty property in modelProperties) {
+	if (property.IsForeignItem) {
+		countForeignItem++;
+	}
+}
+
+ #>
+		public static byte[] GenerateTemplate(<#
+count = 0;
+foreach (ModelProperty property in modelProperties) {
+	if (property.IsForeignItem) {
+		count++;
+#>List<<#= property.Type.AsString #>> list<#= property.NamePascalCase #><#= count != countForeignItem ? "," : "" #><#
+	}
+}
+#>)
+        {
+            //culture
+            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US"); //supaya file tidak corrupt
+            int parseRecordNumber = 100; // number of rows that has style or validation
+            int startRowIndex = 3;
+
+            XSSFCellStyle styleCurrency;
+            XSSFCellStyle styleDate;
+            XSSFCellStyle styleNumeric;
+			XSSFCellStyle styleDecimal;
+
+            //kamus
+            XSSFWorkbook workbook = new XSSFWorkbook();
+            XSSFSheet sheet; XSSFRow row; XSSFCell cell;
+
+            XSSFCellStyle style; XSSFFont font;
+
+            CellRangeAddressList addressList; XSSFDataValidationHelper dvHelper; XSSFDataValidationConstraint dvConstraint; XSSFDataValidation validation;
+
+
+			<#
+count = 0;
+foreach (ModelProperty property in modelProperties) {
+	if (property.IsForeignItem) {
+		count++;
+#>List<string> list<#= property.NamePascalCase #>String = new List<string>();
+  foreach(var data in  list<#= property.NamePascalCase #>)
+  {
+		list<#= property.NamePascalCase #>String.Add(data.name);
+  }
+
+
+<#
+	}
+}
+#>
+
+            styleCurrency = (XSSFCellStyle)workbook.CreateCellStyle();
+            styleCurrency.DataFormat = workbook.CreateDataFormat().GetFormat("$#,##0.00_);($#,##0.00)");
+
+            styleNumeric = (XSSFCellStyle)workbook.CreateCellStyle();
+            styleNumeric.DataFormat = workbook.CreateDataFormat().GetFormat("#,##0");
+
+            styleDate = (XSSFCellStyle)workbook.CreateCellStyle();
+            styleDate.DataFormat = workbook.CreateDataFormat().GetFormat("mm/dd/yyyy");
+
+			         styleDecimal = (XSSFCellStyle)workbook.CreateCellStyle();
+            styleDecimal.DataFormat = workbook.CreateDataFormat().GetFormat("0.00");
+
+            List<string> columnList = new List<string>();
+			<# count = 0;
+foreach (ModelProperty property in modelProperties) {
+	if (!property.IsChildItem && !property.IsForeignItem) { 
+		if(property.DisplayName.Contains("Id"))
+        { 
+			string displayNameColumnList = property.DisplayName.Replace("Id","").Trim();
+			if(displayNameColumnList != "")
+            {
+		
+		#>
+			int <#= displayNameColumnList #>StringLocation = <#= count-1 #>; 
+			columnList.Add("<#= displayNameColumnList #>");
+        <# }
+			}
+		else
+        { #>
+			columnList.Add("<#= property.DisplayName #>");
+       <# }
+	#>
+    <# count++; }
+}
+#>
+
+            sheet = (XSSFSheet)workbook.CreateSheet("Data");
+            int col = 0;
+            int rowNumber = 0;
+            //create row (header)
+            row = (XSSFRow)sheet.CreateRow((short)rowNumber);
+            dvHelper = new XSSFDataValidationHelper(sheet);
+            //header data
+            style = (XSSFCellStyle)workbook.CreateCellStyle();
+            cell = (XSSFCell)row.CreateCell(col);
+            cell.SetCellValue("<#= displayName #>");
+            font = (XSSFFont)workbook.CreateFont();
+            font.FontHeight = 24;
+            style.SetFont(font);
+            cell.CellStyle = style;
+            rowNumber++;
+            row = (XSSFRow)sheet.CreateRow((short)rowNumber);
+
+            style = (XSSFCellStyle)workbook.CreateCellStyle();
+            font = (XSSFFont)workbook.CreateFont();
+            font.Boldweight = (short)FontBoldWeight.Bold;
+            style.SetFont(font);
+            rowNumber++;
+            row = (XSSFRow)sheet.CreateRow((short)rowNumber);
+            //header data
+            foreach (string data in columnList)
+            {
+                cell = (XSSFCell)row.CreateCell(col);
+                cell.SetCellValue(data);
+
+                cell.CellStyle = style;
+                //cell.CellStyle.IsLocked = true;
+
+                //column width
+                sheet.SetColumnWidth(col, (30 * 256));
+                ++col;
+            }
+
+            //sheet.CreateFreezePane(0, 4);
+			<# int sheetIndex = 1;
+			foreach (ModelProperty property in modelProperties) {
+	if (property.IsForeignItem) {
+		count++;
+#>		
+		//dropdownlist <#= property.NamePascalCase #>
+		if(list<#= property.NamePascalCase #>String.Count > 0)
+		{
+				
+				XSSFSheet hidden = (XSSFSheet)workbook.CreateSheet("Master<#= property.NamePascalCase #>");
+				int i=0;
+				foreach(string a in list<#= property.NamePascalCase #>String)
+				{
+					row = (XSSFRow)hidden.CreateRow(i);
+                    cell = (XSSFCell)row.CreateCell(0);
+					cell.SetCellValue(a);
+					i++;
+				}
+
+				validation = null;
+				dvConstraint = null;
+				dvHelper = null;
+				dvHelper=new XSSFDataValidationHelper(sheet);
+				addressList = new  CellRangeAddressList(startRowIndex,parseRecordNumber,<#= property.NamePascalCase #>StringLocation,<#= property.NamePascalCase #>StringLocation);
+				 dvConstraint = (XSSFDataValidationConstraint)dvHelper.CreateFormulaListConstraint("Master<#= property.NamePascalCase #>!$A$1:$A$" + list<#= property.NamePascalCase #>String.Count);
+				validation = (XSSFDataValidation)dvHelper.CreateValidation(dvConstraint, addressList);
+                validation.SuppressDropDownArrow = true;
+                validation.ShowErrorBox = true;
+				workbook.SetSheetHidden(<#= sheetIndex #>, true);
+                sheet.AddValidationData(validation);
+		}
+		
+		<# sheetIndex++;
+	}
+} #>
+
+            /*Cell formatting*/
+            for (int i = startRowIndex; i <= parseRecordNumber; i++)
+            {
+                rowNumber++;
+                row = (XSSFRow)sheet.CreateRow((short)rowNumber);
+
+							<# count = 0;
+foreach (ModelProperty property in modelProperties) {
+	if (!property.IsChildItem && !property.IsForeignItem) {
+
+		string propData = "";
+		bool writeInput = false;
+		string validation = "";
+		switch(property.Type.AsString)
+        {
+			case "int" : propData = "cell.CellStyle = styleNumeric;";
+						writeInput = true;
+						validation="numeric";
+						break;
+			case "int?" : propData = "cell.CellStyle = styleNumeric;";
+						writeInput = true;
+						validation="numeric";
+						break;
+			case "long?" : propData = "cell.CellStyle = styleNumeric;";
+						writeInput = true;
+						validation="numeric";
+						break;
+			case "long" : propData = "cell.CellStyle = styleNumeric;";
+						writeInput = true;
+						validation="numeric";
+			break;
+			case "System.DateTime" : propData = "cell.CellStyle = styleDate;";
+				writeInput = true;
+				validation="datetime";
+						break;
+			case "System.DateTime?" : propData = "cell.CellStyle = styleDate;";
+				writeInput = true;
+				validation="datetime";
+					break;
+			case "double?" : propData = "cell.CellStyle = styleDecimal;";
+				writeInput = true;
+				break;
+			case "double" : propData = "cell.CellStyle = styleDecimal;";
+				writeInput = true;
+				break;
+			case "decimal?" : propData = "cell.CellStyle = styleDecimal;";
+				writeInput = true;
+				break;
+			case "decimal" : propData = "cell.CellStyle = styleDecimal;";
+				writeInput = true;
+				break;
+        }
+ 
+		if(property.DisplayName.Contains("Id"))
+        { 
+			string displayNameColumnList = property.DisplayName.Replace("Id","").Trim();
+			if(displayNameColumnList != "")
+            {
+		#>
+			
+		<#
+         }
+			}
+		else
+        { 
+		
+			if(writeInput == true)
+            { 
+		#>
+			//<#=property.Name #>
+			col = <#= count-1 #>;
+            cell = (XSSFCell)row.CreateCell((short)col);
+			<#= propData #>
+		    
+			if(i==startRowIndex)
+			{
+				<# 
+					if(validation=="numeric")
+					{ #>
+						addressList = new CellRangeAddressList(startRowIndex, parseRecordNumber, <#= count-1 #>, <#= count-1 #>);
+						dvHelper = new XSSFDataValidationHelper(sheet);
+						dvConstraint = (XSSFDataValidationConstraint)dvHelper.CreateNumericConstraint(ValidationType.INTEGER, OperatorType.BETWEEN, "0", "1000000000000000000");
+						validation = (XSSFDataValidation)dvHelper.CreateValidation(dvConstraint, addressList);
+						validation.ShowErrorBox = true;
+						validation.CreateErrorBox("Input Error", "Value must be a number, maximum 1.000.000.000.000.000.000");
+						sheet.AddValidationData(validation);
+				<#	}
+					else if(validation == "datetime")
+                    { #>
+
+						
+						addressList = new CellRangeAddressList(startRowIndex, parseRecordNumber, <#= count-1 #>, <#= count-1 #>);
+						dvConstraint = (XSSFDataValidationConstraint)dvHelper.CreateDateConstraint(OperatorType.GREATER_THAN, "01/01/1900", "", "mm/dd/yyyy");
+						validation = (XSSFDataValidation)dvHelper.CreateValidation(dvConstraint, addressList);
+						validation.ShowErrorBox = true;
+						validation.CreateErrorBox("Input Error", "Value must be a date, example 12/30/2000");
+						sheet.AddValidationData(validation);
+
+                  <#  }
+				#>
+			}
+       <# } 
+	   }
+	#>
+    <# count++; }
+}
+#>
+
+            }
+			
+            //write to byte[]
+            MemoryStream ms = new MemoryStream();
+            workbook.Write(ms);
+
+            return ms.ToArray();
+        }
+
+	}
+}
+
+<#+
+// Describes the information about a property on the model
+// Product
+class ModelProperty {
+    public string Name { get; set; }
+    public string NamePascalCase { get; set; }
+    public string DisplayName { get; set; }
+    public string ValueExpression { get; set; }
+	public EnvDTE.CodeTypeRef Type { get; set; }
+    public bool IsPrimaryKey { get; set; }
+	public bool IsForeignKey { get; set; }
+	public bool IsReadOnly { get; set; }
+	public bool IsForeignItem { get; set; }
+	public bool IsChildItem { get; set; }
+	public bool IsRequired { get; set; }
+	public EnvDTE.CodeProperty SubProperty { get; set; }
+}
+
+// Change this list to include any non-primitive types you think should be eligible to be edited using a textbox
+static Type[] bindableNonPrimitiveTypes = new[] {
+    typeof(string),
+    typeof(decimal),
+    typeof(Guid),
+    typeof(DateTime),
+    typeof(DateTimeOffset),
+    typeof(TimeSpan),
+};
+
+// Call this to get the list of properties in the model. Change this to modify or add your
+// own default formatting for display values.
+List<ModelProperty> GetModelProperties(EnvDTE.CodeType typeInfo, bool includeUnbindableProperties) {
+    List<ModelProperty> results = GetEligibleProperties(typeInfo, includeUnbindableProperties);
+    
+    foreach (ModelProperty prop in results) {
+		prop.DisplayName = Regex.Replace(Regex.Replace(prop.Name, @"_(\p{Ll})",m => " " + m.Groups[1].Value.ToUpper()), @"\b(\p{Ll})",m => m.Groups[1].Value.ToUpper());
+		if (!prop.IsPrimaryKey)
+		{
+			prop.DisplayName = Regex.Replace(prop.DisplayName, @"\s(Id)\s", "");
+		}
+
+
+        if (prop.Type.UnderlyingTypeIs<double>() || prop.Type.UnderlyingTypeIs<decimal>()) {
+            prop.ValueExpression = "String.Format(\"{0:F}\", " + prop.ValueExpression + ")";
+        }
+        else if (prop.Type.UnderlyingTypeIs<DateTime>()) {
+            prop.ValueExpression = "String.Format(\"{0:g}\", " + prop.ValueExpression + ")";
+        }
+		else if (!IsBindableType(prop.Type)) {
+			prop.ValueExpression = GetValueExpression("Model." + prop.Name, (EnvDTE.CodeType)prop.Type.CodeType);
+			var subProperty = GetDbItemExpression((EnvDTE.CodeType)prop.Type.CodeType);
+			if (subProperty != null) {
+				prop.IsForeignItem = true;
+				prop.SubProperty = subProperty;
+			} else {
+				prop.IsForeignItem = false;
+				prop.IsChildItem = true;
+			}
+
+		}
+    }
+
+    return results;
+}
+
+// Change this list to include the names of properties that should be selected to represent an entity as a single string
+static string[] displayPropertyNames = new[] { "Name", "Title", "LastName", "Surname", "Subject", "Count" };
+
+string GetValueExpression(string propertyExpression, EnvDTE.CodeType propertyType) {
+	if (propertyType != null) {
+		var chosenSubproperty = propertyType.DisplayColumnProperty() ?? propertyType.FindProperty(displayPropertyNames);
+		if (chosenSubproperty != null) {
+			var toStringSuffix = chosenSubproperty.Type.AsFullName == "System.String" ? "" : ".ToString()";
+			return String.Format("({0} == null ? \"None\" : {0}.{1}{2})", propertyExpression, chosenSubproperty.Name, toStringSuffix);
+		}
+	}
+	return "Html.DisplayTextFor(_ => " + propertyExpression + ").ToString()";
+}
+
+// Change this list to include the names of properties that should be selected to represent an entity as a single string
+static string[] dbItemPropertyNames = new[] { "name", "title", "last_name", "surname", "subject", "count" };
+
+EnvDTE.CodeProperty GetDbItemExpression(EnvDTE.CodeType propertyType) {
+	if (propertyType != null) {
+		var chosenSubproperty = propertyType.DisplayColumnProperty() ?? propertyType.FindProperty(dbItemPropertyNames);
+		if (chosenSubproperty != null) {
+			return chosenSubproperty;
+		}
+	}
+	return null;
+}
+
+// Helper
+List<ModelProperty> GetEligibleProperties(EnvDTE.CodeType typeInfo, bool includeUnbindableProperties) {
+    List<ModelProperty> results = new List<ModelProperty>();
+	if (typeInfo != null) {
+		foreach (var prop in typeInfo.VisibleMembers().OfType<EnvDTE.CodeProperty>()) {
+			if (prop.IsReadable() && !prop.HasIndexParameters() && (includeUnbindableProperties || IsBindableType(prop.Type))) {
+				results.Add(new ModelProperty {
+					Name = prop.Name,
+					NamePascalCase =  Regex.Replace(Regex.Replace(prop.Name, @"_(\p{Ll})",m => m.Groups[1].Value.ToUpper()), @"\b(\p{Ll})",m => m.Groups[1].Value.ToUpper()),
+					ValueExpression = "Model." + prop.Name,
+					Type = prop.Type,
+					IsPrimaryKey = Model.PrimaryKeyName == prop.Name,
+					IsForeignKey = ParentRelations.Any(x => x.RelationProperty.Name == prop.Name),
+					IsReadOnly = !prop.IsWriteable(),
+					IsRequired = !IsNullable(prop.Type)
+				});
+			}
+		}
+	}
+
+    return results;
+}
+
+IEnumerable<RekadiaPS.RelatedEntityLocators.RelatedEntityInfo> ParentRelations {
+	get { return ((IEnumerable)Model.RelatedEntities).OfType<RekadiaPS.RelatedEntityLocators.RelatedEntityInfo>().Where(x => x.RelationType == RekadiaPS.RelatedEntityLocators.RelationType.Parent); }
+}
+
+// Helper
+bool IsBindableType(EnvDTE.CodeTypeRef type) {
+    return type.UnderlyingIsPrimitive() || bindableNonPrimitiveTypes.Any(x => type.UnderlyingTypeIs(x));
+}
+
+bool IsNullable(EnvDTE.CodeTypeRef propType) {
+  return propType.AsFullName.Contains(".Nullable<");
+}
+#>

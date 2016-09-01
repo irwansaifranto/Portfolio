@@ -1,0 +1,120 @@
+﻿@using WebUI.Extension;
+@using MvcSiteMapProvider.Web.Html;
+@model WebUI.Areas.Report.Models.DailyFilterModel
+
+@{
+    ViewBag.Title = "Penugasan";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentController = (WebUI.Areas.Report.Controllers.AssignmentController)ViewContext.Controller;
+
+    Dictionary<string, string> jsonCarListByModel = ViewBag.JsonCarListByModel;
+}
+
+<style type="text/css">
+    /*CSS hiding "WEEK" toolbar*/
+</style>
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+@Html.Raw(currentController.GetMessage())
+
+@*<div class="form-inline margin-bottom-5">
+        <div class="form-group">
+            @Html.EditorFor(model => model.StartDate)
+        </div>
+        <div class="form-group">
+            <label>s/d</label>
+            @Html.EditorFor(model => model.EndDate)
+        </div>
+        <a href="javascript:" class="btn btn-default" onclick="redisplayChart()">Tampilkan</a>
+    </div>*@
+
+<div id="scheduler-list">
+    @foreach (var carModelName in jsonCarListByModel)
+    {
+        <div class="assignment" id="scheduler-@carModelName.Key" style="margin-bottom:30px;"></div>
+    }
+</div>
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/assignment")
+
+    <script id="event-template" type="text/x-kendo-template">
+        #if(StatusEnum == 'NEW') {#
+            <div class="assignment-block assignment-new">
+        #}else if(StatusEnum == 'GO'){#
+            <div class="assignment-block assignment-go">
+        #}else{#
+            <div class="assignment-block assignment-finish">
+        #}#
+                <div class="color-bar"></div>
+                <div class="assignment-text">#: title #</div>
+            </div>
+    </script>
+
+    <script id="editor" type="text/x-kendo-template">
+        <div class="form-horizontal form-display">
+            <div class="form-group">
+                <label class="control-label col-xs-2">Supir</label>
+                <div class="col-xs-7">
+                    <p class="form-control-static">#=(DriverName == null ? '-' : DriverName)#</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-2">Plat Nomor</label>
+                <div class="col-xs-7">
+                    <p class="form-control-static">#=(LicensePlate == null ? '-' : LicensePlate)#</p>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function (){
+            @foreach (var carList in jsonCarListByModel)
+            {
+                <text>
+                $('#scheduler-@carList.Key').assignmentChart({
+                    carModelName: [{ text: '@carList.Key', value: '@carList.Key' }],
+                    licensePlate: @Html.Raw(carList.Value),
+                    bindingUrl: '@Url.Action("Binding")',               
+                    editUrl: '@Url.Action("Edit", "Booking", new { area = "" })',
+                });
+            </text>
+            }
+
+            //auto refresh setiap 5 menit
+            setInterval(function(){
+                $('.assignment').each(function(){
+                    $(this).assignmentChart('refresh');
+                });
+            }, 300000);
+        });
+
+        
+        //$('.k-scheduler-update').hide();
+
+        function redisplayChart() {
+            //kamus
+            var sSelector, eSelector, start, end;
+
+            //algoritma
+            sSelector = '#StartDate';
+            eSelector = '#EndDate';
+
+            start = $(sSelector).data('kendoDatePicker').value();
+            end = $(eSelector).data('kendoDatePicker').value();
+
+            //$('.scheduler').each(function(){
+            //    $(this).assignmentChart('reload', start, end);
+            //});
+        }
+           
+    </script>
+
+}
+

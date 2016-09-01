@@ -1,0 +1,197 @@
+@using WebUI.Extension;
+@using MvcSiteMapProvider.Web.Html;
+@{
+    ViewBag.Title = "Supir";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentController = (WebUI.Controllers.DriverController)ViewContext.Controller;
+}
+<div class="page-header">
+    <div class="btn-group pull-right">
+        @Html.ActionLink("Tambah Supir", "Create", new { area = "" }, new { @class = "btn btn-default" })
+    </div>
+    <h1>@ViewBag.Title</h1>
+</div>
+@Html.Raw(currentController.GetMessage())
+<div id="grid"></div>
+
+@section scripts
+{
+    <script id="command-template" type="text/x-kendo-template">
+        <a class="k-button-icon k-grid-edit" href="javascript:" title="Detail" onclick="detailItem('#=Id#')"><span class="glyphicon glyphicon-list-alt"></span></a>
+        <a class="k-button-icon k-grid-edit" href="javascript:" title="Edit" onclick="editItem('#=Id#')"><span class="glyphicon glyphicon-edit"></span></a>
+        # if(Username != null) { #
+        <a class="k-button-icon k-grid-edit" href="javascript:" title="ChangePassword" onclick="changePassword('#=Id#')"><span class="glyphicon glyphicon-user"></span></a>        
+        # }#
+    </script>
+    <script type="text/javascript">
+
+
+    function editItem(id) {
+        window.location.href = "@Url.Action("Edit")" + "?id=" + id;
+
+    }
+
+    function changePassword(id) {
+        window.location.href = "@Url.Action("ChangePassword")" + "?id=" + id;
+    }
+
+    function detailItem(id) {
+        window.location.href = "@Url.Action("Detail")" + "?id=" + id;
+    }
+
+    //function onChange(){
+    //    console.log("test");
+
+    //}
+
+    @*function deleteItem(e) {
+        e.preventDefault();
+        var data = this.dataItem(getDataRowGrid(e));
+        goToDeletePage('@Url.Action("Delete")' + "?id=" + data.Id,this.dataSource);
+    }
+
+    function editItem(e) {
+        e.preventDefault();
+        var data = this.dataItem(getDataRowGrid(e));
+        window.location.href = "@Url.Action("Edit")" + "?id=" + data.Id;
+        }*@
+
+    function ListTypeDriver(element) {
+        element.kendoDropDownList({
+            dataTextField: "Text",
+            dataValueField: "Value",
+            dataSource: {
+                data: @Html.Raw(ViewBag.ListTypeDriver)
+                },
+            optionLabel: "--Pilih--",
+        });
+    }
+
+
+    $(document).ready(function () {
+
+        var ds = {
+            pageable: true,
+            pageSize: 10,
+            serverFiltering: true,
+            serverPaging: true,
+            serverSorting: true,
+            sortable:true,
+            transport: {
+                read: {
+                    url: "@Url.Action("Binding")",
+                    dataType: "json",
+                    type:"POST",
+                },
+                parameterMap: function (options, operation) {
+                    if (operation !== "read" && options != '') {
+                        return kendo.stringify(options);
+                    }
+                    else if (operation == "read") {
+                        if (options.filter) {
+                            filter = options.filter.filters;
+                            for (var i in filter) {
+                                if (filter[i].field == "OwnerName") {
+                                    filter[i].field = "owner.name";
+                                }
+                                if (filter[i].field == "WorkStartDate") {
+                                    var date = filter[i].value;
+                                    filter[i].value = kendo.toString(date, "yyyy-MM-dd");
+                                }
+                            }
+                        }
+
+                        if (options.sort) {
+                            sort = options.sort;
+                            for (var i in sort) {
+                                if (sort[i].field == "OwnerName") {
+                                    sort[i].field = "owner.name";
+                                }
+                            }
+                        }
+                        return options;
+                    }
+                }
+            },
+            schema: {
+                data: "data",
+                total: "total",
+                model: {
+                    fields: {
+                        "Id": { type: "string" },
+                        "Name": { type: "string" },
+                        "DriverType": { type: "string" },
+                        "PhoneNumber": { type: "string" },
+                        "Address": { type: "string" },
+                        "City": { type: "string" },
+                        "Email": { type: "string" },
+                        "Notes": { type: "string" },
+                        "IdOwner": { type: "string" },
+                        "OwnerName": { type: "string" },
+                        "WorkStartDate":{type: "date"},
+                        "Photo":{type:"string"},
+                        "Username":{type: "string"},
+                    }
+                }
+            },
+            sort: { field: "Name", dir: "asc" }
+        };
+
+        $("#grid").kendoGrid({
+            dataSource: ds,
+            filterable: kendoGridFilterable,
+            pageable: true,
+            sortable: true,
+            resizable: true,
+            columns: [
+                {
+                    template: kendo.template($("#command-template").html()),
+                    width: 100
+                },
+
+                 //{
+                 //    field: "Id",
+                 //    title: "Id",
+                 //},
+                {
+                    field: "Photo",
+                    title: "Foto",
+                    template: "<img src ='#: Photo#' class='img-responsive' alt='image' />",
+                },
+                {
+                    field: "Name",
+                    title: "Nama",
+                },
+                {
+                    field: "Username",
+                    title: "Username",
+                },
+                {
+                    field: "DriverType",
+                    title: "Tipe",
+                    filterable: {
+                        ui: ListTypeDriver,
+                        operators: {
+                            string: {
+                                eq: "Sama Dengan",
+                            }
+                        },
+                        extra: false,
+                    },
+                    template: kendo.template($("#template-type").html()),
+                },
+                {
+                    field: "PhoneNumber",
+                    title: "Nomor Telpon",
+                },
+            ],
+        });
+    });
+    </script>
+    <script type="text/x-kendo-template" id="template-type">
+
+        <span>#=TypeName #</span>
+
+    </script>
+}
+

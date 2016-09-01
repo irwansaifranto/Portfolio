@@ -1,0 +1,152 @@
+@model WebUI.Models.Invoice.InvoicePresentationStub
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    string currentController = (string)ViewContext.RouteData.Values["controller"];
+    string currentAction = (string)ViewContext.RouteData.Values["action"];
+    string backLink = "";
+
+    ViewBag.Title = Model.Code + " | Detail";
+
+    backLink = Url.Action("Index");
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+<div class="form-horizontal form-display">
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(model => model.Id)
+    @Html.Hidden("print", true);
+
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="form-group">
+                @Html.LabelFor(model => model.Code, new { @class = "col-xs-4 control-label" })
+                <label class="col-xs-8 control-text" id="id-rent">@Model.Code</label>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.InvoiceDate, new { @class = "col-xs-4 control-label" })
+                <label class="col-xs-8 control-text" id="invoice-date">@Model.InvoiceDate.ToString(dfh.FullDateTimeFormat)</label>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.CustomerName, new { @class = "col-xs-4 control-label" })
+                <label class="col-xs-8 control-text" id="customer-name">@Model.CustomerName</label>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Price, new { @class = "col-xs-4 control-label" })
+                <label class="col-xs-8 control-text" id="price">@Model.Price.ToString("N0")</label>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.AdditionalItemText, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-12 grid-item-container">                    
+                    <div id="grid-item"></div>                    
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <div class="form-group">
+                @Html.LabelFor(model => model.Status, new { @class = "col-xs-4 control-label" })
+                <label class="col-xs-8 control-text" id="status">@Model.Status</label>
+            </div>
+            <div id="cancel-note" class="form-group" style="display: none;">
+                <label class="col-xs-4 control-label" for="Notes">Catatan Pembatalan</label>
+                <label class="col-xs-8 control-text" id="notes">@Model.CancelNotes</label>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.PPN, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.DisplayFor(model => model.PPN)
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Total, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.DisplayFor(model => model.Total)
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-xs-offset-2 col-xs-10">
+            <button type="button" class="btn btn-primary" onclick="PrintInvoice()">Print Invoice</button>
+            <a href="@backLink" class="btn btn-link">Kembali</a>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        //variabel
+        var initialData = [];
+
+        $(document).ready(function () {
+            var statusOptions = "@Model.Status";
+            if(statusOptions == '@Common.Enums.InvoiceStatus.CANCEL.ToString()'){
+                    $( "#cancel-note" ).show();
+            }
+
+            //additional invoice items
+            @if (Model.AdditionalItemText != null && Model.AdditionalItemText != "")
+            {
+                <text>            
+                initialData = @Html.Raw(Model.AdditionalItemText);
+                </text>
+            }
+
+            $("#grid-item").kendoGrid({
+                dataSource: {
+                    data: initialData,
+                    schema: {
+                        model: {
+                            id: 'Id',
+                            fields: {
+                                Id: { type: "string", defaultValue: null },
+                                IdInvoice: { type: "string", defaultValue: null },
+                                Category: { type: "string", validation: { required: { message: "Kategori wajib diisi." } } },
+                                Value: { type: "number", validation: { min: 0, max: 1000000000000000, required: { message: "Nilai wajib diisi." } } },
+                            }
+                        }
+                    },
+                    aggregate: [{ field: "Value", aggregate: "sum" }],
+                    sort: { field: 'Category', dir: 'asc' },
+                },
+                filterable: kendoGridFilterable,
+                sortable: true,
+                scrollable: true,
+                resizable: true,
+                editable: 'inline',
+                columns: [
+                    {
+                        field: "Category",
+                        title: "Keterangan",
+                    },
+                    {
+                        field: "Value",
+                        title: "Nilai",
+                        format: '{0:n0}',
+                        attributes: { 'class': 'text-right' }
+                    },
+                ],
+            });
+        });
+
+        function PrintInvoice() {
+            var url = '@Url.Action("PrintInvoice", new { id = Model.Id })';
+        var windowName = "quotation";
+
+        openPrintWindow(url, windowName);
+        @*$("#form").attr("action", '@Url.Action("PrintInvoice", currentController, new { id=Model.Id })');
+            $("#form").attr("target", '_blank');
+            $("#form").submit();*@
+    }
+    </script>
+}
+

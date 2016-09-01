@@ -1,0 +1,22 @@
+﻿@model string
+@{
+    RouteValueDictionary htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(ViewData["htmlAttributes"]);
+
+    if (htmlAttributes == null) 
+    {
+        htmlAttributes = new RouteValueDictionary();
+    }
+    if (htmlAttributes.ContainsKey("class") == false)
+    {
+        htmlAttributes.Add("class", "form-control-static");
+    }
+}
+
+@if (string.IsNullOrEmpty(Model)) {
+    @Html.Label("", "-", htmlAttributes)
+}
+else {
+    <p class="@htmlAttributes["class"]">
+        @Html.Raw(Model)
+    </p>
+}

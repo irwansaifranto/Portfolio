@@ -1,0 +1,96 @@
+﻿@model SecurityGuard.ViewModels.AddModulesToRoleViewModel
+@{
+    ViewBag.Title = "AddModule";
+    //Layout = "~/Areas/SecurityGuard/Views/Shared/_SecurityGuardLayoutPage.cshtml";
+}
+
+<div id="breadcrumb">
+    @Html.ActionLink("Dashboard", "Index", "Dashboard") > 
+    @Html.ActionLink("Manage Role", "Index", "Role") > 
+    Add Modules to Role
+</div>
+
+<div class="page-header">
+	<h1>Add Modules to Role</h1>
+</div>
+
+<p>Add any of the following modules to: <span id="modulename-to-grant-roles">@Model.RoleName</span></p>
+
+<ul class="system_messages" style="display: none;">
+    <li><span class="ico"></span><strong class="system_title"></strong></li>
+</ul>
+
+<div class="form-horizontal">
+    @{
+        string classHeader = "col-md-"+(int)(9/(Model.Actions.Count+1));
+        <div class="row">
+            <div class="col-xs-3"></div>
+        @foreach(Business.Entities.Actions a in Model.Actions){                            
+            <div id="@a.Id" class="@classHeader">@a.ActionName</div>            
+        }
+        </div>
+    }
+    @Html.Raw(Model.Render)
+    
+    <br>
+	<div class="form-group">
+		<div class="col-xs-12">
+            <button id="save-module-roles" class="btn btn-default">Save modules to role</button>
+		</div>
+	</div>
+</div>
+
+@section sgscripts{
+<script type="text/javascript">
+    $(function () {
+        var message = $(".system_messages");
+
+        /******************************************************
+        * Begin added commands
+        ******************************************************/
+
+        $("#save-module-roles").click(function () {
+            var checkedValues = $('input:checkbox:checked').map(function () {
+                return this.value;
+            }).get();
+
+            console.log(checkedValues.length);
+
+            // First check if any items 
+            // are selected.
+            if (checkedValues.length <= 0) {
+                alert("You must select an action in module to add.");
+                return;
+            }
+
+            // Now execute the command using jQuery ajax.
+            $.ajax({
+                url: '@Url.Action("AddModulesToRole", "Role")',
+                type: 'POST',
+                traditional: true,
+                data: { modules: checkedValues, roleName : '@Model.RoleName' },
+                dataType: 'json',
+                success: OnAddedSuccess,
+                error: OnAddedError
+            });
+        });
+
+        function OnAddedSuccess(data) {
+            message.show().delay(5000).fadeOut();    // Show the message
+            $("li", message).addClass("green");      // Apply the Green style
+            $("strong", message).text(data.Message); // Insert the message
+        }
+
+        function OnAddedError(xhr, status, error) {
+            alert(error);
+        }
+
+        /******************************************************
+        * End added
+        ******************************************************/
+
+
+
+    });
+</script>
+}

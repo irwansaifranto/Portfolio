@@ -1,0 +1,187 @@
+@using WebUI.Extension;
+@using MvcSiteMapProvider.Web.Html;
+@model WebUI.Models.CarExpense.CarExpensePresentationStub
+@{
+    ViewBag.Title = "Biaya Kendaraan";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+    var currentController = (WebUI.Controllers.CarExpenseController)ViewContext.Controller;
+}
+<div class="page-header">
+    <div class="btn-group pull-right">
+        @Html.ActionLink("Tambah Biaya Kendaraan", "Create", new { area = "" }, new { @class = "btn btn-default" })
+    </div>
+    <h1>@ViewBag.Title</h1>
+</div>
+
+@Html.Raw(currentController.GetMessage())
+
+<div id="grid"></div>
+
+@section scripts
+{
+    <script type="text/javascript">
+
+        function detailItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            window.location.href = "@Url.Action("Detail")" + "?id=" + data.Id;
+        }
+
+        function editItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            window.location.href = "@Url.Action("Edit")" + "?id=" + data.Id;
+        }
+
+        function ListExpenseType (element) {
+            element.kendoDropDownList({
+                dataTextField: "Text",
+                dataValueField: "Value",
+                dataSource: {
+                    data: @Html.Raw(ViewBag.ListExpenseType)
+                    },
+                optionLabel: "--Pilih--",
+            });
+        }
+
+        $(document).ready(function () {
+
+            var ds = {
+                pageable: true,
+                pageSize: 10,
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                sortable: true,
+                transport: {
+                    read: {
+                        url: "@Url.Action("Binding")",
+                        dataType: "json",
+                        type: "POST",
+                    },
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options != '') {
+                            return kendo.stringify(options);
+                        }
+                        else if (operation == "read") {
+                            var filter;
+                            if (options.filter) {
+                                filter = options.filter.filters;
+                                for (var i in filter) {
+                                    if (filter[i].field == "ExpenseDate") {
+                                        var date = filter[i].value;
+                                        filter[i].value = kendo.toString(date, "yyyy-MM-dd");
+                                    } else if (filter[i].field == "LicensePlate") {
+                                        filter[i].field = "car.license_plate";
+                                    }
+                                }
+                            }
+
+                            if (options.sort) {
+                                sort = options.sort;
+                                for (var i in sort) {
+                                    if(sort[i].field == 'LicensePlate') {
+                                        sort[i].field = 'car.license_plate';
+                                    }
+                                }
+                            }
+                            return options;
+                        }
+                    }
+
+                },
+                schema: {
+                    data: "data",
+                    total: "total",
+                    model: {
+                        fields: {
+                            "Id": { type: "string" },
+                            "IdCar": { type: "string" },
+                            "ExpenseDate": { type: "date" },
+                            "LicensePlate": { type: "string" },
+                            "ExpenseType": { type: "string" },
+                            "Other" : { type: "string" },
+                            "Distance" : { type: "number"},
+                            "Value": { type: "number" },
+                            "Attachment": { type: "string" },
+                            "Notes": { type: "string" },
+                        }
+                    }
+                },
+                sort: { field: "ExpenseDate", dir: "desc" }
+            };
+
+            $("#grid").kendoGrid({
+                dataSource: ds,
+                filterable: kendoGridFilterable,
+                pageable: true,
+                sortable: true,
+                resizable: true,
+                columns: [
+                    {
+                        command: [
+                            {
+                                name: "detail",
+                                text: "detail",
+                                click: detailItem,
+                                imageClass: "glyphicon glyphicon-list-alt",
+                                template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=imageClass#"></span></a>'
+                            },
+                            {
+                                name: "edit",
+                                text: "edit",
+                                click: editItem,
+                                imageClass: "glyphicon glyphicon-edit",
+                                template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=imageClass#"></span></a>'
+                            },
+                        ],
+                        width: 65
+                    },
+                    {
+                        field: "ExpenseDate",
+                        title: "Tanggal",
+                        format: "@dfh.JsCompactDateFormat",
+                    },
+                    {
+                        field: "LicensePlate",
+                        title: "Plat Nomor",
+                    },
+                    {
+                        field: "ExpenseType",
+                        data:{hidden:true},
+                        title: "Kategori",
+                        filterable: {
+                            ui: ListExpenseType,
+                            operators: {
+                                string: {
+                                    eq: "Sama Dengan",
+                                }
+                            },
+                            extra: false,
+                        },
+
+                    },
+                    {
+                        field: "Distance",
+                        title: "Kilometer",
+                        format: '{0:n0}',
+                        attributes: {
+                            'class': 'text-right'
+                        },
+                    },
+                    {
+                        field: "ExpenseValue",
+                        title: "Nilai",
+                        format: '{0:n0}',
+                        attributes: {
+                            'class': 'text-right'
+                        },
+                    },
+
+                ],
+            });
+        });
+    </script>
+}
+

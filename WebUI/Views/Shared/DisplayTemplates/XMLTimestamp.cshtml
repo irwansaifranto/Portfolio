@@ -1,0 +1,5 @@
+﻿@model string
+
+@if (!string.IsNullOrEmpty(Model)) {
+    @Html.Label("", DateTime.Parse(Model, null, System.Globalization.DateTimeStyles.RoundtripKind).ToString("M/d/yyyy hh:mm tt"), ViewData["htmlAttributes"])
+}

@@ -1,0 +1,95 @@
+﻿@using WebUI.Extension;
+@{
+    ViewBag.Title = "Log Activity";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //var currentController = (WebUI.Controllers.NewsController)ViewContext.Controller;
+}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Log Activity</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div id="div-log-activity"></div>
+    </div>
+</div>
+<br />
+<!--==================== SCRIPT ====================-->
+@section scripts
+{
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var ds = new kendo.data.DataSource(
+            {
+                transport: {
+                    read: {
+                        url: "@Url.Action("Binding")",
+                        dataType: "json",
+                        type: "POST",
+                    },
+                    parameterMap: function (data, operation) {
+                        if (operation === "read") {
+                            if (data.filter) {
+                                filter = data.filter.filters;
+                                for (var i in filter) {
+                                    if (filter[i].field == "Timestamp") {
+                                        var date = filter[i].value;
+                                        filter[i].value = kendo.toString(date, "G");
+                                    }
+                                }
+                            }
+                        }
+                        return data;
+                    }
+                },
+                schema: {
+                    //groups: 'Groups',
+                    //aggregates: 'Aggregates',
+                    data: "data",
+                    total: "total",
+                    model: {
+                        id: "Id",
+                        fields: {
+                            Application: { type: "string" },
+                            Timestamp: { type: "date" },
+                            Ip: { type: "string" },
+                            User: { type: "string" },
+                            Action: { type: "string" },
+                            Data: { type: "string" },
+                        }
+                    },
+                },
+                pageSize: 20,
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true,
+                //serverGrouping: true,
+                //serverAggregates: true,
+
+            }
+       );
+
+        $("#div-log-activity").kendoGrid({
+            dataSource: ds,
+            scrollable: true,
+            sortable: true,
+            filterable: true,
+            pageable: true,
+            resizable: true,
+            //groupable: true,
+            filterable: kendoGridFilterBahasaIndonesia,
+            columns: [
+                //{ field: "Application", title: "Application", width: 100 },
+                    { field: "Timestamp", title: "Date Time", width: 100, filterable: {extra:false}, format: "{0:dd MMMM yyyy HH:mm}", },
+                    { field: "Ip", title: "Ip", width: 100, filterable: { extra: false } },
+                    { field: "User", title: "Username", width: 200, filterable: { extra: false } },
+                    { field: "Action", title: "Action", width: 300, filterable: { extra: false } },
+                    { field: "Data", title: "Data", width: 300, filterable: { extra: false } },
+            ]
+        });
+    });
+    
+</script>
+}

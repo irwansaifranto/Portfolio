@@ -1,0 +1,134 @@
+﻿@using WebUI.Extension;
+@{
+    ViewBag.Title = "Activity Log";
+    Layout = "~/Views/Shared/SmartAdmin/_Layout.cshtml";
+    var currentController = (WebUI.Controllers.LogController)ViewContext.Controller;
+}
+
+<div class="page-header">
+    <div class="btn-group pull-right">
+        @Html.ActionLink("Backup Data", "Download", null, new { @class = "btn btn-default" });
+        <a href="javascript:" onclick="truncate()" class="btn btn-default">Hapus Semua Data</a>
+    </div>
+    <h1>@ViewBag.Title</h1>
+</div>
+@Html.Raw(currentController.GetMessage())
+
+<div id="grid"></div>
+
+@section scripts
+{
+<script type="text/javascript">
+    function truncate() {
+        if (confirm("Anda sudah melakukan backup sebelum melakukanghapus data?")) {
+            $.post('@Url.Action("Truncate")', function () {
+                $('#grid').data('kendoGrid').dataSource.read();
+                $('#grid').data('kendoGrid').refresh();
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "@Url.Action("Binding")",
+                    dataType: "json",
+                },
+                parameterMap: function (options, operation) {
+                    if (operation !== "read" && options.models) {
+
+                    } else {
+
+                        if (options.filter) {
+                            filter = options.filter.filters;
+                            for (var i in filter) {
+                                if (filter[i].field == "Timestamp") {
+                                    var date = filter[i].value;
+                                    filter[i].value = kendo.toString(date, "G");
+                                }
+                            }
+                        }
+
+                        //if (options.sort) {
+                        //    sort = options.sort;
+                        //    for (var i in sort) {
+                        //        if (sort[i].field == "BankName") {
+                        //            sort[i].field = "bank.name";
+                        //            var sor = { field: "bank.name", dir: sort[i].dir };
+                        //            sort.push(sor);
+                        //        } else if (sort[i].field == "Currency") {
+                        //            sort[i].field = "currency.currency1";
+                        //            var sor = { field: "currency.currency1", dir: sort[i].dir };
+                        //            sort.push(sor);
+                        //        }
+                        //    }
+                        //}
+                        return options;
+                    }
+                },
+            },
+            schema: {
+                data: "data",
+                total: "total",
+                model: {
+                    fields: {
+                        //Value: { type: "number" },
+                        Timestamp: { type: "date" }
+                    }
+                }
+            },
+            pageSize: 10,
+            serverPaging: true,
+            serverFiltering: true,
+            serverSorting: true,
+            //filter: { field: "Status", operator: "contains", value: "RETRIEVED" }
+            sort: { field: "Timestamp", dir: "desc" },
+        });
+
+        $("#grid").kendoGrid({
+            dataSource: dataSource,
+            filterable: kendoGridFilterable,
+            pageable: true,
+            sortable: true,
+            columns: [
+                {
+                    field: "Timestamp",
+                    title: "Waktu",
+                    format: "{0: yyyy-MM-dd HH:mm}",
+                    width: 150,
+                },
+                {
+                    field: "Ip",
+                    width: 150,
+                },
+                {
+                    field: "User",
+                    title: "Pengguna",
+                    width: 110,
+                },
+                {
+                    field: "Action",
+                    title: "Tindakan",
+                },
+                {
+                    field: "Data",
+                },
+                //{
+                //    command: [
+                //        {
+                //            name: "detail",
+                //            text: "detail",
+                //            //click: editItem,
+                //            imageClass: "glyphicon glyphicon-edit",
+                //            template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=imageClass#"></span></a>'
+                //        }
+                //    ],
+                //    width: 75
+                //}
+            ],
+        });
+    });
+
+</script>
+}

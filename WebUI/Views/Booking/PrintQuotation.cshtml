@@ -1,0 +1,143 @@
+@model WebUI.Models.Booking.BookingPresentationStub
+@{
+    Layout = "~/Views/Shared/_LayoutPrint.cshtml";
+    string currentController = (string)ViewContext.RouteData.Values["controller"];
+    string currentAction = (string)ViewContext.RouteData.Values["action"];
+    string backLink = "";
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+
+    ViewBag.Title = "Booking " + Model.Name;
+
+    backLink = Url.Action("Index");
+}
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-6"><img src="@Url.Content("~/Content/theme/print/header-left.jpg")" alt="" /></div>
+            <div class="col-xs-6 text-right"><img src="@Url.Content("~/Content/theme/print/header-right.jpg")" alt="" /></div>
+        </div>
+    </div>
+</header>
+
+<div class="print-content">
+    <div class="row">
+        <div class="col-xs-6">
+            <div>
+                @if (Model.Logo == null)
+                {
+                    <img src="@Url.Content("~/Content/theme/print/logo.jpg")" alt="" class="img-responsive" />
+                }
+                else
+                {
+                    <img src="@Url.Content(Model.Logo)" alt="" class="img-responsive" />
+                }
+            </div>
+            <br />
+            <div class="medium-text">CUSTOMER:</div>
+            <div>@Model.Name</div>
+            <div>@Html.Raw(Model.PhoneNumber)</div>
+        </div>
+        <div class="col-xs-6 text-right">
+            <br /><br />
+            <h2>BOOKING<br>CONFIRMATION</h2>
+            <div>Car Type: @Model.CarModelName</div>
+            <div>Alamat Penjemputan: @Model.PickupLocation</div>
+            <div>Quote No: @Model.Code</div>
+            <div>Payment: Bank Transfer / Cash</div>
+
+            <br /><br />
+
+            <div class="medium-text">TOTAL:</div>
+            <div class="total-price">
+                RP @Model.Price.ToString("n0")
+            </div>
+        </div>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="col-xs-6">Description</th>
+                <th class="text-right">Quantity</th>
+                <th class="col-xs-2 text-right">Cost</th>
+            </tr>
+        </thead>
+        <tr>
+            <td colspan="3">@Model.CarModelName @Model.StartRent.ToString(dfh.FullDateFormat) - @Model.FinishRent.ToString(dfh.FullDateFormat)</td>
+        </tr>
+        @{
+            int i = 1;
+        }
+        @foreach (var item in Model.ListRentPackage)
+        {
+            Model.ListRentPackage.Count();
+            <tr>
+                <td>@item.car_package.name</td>
+                <td class="text-right">@item.quantity</td>
+                <td class="text-right">@item.price_each.ToString("n0")</td>
+            </tr>
+            if (@item.rent.discount != null && i == Model.ListRentPackage.Count())
+            {
+                <tr>
+                    <td>Diskon</td>
+                    <td class="text-right"></td>
+                    <td class="text-right">@item.rent.discount</td>
+                </tr>
+            }
+            ++i;
+        }
+       
+        @if (@Model.Notes != null)
+        {
+            <tr><td colspan="3">@Html.Raw(Model.Notes)</td></tr>
+        }
+        <tr><td colspan="3">&nbsp;</td></tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td class="text-right">Subtotal</td>
+            <td class="text-right">Rp. @Model.Price.ToString("n0")</td>
+        </tr>
+        <tr><td colspan="3">&nbsp;</td></tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td class="text-right">Total</td>
+            <td class="text-right total-price-cell">Rp. @Model.Price.ToString("n0")</td>
+        </tr>
+    </table>
+
+    <div>Terms and Conditions:</div>
+    <div>@Html.Raw(Model.Terms)</div>
+
+</div>
+<footer id="footer-firstpage">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="relative">
+                    <div class="bg"><img src="@Url.Content("~/Content/theme/print/footer.jpg")" class="img-responsive" alt="" /></div>
+                    <div class="print-content text-right">
+                        @Html.Raw(Model.Contact)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+@section scripts
+{
+    <script type="text/javascript">
+        function printQuotation(id) {
+            var url = '@Url.Action("PrintQuotation", new { id = Model.Id })';
+            var windowName = "quotation";
+
+            window.open(url, windowName, "height=500,width=700,modal=yes,alwaysRaised=yes");
+        }
+
+        $(document).ready(function () {
+            print();
+        });
+    </script>
+}

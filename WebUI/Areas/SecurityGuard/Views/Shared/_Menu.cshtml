@@ -1,0 +1,16 @@
+﻿<ul class="nav navbar-nav">
+@{
+    //kamus
+    string currentArea, currentController, currentClass;
+
+    //algoritma
+    currentArea = (string)ViewContext.RouteData.DataTokens["area"];
+    currentController = (string)ViewContext.RouteData.Values["controller"];
+                
+    currentClass = "";
+	<li>@Html.ActionLink("Back to Main Application", "Index", "Home", new { area = "" }, null)</li>
+    
+    currentClass = "active";
+	<li class="@currentClass">@Html.ActionLink("Security Guard", "Index", "Dashboard", new { area = "SecurityGuard" }, null)</li>
+}
+</ul>

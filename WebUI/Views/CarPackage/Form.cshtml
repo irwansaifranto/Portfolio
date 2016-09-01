@@ -1,0 +1,113 @@
+﻿@model WebUI.Models.CarPackage.CarPackageFormStub
+@using WebUI.Extension;
+@using MvcSiteMapProvider.Web.Html;
+@{
+    //...
+
+    string fileTypeErrMsg = HttpContext.GetGlobalResourceObject("MyGlobalMessage", "FileUploadImageTypeError").ToString();
+    string template = HttpContext.GetGlobalResourceObject("MyGlobalMessage", "FileUploadSizeError").ToString();
+    string fileSizeErrMsg = string.Format(template, System.Configuration.ConfigurationManager.AppSettings["maxImageWord"]);
+}
+
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    string currentController = (string)ViewContext.RouteData.Values["controller"];
+    string currentAction = (string)ViewContext.RouteData.Values["action"];
+    string backLink = "";
+
+    if (currentAction == "Create")
+    {
+        ViewBag.Title = "Tambah Paket Kendaraan";
+    }
+    else
+    {
+        ViewBag.Title = ViewBag.Name + " | Edit";
+    }
+    backLink = Url.Action("Index");
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+@using (@Html.BeginForm(currentAction, currentController, FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(model => model.Id)
+
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="form-group">
+                @Html.LabelFor(model => model.IdCarBrand, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.IdCarBrand, new { @class = "" })
+                    @Html.ValidationMessageFor(model => model.IdCarBrand)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.IdCarModel, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.IdCarModel, new { @class = "" })
+                    @Html.ValidationMessageFor(model => model.IdCarModel)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Name, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Name)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Price, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.Price)
+                    @Html.ValidationMessageFor(model => model.Price)
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-4 text-right">
+                    @Html.EditorFor(model => model.IsActive)
+                    @Html.ValidationMessageFor(model => model.IsActive)
+                </div>
+                @Html.LabelFor(model => model.IsActive, new { @class = "col-xs-8 control-label text-left" })
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-xs-offset-2 col-xs-10">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="@backLink" class="btn btn-link">Cancel</a>
+        </div>
+    </div>
+}
+
+@section scripts
+{
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#IdCarBrand').kendoDropDownList({
+                optionLabel: "Pilih Merek",
+                dataTextField: "Name",
+                dataValueField: "IdCarBrand",
+                dataSource: {
+                    data: @Html.Raw(Model.GetCarBrandOptionsAsJson())
+                }
+            });
+
+            $('#IdCarModel').kendoDropDownList({
+                optionLabel: "Pilih Model",
+                cascadeFrom: "IdCarBrand",
+                dataTextField: "Name",
+                dataValueField: "Id",
+                dataSource: {
+                    data: @Html.Raw(Model.GetCarModelOptionsAsJson())
+                }
+            });
+        });
+
+    </script>
+
+
+
+}

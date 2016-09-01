@@ -1,0 +1,169 @@
+@using WebUI.Extension
+@model WebUI.Areas.Report.Models.DailyFilterModel
+@{
+    ViewBag.Title = "Laporan Kendaraan";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentController = (WebUI.Areas.Report.Controllers.CarReportController)ViewContext.Controller;
+}
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+@Html.Raw(currentController.GetMessage())
+
+<div class="form-inline">
+    <div class="form-group">
+        @Html.EditorFor(model => model.StartDate, new { @class = "form-control-datepicker", placeholder = "Tanggal Awal" })
+        @Html.ValidationMessageFor(model => model.StartDate)
+    </div>
+    <div class="form-group">
+        <label>s/d</label>
+        @Html.EditorFor(model => model.EndDate, new { @class = "form-control-datepicker", placeholder = "Tanggal Ahir" })
+        @Html.ValidationMessageFor(model => model.EndDate)
+    </div>
+    <button id="btnFilter" type="submit" class="btn btn-default">Tampilkan</button>
+</div><br />
+
+<div id="grid" class="grid-med"></div>
+
+@section scripts
+{
+<script type="text/javascript">
+    $("#btnFilter").click(function () {
+        getReport();
+    });
+
+    function detailItem(e) {
+        e.preventDefault();
+        //var data = e.view.dataSource[0];
+        var data = this.dataItem(getDataRowGrid(e));
+        console.log(data);
+        window.location.href = "@Url.Action("Detail")" + "?id=" + data.IdCar + "&startDate=" + data.StartDate + "&endDate=" + data.EndDate;
+    }
+
+    function getReport() {
+        dataSource = [];
+        var data = {
+            StartDate : $("#StartDate").val(),
+            EndDate: $("#EndDate").val()
+        };
+        $.post("@Url.Action("Binding", "CarReport", new { area = "" })", data, function (result) {
+            if (result.length > 0) {
+                $.each(result, function (index, value) {
+                    dataSource.push({
+                        CarBrandName: value.CarBrandName,
+                        CarModelName: value.CarModelName,
+                        CarUsed: value.CarUsed,
+                        IdCarModel: value.IdCarModel,
+                        Income: value.Income,
+                        Expense: value.Expense,
+                        Margin: value.Margin,
+                        LicensePlate: value.LicensePlate,
+                        StartDate: $("#StartDate").val(),
+                        EndDate: $("#EndDate").val(),
+                        IdCar : value.IdCar
+                    });
+                });
+            }
+
+            var dataSourceGrid = new kendo.data.DataSource({
+                data: dataSource,
+                schema: {
+                    model: {
+                        fields: {
+                            "CarUsed": { type: "number" },
+                            "Income": { type: "number" },
+                            "Expense": { type: "number" },
+                            "Margin": { type: "number" }
+                        }
+                    }
+                },
+                aggregate: [
+                    { field: "CarUsed", aggregate: "sum" },
+                    { field: "Income", aggregate: "sum" },
+                    { field: "Expense", aggregate: "sum" },
+                    { field: "Margin", aggregate: "sum" }
+                ],
+                sort: [{ field: 'CarModelName', dir: 'asc' }, { field: 'LicensePlate', dir: 'asc' }]
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: dataSourceGrid,
+                filterable: kendoGridFilterable,
+                pageable: false,
+                sortable: true,
+                resizable: true,
+                columns: [
+                    {
+                        command: [
+                            {
+                                name: "detail",
+                                text: "detail",
+                                click: detailItem,
+                                imageClass: "glyphicon glyphicon-search",
+                                template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=imageClass#"></span></a>'
+                                //template: '<form action="/Car/Create" class="form-horizontal" method="post"><button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></form>'
+                            }
+                        ],
+                        width: "90px"
+                    },
+                    {
+                        field: "LicensePlate",
+                        title: "Plat",
+                    },
+                    {
+                        field: "CarModelName",
+                        title: "Model Mobil",
+                    },
+                    {
+                        field: "CarUsed",
+                        title: "Penggunaan",
+                        format: "{0:n0}",
+                        filterable: false,
+                        footerTemplate: "<div>Total Penggunaan:<br> #=kendo.toString(sum, \"n0\")# kali</div>",
+                        attributes: {
+                            'class': 'text-right'
+                        }
+                    },
+                    {
+                        field: "Income",
+                        title: "Pemasukan",
+                        format: "{0:n0}",
+                        filterable: false,
+                        footerTemplate: "<div>Total Pemasukan:<br> #=kendo.toString(sum, \"n0\")#</div>",
+                        attributes: {
+                            'class': 'text-right'
+                        }
+                    },
+                    {
+                        field: "Expense",
+                        title: "Biaya",
+                        format: "{0:n0}",
+                        filterable: false,
+                        footerTemplate: "<div>Total Biaya:<br> #=kendo.toString(sum, \"n0\")#</div>",
+                        attributes: {
+                            'class': 'text-right'
+                        }
+                    },
+                    {
+                        field: "Margin",
+                        title: "Margin",
+                        format: "{0:n0}",
+                        filterable: false,
+                        footerTemplate: "<div>Total Margin:<br> #=kendo.toString(sum, \"n0\")#</div>",
+                        attributes: {
+                            'class': 'text-right'
+                        }
+                    }
+
+                ],
+            });
+        });
+    }
+
+    $(document).ready(function () {
+        getReport();
+    });
+</script>
+}
+

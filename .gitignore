@@ -1,0 +1,16 @@
+WebUI/bin/
+WebUI/obj/
+WebUI/Uploads/
+packages/
+Business/obj/
+Business/bin/
+ProjectLog/ProjectLog/obj/
+ProjectLog/ProjectLog/bin/
+Common.Enums/obj/
+Common.Enums/bin/
+TestResults/
+WebUI/WebUI.csproj.user
+Business/Business.csproj.user
+Carrental.v12.suo
+WebUI/Properties/
+WebUI/Backup/

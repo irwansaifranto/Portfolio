@@ -1,0 +1,29 @@
+body { font-size: 12px; }
+.container { width: 793px !important; }
+
+.relative { position: relative; }
+.medium-text { font-size: 12px; }
+
+.print-content { margin: 0 60px; margin-bottom: 75px; }
+.total-price { background: #00BBD9; padding: 8px 5px; font-size: 25px; display: inline-block; color: #fff; }
+.total-price-cell { background: #00BBD9; color: #fff; }
+
+/*footer .bg { position: absolute; top: 0; left: 0; }*/
+footer .bg { position: absolute; top: 0; left: 0; right: 0; z-index: 1; bottom:0;}
+footer .print-content { padding-top: 80px; color: #fff; position: relative; z-index: 2; }
+
+.pageafter { page-break-after: always; }
+.pagebefore { page-break-before: always; }
+.height-print-content { height: 520pt; } 
+
+@media print
+{
+     .total-price, .total-price-cell { background: #00BBD9 !important; color: #fff; -webkit-print-color-adjust:exact; }     
+    
+}
+
+
+
+
+
+ 

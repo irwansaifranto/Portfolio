@@ -1,0 +1,492 @@
+@model WebUI.Models.Car.CarFormStub
+@using WebUI.Extension;
+@using MvcSiteMapProvider.Web.Html;
+@{
+    //...
+
+    string template = HttpContext.GetGlobalResourceObject("MyGlobalMessage", "FileUploadTypeError").ToString();
+    string imageTypeErrMsg = string.Format(template, ".jpg, .jpeg, .png");
+    string fileTypeErrMsg = string.Format(template, ".pdf, .jpg, .jpeg, .png");
+    
+    template = HttpContext.GetGlobalResourceObject("MyGlobalMessage", "FileUploadSizeError").ToString();
+    string fileSizeErrMsg = string.Format(template, System.Configuration.ConfigurationManager.AppSettings["maxImageWord"]);
+}
+
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    string currentController = (string)ViewContext.RouteData.Values["controller"];
+    string currentAction = (string)ViewContext.RouteData.Values["action"];
+    string backLink = "";
+
+    if (currentAction == "Create")
+    {
+        ViewBag.Title = "Tambah Kendaraan";
+    }
+    else
+    {
+        ViewBag.Title = ViewBag.name + " | Edit";
+    }
+    backLink = Url.Action("Index");
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+@using (@Html.BeginForm(currentAction, currentController, FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(model => model.Id)
+    
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="form-group">
+                @Html.LabelFor(model => model.IdCarBrand, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.IdCarBrand, new { @class = "" })
+                    @Html.ValidationMessageFor(model => model.IdCarBrand)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.IdCarModel, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.IdCarModel, new { @class = "" })
+                    @Html.ValidationMessageFor(model => model.IdCarModel)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.LicensePlate, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.LicensePlate)
+                    @Html.ValidationMessageFor(model => model.LicensePlate)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.ModelYear, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DropDownListFor(model => model.ModelYear, new SelectList(Model.YearOptions, "Value", "Text"), new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.ModelYear)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Transmission, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DropDownListFor(model => model.Transmission, new SelectList(Model.CarTransmissionOptions, "Value", "Text"), new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Transmission)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Fuel, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DropDownListFor(model => model.Fuel, new SelectList(Model.CarFuelOptions, "Value", "Text"), new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Fuel)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Color, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.Color, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                    @Html.ValidationMessageFor(model => model.Color)
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-xs-4 text-right">
+                    @Html.EditorFor(model => model.IsActive, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                    @Html.ValidationMessageFor(model => model.IsActive)
+                </div>
+                @Html.LabelFor(model => model.IsActive, new { @class = "col-xs-8 control-label text-left" })
+            </div>
+
+
+            <div class="form-group">
+                <div class="col-xs-offset-4 col-xs-8">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a href="@backLink" class="btn btn-link">Cancel</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-6">      
+            <!--Foto-->
+            <div class="form-group ">
+                @Html.LabelFor(model => model.Photo, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.HiddenFor(model => model.Photo)
+                    @Html.TextBox("files", "", new { type = "file", id = "kendo-upload" })
+                    <p><em class="text-info">*) ukuran file maksimal 1 MB dan bertipe (jpg, jpeg, atau png)</em></p>
+                    <div class="margin-bottom-0">
+                        @if (Model.Photo == null)
+                        {
+                            <img id="uploaded-image" src="" class="img-responsive" alt="" />
+                        }
+                        else
+                        {
+                            <img id="uploaded-image" src="@Url.Content(Model.Photo)" class="img-responsive" alt="" />
+                        }
+                    </div>
+                    @Html.ValidationMessageFor(model => model.Photo)
+                </div>
+            </div>
+
+            <!--VehicleRegistration-->
+            <div class="form-group ">
+                @Html.LabelFor(model => model.VehicleRegistrationFile, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.HiddenFor(model => model.VehicleRegistrationFile)
+                    @Html.TextBox("files", "", new { type = "file", id = "kendo-upload-vehicle"})
+                    <p><em class="text-info">*) ukuran file maksimal 1 MB dan bertipe (PDF, jpg, jpeg, atau png)</em></p>
+                    @if (Model.VehicleRegistrationFile == null)
+                    {
+                        <img id="uploaded-image-vehicle" src="" class="img-responsive" alt="" />
+                    }
+                    else
+                    {
+                        if (Model.VehicleRegistrationFile.EndsWith(".pdf"))
+                        {
+                            <img id="uploaded-image-vehicle" src="@Url.Content("~/Content/theme/pdf.png")" class="img-responsive" alt="" />
+                        }
+                        else
+                        {
+                            <img id="uploaded-image-vehicle" src="@Url.Content(Model.VehicleRegistrationFile)" class="img-responsive" alt="" />
+                        }
+                    }
+                    @Html.ValidationMessageFor(model => model.VehicleRegistrationFile)
+                </div>
+            </div>
+
+            <!--Tax-->
+            <div class="form-group ">
+                @Html.LabelFor(model => model.TaxFile, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.HiddenFor(model => model.TaxFile)
+                    @Html.TextBox("files", "", new { type = "file", id = "kendo-upload-taxfile" })
+                    <p><em class="text-info">*) ukuran file maksimal 1 MB dan bertipe (PDF, jpg, jpeg, atau png)</em></p>
+                    @if (Model.TaxFile == null)
+                    {
+                        <img id="uploaded-image-taxfile" src="" class="img-responsive" alt="" />
+                    }
+                    else
+                    {
+                        if (Model.TaxFile.EndsWith(".pdf"))
+                        {
+
+                            <img id="uploaded-image-taxfile" src="@Url.Content("~/Content/theme/pdf.png")" class="img-responsive" alt="" />
+                        }
+                        else
+                        {
+                            <img id="uploaded-image-taxfile" src="@Url.Content(Model.TaxFile)" class="img-responsive" alt="" />
+                        }
+                    }
+                    @Html.ValidationMessageFor(model => model.TaxFile)
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts
+{
+<script type="text/javascript">
+    // scripts here
+    var fileInputSelector = '#Photo';
+    var imageContainerSelector = '#uploaded-image';
+
+    var fileInputSelectorVehicleReg = '#VehicleRegistrationFile';
+    var imageContainerSelectorVehicleReg = '#uploaded-image-vehicle';
+
+    var fileInputSelectorTax = '#TaxFile';
+    var imageContainerTax = '#uploaded-image-taxfile';
+
+    //functions foto
+    function onRemove(e) {
+        $(fileInputSelector).val("");
+        $(imageContainerSelector).hide();
+    }
+
+    function onSelectFile(e) {
+        var flagExtension = 0;
+        var flagSize = 0;
+        var allowedExtension = ['.png', '.jpeg', '.jpg'];
+        var file = e.files;
+        var maxImage = '@System.Configuration.ConfigurationManager.AppSettings["maxImage"]';
+
+        if (file[0].size > maxImage) {
+            flagSize = 1;
+        }
+
+        if ($.inArray((file[0].extension).toLowerCase(), allowedExtension) === -1) {
+            flagExtension = 1;
+        }
+        if (flagExtension == 1) {
+            alert("@imageTypeErrMsg");
+            e.preventDefault();
+        }
+        if (flagSize == 1) {
+            alert("@fileSizeErrMsg");
+            e.preventDefault();
+
+        }
+    }
+
+    function onSuccessFile(e) {
+        if (e.operation == "upload") {
+            var file = e.response;
+            $(fileInputSelector).val(file.filepath);
+            //$(fileNameSelector).html(file.filepath);
+            $(imageContainerSelector).attr('src', file.absolutepath).show();
+        }
+    }
+
+    //functions VehicleRegistration
+    function onRemoveVehicleReg(e) {
+        $(fileInputSelectorVehicleReg).val("");
+        $(imageContainerSelectorVehicleReg).hide();
+    }
+
+    function onSelectFileVehicleReg(e) {
+        var flagExtension = 0;
+        var flagSize = 0;
+        var allowedExtension = ['.png', '.jpeg', '.jpg', '.pdf'];
+        var file = e.files;
+        var maxImage = '@System.Configuration.ConfigurationManager.AppSettings["maxImage"]';
+
+        if (file[0].size > maxImage) {
+            flagSize = 1;
+        }
+
+        if ($.inArray((file[0].extension).toLowerCase(), allowedExtension) === -1) {
+            flagExtension = 1;
+        }
+        if (flagExtension == 1) {
+            alert("@fileTypeErrMsg");
+            e.preventDefault();
+        }
+        if (flagSize == 1) {
+            alert("@fileSizeErrMsg");
+            e.preventDefault();
+
+        }
+    }
+
+    function onSuccessFileVehicleReg(e) {
+        if (e.operation == "upload") {
+            var file = e.response;
+            $(fileInputSelectorVehicleReg).val(file.filepath);
+
+            if (e.files[0].extension === '.pdf') {
+                $(imageContainerSelectorVehicleReg).attr('src', '@Url.Content("~/Content/theme/pdf.png")').show();
+            } else {
+                $(imageContainerSelectorVehicleReg).attr('src', file.absolutepath).show();
+            }
+        }
+    }
+
+    //Pajak/Tax
+    function onRemoveTax(e) {
+        $(fileInputSelectorTax).val("");
+        $(imageContainerTax).hide();
+    }
+
+    function onSuccessTax(e) {
+        if (e.operation == "upload") {
+            var file = e.response;
+            $(fileInputSelectorTax).val(file.filepath);
+            if (e.files[0].extension === '.pdf') {
+                $(imageContainerTax).attr('src', '@Url.Content("~/Content/theme/pdf.png")').show();
+            } else {
+                $(imageContainerTax).attr('src', file.absolutepath).show();
+            }
+        }
+    }
+
+    $(document).ready(function () {
+        if ($(imageContainerSelector).attr('src') === '') {
+            $(imageContainerSelector).hide();
+        }
+
+        $("#kendo-upload").kendoUpload({
+            multiple: false,
+            async: {
+                saveUrl: '@Url.Action("Save", "FileManagement", new { area = "" })',
+                removeUrl: '@Url.Action("Remove", "FileManagement", new { area = "" })',
+                autoUpload: true
+            },
+            //files: initialFilesContent,
+            select: onSelectFile,
+            success: onSuccessFile,
+            remove: onRemove,
+            showFileList: true,
+        });
+
+        $("#kendo-upload-vehicle").kendoUpload({
+            multiple: false,
+            async: {
+                saveUrl: '@Url.Action("Save", "FileManagement", new { area = "" })',
+                removeUrl: '@Url.Action("Remove", "FileManagement", new { area = "" })',
+                autoUpload: true
+            },
+            //files: initialFilesContent,
+            select: onSelectFileVehicleReg,
+            success: onSuccessFileVehicleReg,
+            remove: onRemoveVehicleReg,
+            showFileList: true,
+        });
+
+        $("#kendo-upload-taxfile").kendoUpload({
+            multiple: false,
+            async: {
+                saveUrl: '@Url.Action("Save", "FileManagement", new { area = "" })',
+                removeUrl: '@Url.Action("Remove", "FileManagement", new { area = "" })',
+                autoUpload: true
+            },
+            //files: initialFilesContent,
+            select: onSelectFileVehicleReg,
+            success: onSuccessTax,
+            remove: onRemoveTax,
+            showFileList: true,
+        });
+
+        $("#LicensePlate").kendoMaskedTextBox({
+            mask: "?? 9999 ???"
+        });
+
+        $("#LicensePlate").keyup(function () {
+            var caretPosition = getCaretPosition(this);
+            this.value = this.value.toUpperCase();
+            setCaretPosition(this, caretPosition);
+        });
+    });
+    </script>
+
+    <script type="text/javascript">
+
+        function comboBoxOnChange(e) {
+            if (this.value() && this.selectedIndex == -1) {   //or use this.dataItem to see if it has an object
+                this.text('');
+            }
+        }
+
+        /* fungsi supaya kursor tidak pindah kebelakang */
+        function getCaretPosition(ctrl) {
+            var CaretPos = 0;    // IE Support
+            if (document.selection) {
+                ctrl.focus();
+                var Sel = document.selection.createRange();
+                Sel.moveStart('character', -ctrl.value.length);
+                CaretPos = Sel.text.length;
+            }
+                // Firefox support
+            else if (ctrl.selectionStart || ctrl.selectionStart == '0') {
+                CaretPos = ctrl.selectionStart;
+            }
+
+            return CaretPos;
+        }
+
+        function setCaretPosition(ctrl, pos) {
+            if (ctrl.setSelectionRange) {
+                ctrl.focus();
+                ctrl.setSelectionRange(pos, pos);
+            }
+            else if (ctrl.createTextRange) {
+                var range = ctrl.createTextRange();
+                range.collapse(true);
+                range.moveEnd('character', pos);
+                range.moveStart('character', pos);
+                range.select();
+            }
+        }
+
+        $(document).ready(function () {
+            $('#IdCarBrand').kendoComboBox({
+                optionLabel: "All",
+                dataTextField: "Name",
+                dataValueField: "Id",
+                change: comboBoxOnChange,
+                @{
+                    if(Model.IdCarBrand == Guid.Empty)
+                    {
+                        <text>
+                        value:"",
+                        </text>
+                    }
+                }
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: '@Url.Action("BindingCarBrand")',
+                            dataType: "json",
+                            type: "POST",
+                        },
+                    },
+                    schema: {
+                        data: "data",
+                        total: "total",
+                    }
+                }
+            });
+
+            $("#yearpicker").kendoDatePicker({
+                start: "decade",
+                depth: "decade",
+                format: "yyyy"
+            });
+
+            $('#IdCarModel').kendoComboBox({
+                autoBind: false,
+                cascadeFrom: "IdCarBrand",
+                optionLabel: "All",
+                dataTextField: "Name",
+                dataValueField: "Id",
+                //filter: 'eq',
+                change: comboBoxOnChange,
+                @{
+                    if(Model.IdCarModel == Guid.Empty)
+                    {
+                        <text>
+                        value:"",
+                        </text>
+                    }
+                }
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: '@Url.Action("BindingCarModel")',
+                            dataType: "json",
+                            type: "POST",
+                        },
+                        parameterMap: function (options, operation) {
+                            if (operation !== "read" && options.models) {
+
+                            } else {
+                                if (options.filter) {
+                                    filter = options.filter.filters;
+                                    for (var i in filter) {
+                                        if (filter[i].field == "Id") {
+                                            filter[i].field = "id_car_brand";
+                                        }
+                                    }
+                                }
+
+                                if (options.sort) {
+                                    sort = options.sort;
+                                    for (var i in sort) {
+                                        //if (sort[i].field == "Currency") {
+                                        //    sort[i].field = "currency1";
+                                        //}
+                                    }
+                                }
+                                return options;
+                            }
+                        },
+                    },
+                    schema: {
+                        data: "data",
+                        total: "total",
+                    },
+                    serverFiltering: true,
+                }
+            });
+        });
+    </script>
+}

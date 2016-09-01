@@ -1,0 +1,169 @@
+/* 1. form, link & button */
+textarea { resize: none; }
+.form-control-datetimepicker { height:32px !important; }
+.form-control-autocomplete { margin-bottom : 5px; width: 360px; }
+/*.form-horizontal .control-label { text-align: left; }*/
+.control-text { font-weight: normal; padding-top:7px;}
+/*.form-group { margin-bottom: 10px; }*/
+.ui-datepicker { font-size: 0.9em; }
+.form-control-datetimepicker[readonly] { background-color: transparent; cursor: pointer; }
+
+/*.form-inline-action { display: block; padding-top: 7px; vertical-align: middle; margin-left: -52px; }*/
+.date-input { position: relative; }
+    .date-input .action-group { position: absolute; right: 21px; top: 7px; }
+
+.form-inline .form-control-datetimepicker { height:32px !important; width: 120px; }
+
+.form-horizontal.text-left label { text-align: left; }
+.form-horizontal .text-left { text-align: left; }
+
+.input-validation-error { border-color: #A94442; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset; }
+.field-validation-error { color: #ff0000; }
+
+.form-horizontal .k-numerictextbox, .form-horizontal .k-datepicker, .form-horizontal .k-autocomplete, .form-horizontal .k-combobox, .form-horizontal .k-dropdown, .form-horizontal .k-datetimepicker, .form-horizontal .k-textbox { width: 100%; }
+
+.form-horizontal .k-editor { height: auto; }
+.form-horizontal .k-editor .k-content { height: 120px !important; }
+
+.form-control-datepicker .k-input { height: 2.3em; }
+
+.form-control { border-radius: 4px !important; }
+
+/* kendo image uploader */
+.image-preview img { max-width: 100%; }
+
+/* tooltip */
+form .tooltip { z-index: 1; }
+    form .tooltip .tooltip-inner { max-width: none; }
+
+/* display form */
+.form-display .form-control-static, .form-display .form-control-static label { font-weight: normal; }
+.form-display .form-header .k-upload-button { padding-left: 12px; }
+.form-horizontal.form-display .form-group { margin-bottom: 0; }
+
+/* filter form */
+.filter-form { margin-bottom: 15px; }
+
+/* look disabled kendo form*/
+.kendo-disabled { cursor: not-allowed; background-color: #eee !important; }
+.k-input[disabled] { cursor: not-allowed; background-color: #eee !important; }
+
+
+/* 2. content */
+.page-header { margin: 0; border: none; padding-bottom: 0; }
+    .page-header h1 { margin: 12px 0 28px; }
+
+#grid .k-grid-content { min-height: 350px; }
+#grid .nested-grid .k-grid-content { min-height: 200px; }
+.grid-med .k-grid-content { height: 350px; }
+
+.chart { height: 300px; }
+
+.no-gutter-left { padding-left: 0; }
+.no-gutter-bottom { padding-bottom: 0; }
+.gutter-left { padding-left: 15px; }
+.gutter-right { padding-right: 15px; }
+
+.zero-margin-bottom { margin-bottom: 0; }
+.margin-bottom-15 { margin-bottom: 15px; }
+.margin-bottom-5 { margin-bottom: 5px; }
+
+hr { border-color: #ccc; }
+
+/*      2.1. Header & menu */
+.project-selector { cursor: initial; }
+#left-panel ul > li > a img { margin-right: 15px; }
+
+/*      2.2. Booking */
+.date-section { margin-bottom: 10px; }
+/*.date-section .date-text { font-size: 17px; }
+.date-section a { font-size: 13px; }
+.date-section .btn { padding: 3px 12px; }*/
+
+#left-panel .btn { width: 100%; }
+
+.text-cancel { color: #ff0000; }
+.text-new { color: #666666; }
+.text-go { color: #32CD32; }
+.text-finish { color: #0000ff; }
+
+/*      2.3. Assignment */
+.assignment .k-event { border-color: #666; background: #fff; }
+.assignment .k-scheduler-timelineMonthview > tbody > tr:nth-child(1) .k-scheduler-table tr:nth-child(2) { display: none; }
+
+.assignment-block { color: #666; }
+.assignment-block .color-bar { height: 3px; width: 100%; }
+.assignment-block .assignment-text { padding-left: 5px; }
+
+.assignment-new .color-bar { background: #666; }
+.assignment-go .color-bar { background: #32cd32; }
+.assignment-finish .color-bar { background: #00f; }
+
+
+/* 3. misc */
+/*      override bootstrap */
+.table-no-bottom { margin-bottom: 0; }
+.panel { border-radius: 0; }
+.panel-heading-action .panel-title { padding-top: 7.5px; }
+.table thead th { text-align: center; }
+.table .has-feedback .form-control-feedback { top: 0; }
+
+/*      override kendo */
+.k-picker-wrap .k-input { padding: 0; }
+.k-grouping-header, .k-grid-toolbar { padding: .5em; }
+.panel-heading-with-button h3 { padding-top: 7.5px; }
+.k-grid, .k-scheduler, .k-menu, .k-editor { border-radius: 0; }
+.k-popup .k-calendar { font-size: 13px !important; }
+
+input.k-textbox:disabled { background: initial; }
+
+.k-ff { overflow: inherit !important; }
+
+.k-ff input.k-textbox { height: 2.43em; }
+
+/*      bootstrap inside kendo window */
+.k-window-content .form-horizontal .form-group { margin-left: 0; margin-right: 0; }
+/*.k-window-content .col-xs-1, .k-window-content .col-xs-2, .k-window-content .col-xs-3, .k-window-content .col-xs-4, .k-window-content .col-xs-5, .col-sm-5, .k-window-content .col-xs-6, .col-sm-6, .k-window-content .col-xs-7, .col-sm-7, .k-window-content .col-xs-8, .col-sm-8, .k-window-content .col-xs-9, .col-sm-9, .k-window-content .col-xs-10, .col-sm-10, .k-window-content .col-xs-11, .col-sm-11, .k-window-content .col-xs-12, .col-sm-12 { padding-left: 0; padding-right: 0; }*/
+.form-group-datetimepicker { margin-bottom: 20px; }
+
+/*      loading animation */
+.refresh-animation { -moz-animation: spin 5s linear 0s infinite; animation: spin 10s linear 0 infinite; -webkit-animation: spin 5s linear 0 infinite; }
+@-moz-keyframes spin {
+    from { -moz-transform: rotate(0deg); }
+    to { -moz-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+    from {transform:rotate(0deg);}
+    to {transform:rotate(360deg);}
+}
+
+/* 4. content */
+
+/*      4.1. invoice */
+.grid-item-container { margin-top: 10px; }
+
+
+/* 7. printing */
+/* override bootstrap print css */
+@media print
+{
+    a[href]:after { content: ""; }
+    @page { size: A4; margin: 0; }
+    /*body:before { content: "ptmkpwebapp08.pertamina.com/MobidigPMO"; }*/
+}
+
+/* 8. user management */
+#grant-controls { margin-top: 56px; }
+
+.checkbox input[type=checkbox], .checkbox-inline input[type=checkbox], .radio input[type=radio], .radio-inline input[type=radio] {
+    position: initial;
+}
+
+.search-booking {
+    padding-left:0px!important;
+}
+

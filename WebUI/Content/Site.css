@@ -1,0 +1,157 @@
+body {  }
+.container { width: 1170px !important; }
+
+/* 1. non-responsive */
+.container .navbar-header, .container .navbar-collapse { margin-right: 0; margin-left: 0; }
+
+/* 		Always float the navbar header */
+.navbar-header { float: left; }
+
+/* 		Undo the collapsing navbar */
+.navbar-collapse { display: block !important; height: auto !important; padding-bottom: 0; overflow: visible !important; }
+.navbar-brand { margin-left: -15px; }
+
+/* 		Always apply the floated nav */
+.navbar-nav { float: left; margin: 0; }
+.navbar-nav > li { float: left; }
+.navbar-nav > li > a { padding: 15px; }
+
+/* 		Redeclare since we override the float above */
+.navbar-nav.navbar-right { float: right; }
+
+.navbar-text { margin-left: 15px; margin-right: 15px; }
+.navbar-btn { float: left; }
+.k-state-selected, .k-state-selected:link, .k-state-selected:visited, .k-list>.k-state-selected, .k-list>.k-state-highlight, .k-panel>.k-state-selected, .k-button:active, .k-ghost-splitbar-vertical, .k-ghost-splitbar-horizontal, .k-draghandle.k-state-selected:hover, .k-scheduler .k-scheduler-toolbar .k-state-selected, .k-marquee-color { color: #2e2e2e; }
+
+
+/* 2. form, link & button */
+textarea { resize: none; }
+.form-control-datetimepicker { height:32px !important; }
+.form-control-autocomplete { margin-bottom : 5px; width: 360px; }
+/*.form-horizontal .control-label { text-align: left; }*/
+.control-text { font-weight: normal;}
+/*.form-group { margin-bottom: 10px; }*/
+.ui-datepicker { font-size: 0.9em; }
+.form-control-datetimepicker[readonly] { background-color: transparent; cursor: pointer; }
+
+/*.form-inline-action { display: block; padding-top: 7px; vertical-align: middle; margin-left: -52px; }*/
+.date-input { position: relative; }
+    .date-input .action-group { position: absolute; right: 21px; top: 7px; }
+
+.form-inline .form-control-datetimepicker { height:32px !important; width: 120px; }
+
+.form-horizontal.text-left label { text-align: left; }
+.form-horizontal .text-left { text-align: left; }
+
+.input-validation-error { border-color: #A94442; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset; }
+.field-validation-error { color: #ff0000; }
+
+.form-horizontal .k-numerictextbox, .form-horizontal .k-datepicker, .form-horizontal .k-autocomplete, .form-horizontal .k-combobox, .form-horizontal .k-dropdown, .form-horizontal .k-datetimepicker { width: 100%; }
+
+.form-horizontal .k-editor { height: auto; }
+.form-horizontal .k-editor .k-content { height: 120px !important; }
+
+
+/* kendo image uploader */
+.image-preview img { max-width: 100%; }
+
+/* tooltip */
+form .tooltip { z-index: 1; }
+    form .tooltip .tooltip-inner { max-width: none; }
+
+
+/* 3. header & menu */
+header { padding-top: 10px; padding-bottom: 10px; }
+header h1 { display: inline-block; margin-top: 10px; margin-bottom: 0; }
+
+.navbar { background: #CE212E; border-color: #CE212E; border-radius: 0; }
+.navbar-nav a { color: #D0D2D3; }
+.nav>li>a:hover, .nav>li>a:focus { background-color: #603813; color: #fff; }
+.nav .caret { border-top-color: #D0D2D3; border-bottom-color: #D0D2D3; }
+.nav a:hover .caret { border-top-color: #fff; border-bottom-color: #fff; }
+.nav .open > a, .nav .open > a:hover, .nav .open > a:focus { background-color: #603813; }
+.nav .open>a .caret, .nav .open>a:hover .caret, .nav .open>a:focus .caret { border-top-color: #fff; border-bottom-color: #fff; }
+
+.usermenu .greeting { padding: 15px; color: #fff; float: left; }
+.usermenu .navbar-nav > li > a { padding-left: 0; padding-right: 0; }
+.nav>li.active>a, .nav>li>a:hover, .nav>li>a:focus { background-color: inherit; color: #fff; }
+.nav .open > a, .nav .open > a:hover, .nav .open > a:focus { background-color: inherit; }
+
+
+/* 4. content */
+.page-header { margin-top: 20px; }
+#grid .k-grid-content { min-height: 350px; }
+
+.no-gutter-left { padding-left: 0; }
+.no-gutter-bottom { padding-bottom: 0; }
+.gutter-left { padding-left: 15px; }
+.gutter-right { padding-right: 15px; }
+
+/*      4.1. Map */
+#map-canvas { height: 550px; }
+#map-canvas img { max-width: none; }
+.map-window { height: 200px; width: 300px; -webkit-user-select: none; background-color: white; }
+
+
+/* 5. footer */
+footer { font-size: 0.9em; margin-top: 100px; padding-top: 40px; padding-bottom: 40px; text-align: center; border-top: solid 1px #e5e5e5; color: #777; }
+
+
+/* 6. misc */
+/*      override bootstrap */
+.table-no-bottom { margin-bottom: 0; }
+.panel { border-radius: 0; }
+.panel-heading-action .panel-title { padding-top: 7.5px; }
+.table thead th { text-align: center; }
+.table .has-feedback .form-control-feedback { top: 0; }
+
+/*      override kendo */
+.k-picker-wrap .k-input { padding: 0; }
+.k-grouping-header, .k-grid-toolbar { padding: .5em; }
+.panel-heading-with-button h3 { padding-top: 7.5px; }
+.k-grid, .k-scheduler, .k-menu, .k-editor { border-radius: 0; }
+.k-popup .k-calendar { font-size: 13px !important; } 
+/*.k-block, .k-header, .k-grid-header, .k-toolbar, .k-grouping-header, .k-pager-wrap, .k-button, .k-draghandle { background: none; }
+.k-alt, .k-separator { background: none; }*/
+/*.k-pager-wrap .k-pager-nav.k-pager-last { border-radius: 1.0833em; }*/
+
+.k-ff { overflow: inherit !important; }
+
+/*      bootstrap inside kendo window */
+.k-window-content .form-horizontal .form-group { margin-left: 0; margin-right: 0; }
+.k-window-content .col-xs-1, .k-window-content .col-xs-2, .k-window-content .col-xs-3, .k-window-content .col-xs-4, .k-window-content .col-xs-5, .col-sm-5, .k-window-content .col-xs-6, .col-sm-6, .k-window-content .col-xs-7, .col-sm-7, .k-window-content .col-xs-8, .col-sm-8, .k-window-content .col-xs-9, .col-sm-9, .k-window-content .col-xs-10, .col-sm-10, .k-window-content .col-xs-11, .col-sm-11, .k-window-content .col-xs-12, .col-sm-12 { padding-left: 0; padding-right: 0; }
+.form-group-datetimepicker { margin-bottom: 20px; }
+
+/*      loading animation */
+.refresh-animation { -moz-animation: spin 5s linear 0s infinite; animation: spin 10s linear 0 infinite; -webkit-animation: spin 5s linear 0 infinite; }
+@-moz-keyframes spin {
+    from { -moz-transform: rotate(0deg); }
+    to { -moz-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+    from {transform:rotate(0deg);}
+    to {transform:rotate(360deg);}
+}
+
+
+/* 7. printing */
+/* override bootstrap print css */
+@media print
+{
+    a[href]:after { content: ""; }
+    @page { size: A4; margin: 0; }
+}
+
+
+/* 8. user management */
+#grant-controls { margin-top: 56px; }
+
+.checkbox input[type=checkbox], .checkbox-inline input[type=checkbox], .radio input[type=radio], .radio-inline input[type=radio] {
+    position: initial;
+}
+
+.label-static { font-weight: normal; padding-top:7px;}

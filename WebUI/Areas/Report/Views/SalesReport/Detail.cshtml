@@ -1,0 +1,63 @@
+@using WebUI.Extension
+@{
+    ViewBag.Title = "Laporan Kendaraan | D 1234 EF";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentController = (WebUI.Areas.Report.Controllers.CarReportController)ViewContext.Controller;
+}
+<div class="page-header">
+    <div class="btn-group pull-right">
+        @Html.ActionLink("back", "Index", null, new { @class = "btn btn-default" })
+    </div>
+    <h1>@ViewBag.Title</h1>
+</div>
+
+@Html.Raw(currentController.GetMessage())
+
+<div class="form-inline">
+    <div class="form-group">
+        <input type="text" class="form-control-datepicker" placeholder="Tanggal Awal" />
+    </div>
+    <div class="form-group">
+        <label>s/d</label>
+        <input type="text" class="form-control-datepicker" placeholder="Tanggal Akhir" />
+    </div>
+    <button type="submit" class="btn btn-default">Tampilkan</button>
+</div><br />
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>#Booking</th>
+            <th>Tanggal</th>
+            <th>Pemasukan</th>
+        </tr>
+    </thead>
+    <tr>
+        <td><a href="#">KA123</a></td>
+        <td>11 Jan 2016 12.00</td>
+        <td>300.000</td>
+    </tr>
+    <tr>
+        <td><a href="#">KA113</a></td>
+        <td>3 Jan 2016 12.00</td>
+        <td>300.000</td>
+    </tr>
+    <tr>
+        <td><a href="#">KA111</a></td>
+        <td>1 Jan 2016 12.00</td>
+        <td>300.000</td>
+    </tr>
+    <tr>
+        <td colspan="3" class="text-right">Total Pemasukan 900.000</td>
+    </tr>
+</table>
+
+@section scripts
+{
+<script type="text/javascript">
+    $(document).ready(function () {
+
+    });
+</script>
+}
+

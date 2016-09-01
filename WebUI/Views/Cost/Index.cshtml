@@ -1,0 +1,277 @@
+﻿@using WebUI.Extension;
+@using MvcSiteMapProvider.Web.Html;
+@*@model WebUI.Models.Cost.CostPresentationStub*@
+@{
+    ViewBag.Title = "Rincian Booking";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+    var currentController = (WebUI.Controllers.CostController)ViewContext.Controller;
+}
+<div class="page-header">
+    <div class="btn-group pull-right">
+        @Html.ActionLink("Tambah Rincian Booking", "Create", new { area = "" }, new { @class = "btn btn-default" })
+    </div>
+    <h1>@ViewBag.Title</h1>
+</div>
+@Html.Raw(currentController.GetMessage())
+<div id="grid"></div>
+
+@section scripts
+{
+    <script type="text/javascript">
+
+        function detailItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            window.location.href = "@Url.Action("Detail")" + "?id=" + data.Id;
+        }
+
+        function editItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            window.location.href = "@Url.Action("Edit")" + "?id=" + data.Id;
+        }
+        @*function deleteItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            goToDeletePage('@Url.Action("Delete")' + "?id=" + data.Id, this.dataSource);
+        }*@
+        function ListCategory (element) {
+            element.kendoDropDownList({
+                dataTextField: "Text",
+                dataValueField: "Value",
+                dataSource: {
+                    data: @Html.Raw(ViewBag.ListCategory)
+                    },
+                optionLabel: "--Pilih--",
+            });
+        }
+
+        $(document).ready(function () {
+            var ds = {
+                pageable: true,
+                pageSize: 12,
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                sortable: true,
+                transport: {
+                    read: {
+                        url: "@Url.Action("Binding")",
+                            dataType: "json",
+                            type:"POST",
+                        },
+                        parameterMap: function (options, operation) {
+                            if (operation !== "read" && options != '') {
+                                return kendo.stringify(options);
+                            }
+                            else if (operation == "read") {
+                                if (options.filter) {
+                                    filter = options.filter.filters;
+                                    for (var i in filter) {
+                                        if (filter[i].field == "RentCode") {
+                                            filter[i].field = "rent.code";
+                                        }
+                                        else if (filter[i].field == "CustomerName") {
+                                            filter[i].field = "rent.customer.name";
+                                        }
+                                        else if (filter[i].field == "Date") {
+                                            var date = filter[i].value;
+                                            filter[i].value = kendo.toString(date, "yyyy-MM-dd");
+                                        }
+                                    }
+                                }
+
+                                if (options.sort) {
+                                    sort = options.sort;
+                                    for (var i in sort) {
+                                        if (sort[i].field == "RentCode") {
+                                            sort[i].field = "rent.code";
+                                        }
+                                        if (sort[i].field == "CustomerName") {
+                                            sort[i].field = "rent.customer.name";
+                                        }
+                                    }
+                                }
+                                return options;
+                            }
+                        }
+                    },
+                    schema: {
+                        data: "data",
+                        total: "total",
+                        model: {
+                                fields: {
+                                    "Id": { type: "string" },
+                                    "IdRent": { type: "string" },
+                                    "RentCode": { type: "string" },
+                                    "CustomerName": { type: "string" },
+                                    "CreatedTime": { type: "date" },
+                                    "Date": { type: "date" },
+                                }
+                        }
+                    },
+                    sort: { field: "Date", dir: "desc" }
+                };
+
+                $("#grid").kendoGrid({
+                    dataSource: ds,
+                    filterable: kendoGridFilterable,
+                    pageable: true,
+                    sortable: true,
+                    resizable: true,
+                    detailTemplate: kendo.template($("#template").html()),
+                    detailInit: detailInit,
+                    columns: [
+                        {
+                            command: [
+                                {
+                                    name: "detail",
+                                    text: "detail",
+                                    click: detailItem,
+                                    imageClass: "glyphicon glyphicon-list-alt",
+                                    template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=iconClass# #=imageClass#"></span></a>'
+                                },
+                                {
+                                    name: "edit",
+                                    text: "edit",
+                                    click: editItem,
+                                    imageClass: "glyphicon glyphicon-edit",
+                                    template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=imageClass#"></span></a>'
+                                },
+                            ],
+                            width: 65
+                        },
+                        {
+                            field: "Date",
+                            title: "Tanggal",
+                            template: '#= kendo.toString(Date, "@dfh.JsFullDateFormat2") #',
+                        },
+                        {
+                            field: "RentCode",
+                            title: "Kode Booking",
+                            template: kendo.template($("#detail-booking").html()),
+
+                        },
+                        {
+                            field: "CustomerName",
+                            title: "Tamu",
+                        },
+
+                    ],
+                });
+
+            });
+
+            function detailInit(e) {
+                var detailRow = e.detailRow;
+                detailRow.find(".nested-grid").kendoGrid({
+                    dataSource: {
+                        //pageable: true,
+                        pageSize: 6,
+                        serverFiltering: true,
+                        serverPaging: true,
+                        serverSorting: true,
+                        sortable: true,
+                        transport: {
+                            read: {
+                                url: "@Url.Action("BindingItem")",
+                                dataType: "json",
+                                type: "POST",
+                            },
+                        
+                        },
+                        parameterMap: function (options, operation) {
+                            if (operation !== "read" && options != '') {
+                                return kendo.stringify(options);
+                            }
+                            else if (operation == "read") {
+                                if (options.filter) {
+                                    filter = options.filter.filters;
+                                    for (var i in filter) {
+                                        if (filter[i].field == "Category") {
+                                            filter[i].field = "expense_item.category";
+                                        }
+                                        else if (filter[i].field == "Value") {
+                                            filter[i].field = "expense_item.value";
+                                        }
+                                        if (filter[i].field == "Description") {
+                                            filter[i].field = "expense_item.description";
+                                        }
+                                    }
+                                }
+                                if (options.sort) {
+                                    sort = options.sort;
+                                    for (var i in sort) {
+                                        if (sort[i].field == "Category") {
+                                            sort[i].field = "expense_item.category";
+                                        }
+                                        if (sort[i].field == "Value") {
+                                            sort[i].field = "expense_item.value";
+                                        }
+                                        if (sort[i].field == "Description") {
+                                            sort[i].field = "expense_item.description";
+                                        }
+                                    }
+                                }
+                                return options;
+                            }
+                        },
+                        schema: {
+                            data: "data",
+                            total: "total",
+                            model: {
+                                fields: {
+                                    "IdExpenseItem": { type: "string" },
+                                    "IdExpense": { type: "string" },
+                                    "Category": { type: "string" },
+                                    "Value": { type: "number" },
+                                    "Description": { type: "string" },  
+                                }
+                            }
+                        },
+                        filter: { field: "IdExpense", operator: "eq", value: e.data.Id },
+                        sort: { field: "Category", dir: "asc" },
+                },
+                filterable: kendoGridFilterable,
+                sortable: true,
+                resizable: true,
+                columns: [
+                    { 
+                        field: "Category", 
+                        title: "Kategori", 
+                        filterable: {
+                            ui: ListCategory,
+                            operators: {
+                                string: {
+                                    eq: "Sama Dengan",
+                                },
+                            },
+                            extra: false,
+                        }, 
+                    },
+                    { 
+                        field: "Value", 
+                        title: "Nilai",
+                        format: '{0:n0}',
+                        attributes: { 'class': 'text-right' },
+                    },
+                    { 
+                        field: "Description", 
+                        title: "Keterangan", 
+                    },
+                ],
+            })
+        }
+    </script>
+
+    <script type="text/x-kendo-template" id="detail-booking">
+        <a href='@Url.Action("Detail", "Booking")?id=#=IdRent#' target="_blank">#= RentCode #</a>
+    </script>
+
+    <script type="text/x-kendo-template" id="template">   
+        <div class="nested-grid"></div>  
+    </script>
+    
+}
+

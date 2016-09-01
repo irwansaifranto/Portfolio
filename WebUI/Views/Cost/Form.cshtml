@@ -1,0 +1,411 @@
+﻿@model WebUI.Models.Cost.CostFormStub
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    string currentController = (string)ViewContext.RouteData.Values["controller"];
+    string currentAction = (string)ViewContext.RouteData.Values["action"];
+    string backLink = ""; string disableSearch = "";
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+
+    if (currentAction == "Create")
+    {
+        ViewBag.Title = "Tambah Rincian Booking";
+
+    }
+    else
+    {
+        ViewBag.Title = "Rincian Booking | Edit";
+        disableSearch = "disabled";
+    }
+    backLink = Url.Action("Index");
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+@using (@Html.BeginForm(currentAction, currentController, FormMethod.Post, new { @class = "form-horizontal", id = "form" }))
+{
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(model => model.Id)
+    @Html.Hidden("print", false);
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.IdRent, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.HiddenFor(model => model.IdRent)
+            <div class="input-group">
+                @Html.EditorFor(model => model.RentCode, new { htmlAttributes = new { @class = "form-control", style = "", placeholder = "Kode Booking", @readonly = "true" } })
+                @*@Html.EditorFor(model => model.IdRent, new { @class = "form-control" })*@
+                <span class="input-group-btn">
+                    <button id="SearchBooking" class="btn btn-default" type="button" data-toggle="modal" data-target="#DialogBooking"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                </span>
+            </div>
+            @Html.ValidationMessageFor(model => model.IdRent)
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Date, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.EditorFor(model => model.Date)
+            @Html.ValidationMessageFor(model => model.Date)
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Car, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.EditorFor(model => model.ValueVehicle)
+            @Html.ValidationMessageFor(model => model.ValueVehicle)
+            <em class="text-info">Notes: Pengeluaran mobil akan ditampilkan pada laporan kendaraan sebagai pemasukan kendaraan tersebut.</em>
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Driver, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.EditorFor(model => model.ValueDriver)
+            @Html.ValidationMessageFor(model => model.ValueDriver)
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Gas, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.EditorFor(model => model.ValueGas)
+            @Html.ValidationMessageFor(model => model.ValueGas)
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Toll, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.EditorFor(model => model.ValueToll)
+            @Html.ValidationMessageFor(model => model.ValueToll)
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Parking, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.EditorFor(model => model.ValueParking)
+            @Html.ValidationMessageFor(model => model.ValueParking)
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Other, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.EditorFor(model => model.ValueOther)
+            @Html.ValidationMessageFor(model => model.ValueOther)
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.Description, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.EditorFor(model => model.Description)
+            @Html.ValidationMessageFor(model => model.Description)
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-xs-offset-2 col-xs-10">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="@backLink" class="btn btn-link">Cancel</a>
+        </div>
+    </div>
+}
+
+@section scripts
+    {
+    <script type="text/javascript">
+
+        var _ID_BOOKING = "";
+        var currentAction = '@currentAction.ToLower()';
+
+        function SetIdBookingGlobal(id) {
+            _ID_BOOKING = id;
+
+        }
+
+        function GetBookingId(id) {
+            if (id == "") {
+                alert("Pilih satu booking terlebih dahulu");
+            } else {
+                setBookingField(id);
+                $('#DialogBooking').modal('toggle');
+            }
+        }
+
+        function SavePrint() {
+            $("#print").val(true);
+            $("#form").submit();
+        }
+
+        function setBookingField(id, updatePrice) {
+            updatePrice = typeof updatePrice !== 'undefine' ? updatePrice : true;
+            if (id !== 'undefined' && id !== null && id !== '') {
+                $.post("@Url.Action("GetBooking")", { id: id }, function (data) {
+                    $("#IdRent").val(id);
+                    $("#RentCode").val(data[3]);
+                    $("#customer-name").html(data[0]);
+                    $("#rent-date").html(data[1]);
+                    if (updatePrice) {
+                        var price = $("#Price").data("kendoNumericTextBox");
+                        price.value(data[2]);
+                    }
+                });
+            }
+        }
+
+        function comboBoxOnChange(e) {
+            if (this.value() && this.selectedIndex == -1) {   //or use this.dataItem to see if it has an object
+                this.text('');
+            } else {
+                setBookingField(this.value());
+            }
+        }
+
+        function checkBoxChange() {
+            var check = $("#ck-" + $('#IdRent').val());
+            check.prop("checked", true);
+        }
+
+        //status
+        @*function comboBoxOnChangeStatus(e) {
+            if (this.value() && this.selectedIndex == -1) {   //or use this.dataItem to see if it has an object
+                this.text('');
+            }else{
+                if(this.value() == '@Common.Enums.InvoiceStatus.CANCEL.ToString()')   {
+                    $( "#cancel-note" ).show();
+                }else{
+                    $( "#cancel-note" ).hide();
+                }
+            }
+        }*@
+
+        $(document).ready(function () {
+            @*$('#IdRent').kendoComboBox({
+                optionLabel: "--Pilih Salah Satu--",
+                dataTextField: "Text",
+                dataValueField: "Value",
+                change: comboBoxOnChange,
+                @{
+                    if(Model.IdRent == Guid.Empty)
+                    {
+                        <text>
+                value:"--Pilih Salah Satu--",
+                </text>
+                    }
+                }
+                dataSource: {
+                    data: @Html.Raw(Model.GetRentOptions())
+                    }
+            });*@
+
+            @*$('#Status').kendoComboBox({
+                optionLabel: "--Pilih Salah Satu--",
+                dataTextField: "Text",
+                dataValueField: "Value",
+                change: comboBoxOnChangeStatus,
+                dataSource: {
+                    data: @Html.Raw(Model.GetStatusOptions())
+                    }
+            });*@
+
+            setBookingField('@Model.IdRent');
+
+            @*var statusOptions = $("#Status").data("kendoComboBox");
+            if(statusOptions.value() == '@Common.Enums.InvoiceStatus.CANCEL.ToString()'){
+                $( "#cancel-note" ).show();
+            }*@
+            
+            //if (currentAction == "Create")
+            //    $('#IdRent').val("00000000-0000-0000-0000-000000000000");
+
+            //booking datasource & grid
+            setBookingField('@Model.IdRent', (currentAction === 'create'));
+            var rentFilter = [{ field: 'without_expense', operator: 'eq', value: 'true' }];
+            if (currentAction === 'edit')
+                rentFilter.push({ field: 'include_id', operator: 'eq', value: '@Model.IdRent' });
+
+            ds = new kendo.data.DataSource({
+                pageable: true,
+                pageSize: 5,
+                serverFiltering: true,
+                serverSorting: true,
+                sortable: true,
+                transport: {
+                    read: {
+                        url: "@Url.Action("Binding", "Booking")",
+                        dataType: "json",
+                        type: "POST",
+                        @*url: "@Url.Action("BindingRent")",
+                        data: { action: currentAction, id: $('#IdRent').val() },
+                        dataType: "json",
+                        type: "POST",*@
+                    },
+
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options != '') {
+                            return kendo.stringify(options);
+                        } else if (operation == "read") {
+                            var filter;
+                            console.log(options.filter);
+                            if (options.filter) {
+                                filter = options.filter.filters;
+                                for (var i in filter) {
+                                    if (filter[i].field == "Name") {
+                                        var additional =
+                                            {
+                                                filters:
+                                                    [
+                                                        { field: "customer.name", operator: 'contains', value: filter[i].value },
+                                                        { field: "customer.phone_number", operator: 'contains', value: filter[i].value }
+                                                    ],
+                                                logic: 'or',
+                                            };
+
+                                        filter[i] = additional;
+                                    } else if (filter[i].field == "CarModelName") {
+                                        var additional =
+                                            {
+                                                filters:
+                                                    [
+                                                        { field: "car.license_plate", operator: 'contains', value: filter[i].value },
+                                                        { field: "car_model.name", operator: 'contains', value: filter[i].value }
+                                                    ],
+                                                logic: 'or',
+                                            };
+
+                                        filter[i] = additional;
+                                    } else if (filter[i].field == 'DriverName') {
+                                        filter[i].field = 'driver.name';
+                                    } else if (filter[i].field == 'CreatedTime') {
+                                        var date = filter[i].value;
+                                        filter[i].value = kendo.toString(date, "yyyy-MM-dd");
+                                    }
+                                }
+                            }
+
+                            if (options.sort) {
+                                sort = options.sort;
+                                for (var i in sort) {
+                                    if (sort[i].field == "CarModelName") {
+                                        sort[i].field = "car_model.name";
+                                    } else if (sort[i].field == "DriverName") {
+                                        sort[i].field = "driver.name";
+                                    } else if (sort[i].field == "Name") {
+                                        sort[i].field = "customer.name";
+                                    }
+                                }
+                            }
+                            return options;
+                        }
+                    }
+                },
+                schema: {
+                    data: "data",
+                    total: "total",
+                    model: {
+                        fields: {
+                            "Id": { type: "text" },
+                            "Price": { type: "number" },
+                            "StartRent": { type: "date" },
+                            "FinishRent": { type: "date" },
+                            "CreatedTime": { type: "date" },
+                        }
+                    }
+                },
+                sort: { field: "CreatedTime", dir: "desc" },
+                filter: rentFilter,
+            });
+
+            //grid booking
+            $("#grid").kendoGrid({
+                dataSource: ds,
+                dataBound: function (e) {
+                    checkBoxChange();
+                },
+                filterable: kendoGridFilterable,
+                pageable: true,
+                sortable: true,
+                resizable: true,
+                columns: [
+                    {
+                        field: "Id",
+                        title: " ",
+                        template: "<input type='radio' id='ck-#=Id#' name='action' onClick='SetIdBookingGlobal(\"#=Id#\")'>",
+                        filterable: false,
+                        sortable: false,
+                        width: 30
+                    },
+                    {
+                        field: "CreatedTime",
+                        title: "Book Date",
+                        format: "@dfh.JsCompactDateFormat",
+                        width: 130,
+                    },
+					{
+					    field: "Code",
+					    title: "Kode Booking",
+					    width: 150,
+					    //locked: true
+					},
+					{
+					    field: "Name",
+					    title: "Tamu",
+					    template: '#= Name + "<br />" + PhoneNumber #',
+					    encoded: false,
+					    width: 130,
+					},
+					{
+					    field: "StartRent",
+					    title: "Tanggal Berangkat",
+					    template: '#= "Jemput: " + kendo.toString(StartRent, "@dfh.JsShortDateTimeFormat2") + "<br />Selesai: " + kendo.toString(FinishRent, "@dfh.JsShortDateTimeFormat2") #',
+					    encoded: false,
+					    //width: 200,
+					    filterable: false,
+					},
+                //{
+                //    field: "PickupLocation",
+                //    title: "Penjemputan",
+                //    width: 170,
+                //},
+                //{
+                //    field: "DriverName",
+                //    title: "Supir",
+                //    template: '#= (DriverName === null ? \'<span class="glyphicon glyphicon-warning-sign"></span>\' : DriverName) #',
+                //    width: 100,
+                //},
+                ],
+            });
+        });
+
+        $('#SearchBooking').click(function () {
+            checkBoxChange();
+            SetIdBookingGlobal($("#IdRent").val());
+        });
+
+        $('#DialogBooking').on('shown', function () {
+            $(document).off('focusin.modal');
+        });
+
+        function setId(id) {
+
+        }
+    </script>
+}
+
+<!-- Modal 2 For Plant 7-->
+<div class="modal fade" id="DialogBooking" role="dialog" aria-labelledby="ModalBookingLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel7">Daftar Booking</h4>
+            </div>
+            <div class="modal-body">
+                <div id="grid"></div>
+            </div>
+            <div class="modal-footer">
+                <span id="LoadingCompositionPlant7"></span>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
+                <button id="BtnChoose" type="button" class="btn btn-primary" onclick="GetBookingId(_ID_BOOKING)">Pilih Booking</button>
+            </div>
+        </div>
+    </div>
+</div>

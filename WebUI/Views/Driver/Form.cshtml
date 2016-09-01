@@ -1,0 +1,298 @@
+@model WebUI.Models.Driver.DriverFormStub
+@{
+    //...
+
+    string template = HttpContext.GetGlobalResourceObject("MyGlobalMessage", "FileUploadTypeError").ToString();
+    string imageTypeErrMsg = string.Format(template, ".jpg, .jpeg, .png");
+    string fileTypeErrMsg = string.Format(template, ".pdf, .jpg, .jpeg, .png");
+    
+    template = HttpContext.GetGlobalResourceObject("MyGlobalMessage", "FileUploadSizeError").ToString();
+    string fileSizeErrMsg = string.Format(template, System.Configuration.ConfigurationManager.AppSettings["maxImageWord"]);
+}
+
+
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    string currentController = (string)ViewContext.RouteData.Values["controller"];
+    string currentAction = (string)ViewContext.RouteData.Values["action"];
+    string backLink = "";
+
+    if (currentAction == "Create")
+    {
+        ViewBag.Title = "Tambah Supir";
+    }
+    else
+    {
+        ViewBag.Title = ViewBag.name + " | Edit";
+    }
+    backLink = Url.Action("Index");
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+@using (@Html.BeginForm(currentAction, currentController, FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(model => model.Id)
+    @Html.HiddenFor(model => model.IdOwner)
+    
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="form-group">
+                @Html.LabelFor(model => model.Name, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                    @Html.ValidationMessageFor(model => model.Name)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Username, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @if(Model.UsernameOptions != null)
+                    {                    
+                        @Html.DropDownListFor(model => model.Username, new SelectList(Model.UsernameOptions, "Value", "Text"), "- tidak ada username -", new { @class = "form-control" })
+                    }                                    
+                    @Html.ValidationMessageFor(model => model.Username)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.DriverType, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DropDownListFor(model => model.DriverType, new SelectList(Model.TypeOptions, "Value", "Text"), new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.DriverType)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.PhoneNumber, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.PhoneNumber, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                    @Html.ValidationMessageFor(model => model.PhoneNumber)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Address, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.Address, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                    @Html.ValidationMessageFor(model => model.Address)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.City, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.City, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                    @Html.ValidationMessageFor(model => model.City)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Email, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                    @Html.ValidationMessageFor(model => model.Email)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.WorkStartDate, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.EditorFor(model => model.WorkStartDate, new { htmlAttributes = new { @class = "form-control-datepicker" } })
+                    @Html.ValidationMessageFor(model => model.WorkStartDate)
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-xs-offset-4 col-xs-8">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a href="@backLink" class="btn btn-link">Cancel</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-6">
+            <div class="form-group">
+                @Html.LabelFor(model => model.Photo, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.HiddenFor(model => model.Photo)
+                    @Html.TextBox("files", "", new { type = "file", id = "kendo-upload" })
+                    <p><em class="text-info">*) ukuran file maksimal 1 mb dan bertipe (jpg, jpeg, atau png)</em></p>
+                    @if (Model.Photo == null)
+                    {
+                        <img id="uploaded-image" src="" class="img-responsive" alt="" />
+                    }
+                    else
+                    {
+                        <img id="uploaded-image" src="@Url.Content(Model.Photo)" class="img-responsive" alt="" />
+                    }
+                    
+                    @Html.ValidationMessageFor(model => model.Photo)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.DriverLicenseFile, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.HiddenFor(model => model.DriverLicenseFile)
+                    @Html.TextBox("files", "", new { type = "file", id = "kendo-upload-driverlicense" })
+                    <p><em class="text-info">*) ukuran file maksimal 1 MB dan bertipe (PDF, jpg, jpeg, atau png)</em></p>
+                    @if (Model.DriverLicenseFile == null)
+                    {
+                        <img id="uploaded-image-driverlicense" src="" class="img-responsive" alt="" />
+                    }
+                    else
+                    {
+                        if (Model.DriverLicenseFile.EndsWith(".pdf"))
+                        {
+                            <img id="uploaded-image-driverlicense" src="@Url.Content("~/Content/theme/pdf.png")" class="img-responsive" alt="" />
+                        }
+                        else
+                        {
+                            <img id="uploaded-image-driverlicense" src="@Url.Content(Model.DriverLicenseFile)" class="img-responsive" alt="" />
+                        }
+                    }
+
+                    @Html.ValidationMessageFor(model => model.DriverLicenseFile)
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        // scripts here
+        var fileInputSelector = '#Photo';  //
+        //var fileNameSelector = '#uploaded-filename';
+        var imageContainerSelector = '#uploaded-image';
+
+        var fileInputDriverLicense = '#DriverLicense';
+        var imageContainerDriverLicense = '#uploaded-image-driverlicense';
+
+        //functions photo
+        function comboBoxOnChange(e) {
+            if (this.value() && this.selectedIndex == -1) {   //or use this.dataItem to see if it has an object
+                this.text('');
+            }
+        }
+
+        function onRemove(e) {
+            $(fileInputSelector).val("");
+            $(imageContainerSelector).hide();
+        }
+
+        function onSelectFile(e) {
+            var flagExtension = 0;
+            var flagSize = 0;
+            var allowedExtension = ['.png', '.jpeg', '.jpg'];
+            var file = e.files;
+            var maxImage = '@System.Configuration.ConfigurationManager.AppSettings["maxImage"]';
+
+            if (file[0].size > maxImage) {
+                flagSize = 1;
+            }
+
+            if ($.inArray((file[0].extension).toLowerCase(), allowedExtension) === -1) {
+                flagExtension = 1;
+            }
+            if (flagExtension == 1) {
+                alert("@imageTypeErrMsg");
+                e.preventDefault();
+            }
+            if (flagSize == 1) {
+                alert("@fileSizeErrMsg");
+                e.preventDefault();
+
+            }
+        }
+
+        function onSuccessFile(e) {
+            if (e.operation == "upload") {
+                var file = e.response;
+                $(fileInputSelector).val(file.filepath);
+                //$(fileNameSelector).html(file.filepath);
+                $(imageContainerSelector).attr('src', file.absolutepath);
+                $(imageContainerSelector).show();
+
+            }
+        }
+
+        //function driverlicense
+        function onRemoveDriverLicense(e) {
+            $(fileInputDriverLicense).val("");
+            $(imageContainerDriverLicense).hide();
+        }
+
+        function onSelectFileDriverLicense(e) {
+            var flagExtension = 0;
+            var flagSize = 0;
+            var allowedExtension = ['.png', '.jpeg', '.jpg', '.pdf'];
+            var file = e.files;
+            var maxImage = '@System.Configuration.ConfigurationManager.AppSettings["maxImage"]';
+
+            if (file[0].size > maxImage) {
+                flagSize = 1;
+            }
+
+            if ($.inArray((file[0].extension).toLowerCase(), allowedExtension) === -1) {
+                flagExtension = 1;
+            }
+            if (flagExtension == 1) {
+                alert("@fileTypeErrMsg");
+                e.preventDefault();
+            }
+            if (flagSize == 1) {
+                alert("@fileSizeErrMsg");
+                e.preventDefault();
+
+            }
+        }
+
+        function onSuccessFileDriverLicense(e) {
+            if (e.operation == "upload") {
+                var file = e.response;
+                $(fileInputDriverLicense).val(file.filepath);
+
+                if (e.files[0].extension === '.pdf') {
+                    $(imageContainerDriverLicense).attr('src', '@Url.Content("~/Content/theme/pdf.png")').show();
+                } else {
+                    $(imageContainerDriverLicense).attr('src', file.absolutepath);
+                }
+                $(imageContainerDriverLicense).show();
+            }
+        }
+
+        $(document).ready(function () {
+            if ($(imageContainerSelector).attr('src') === '') {
+                $(imageContainerSelector).hide();
+            }
+
+            $("#kendo-upload").kendoUpload({
+                multiple: false,
+                async: {
+                    saveUrl: '@Url.Action("Save", "FileManagement", new { area = "" })',
+                    removeUrl: '@Url.Action("Remove", "FileManagement", new { area = "" })',
+                    autoUpload: true
+                },
+                //files: initialFilesContent,
+                select: onSelectFile,
+                success: onSuccessFile,
+                remove: onRemove,
+                showFileList: true,
+            });
+
+            $("#kendo-upload-driverlicense").kendoUpload({
+                multiple: false,
+                async: {
+                    saveUrl: '@Url.Action("Save", "FileManagement", new { area = "" })',
+                    removeUrl: '@Url.Action("Remove", "FileManagement", new { area = "" })',
+                    autoUpload: true
+                },
+                //files: initialFilesContent,
+                select: onSelectFileDriverLicense,
+                success: onSuccessFileDriverLicense,
+                remove: onRemoveDriverLicense,
+                showFileList: true,
+            });
+        });
+    </script>
+}

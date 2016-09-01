@@ -1,0 +1,259 @@
+@model SecurityGuard.ViewModels.ManageUsersViewModel
+@{
+    ViewBag.Title = "Index";
+    //Layout = "~/Areas/SecurityGuard/Views/Shared/_SecurityGuardLayoutPage.cshtml";
+}
+
+<div id="breadcrumb">
+    @Html.ActionLink("Dashboard", "Index", "Dashboard") > Manage Users
+</div>
+
+<div class="page-header">
+	<div class="btn-group pull-right">
+		@Html.ActionLink("Create User", "CreateUser", "Membership", new { area = "SecurityGuard" }, new { @class = "btn btn-default" })
+        @Html.ActionLink("Grant Roles to User", "GrantRolesToUser", "Membership", new { area = "SecurityGuard" }, new { id = "grant-roles-to-user", disabled = "disabled", @class = "btn btn-default" })
+	</div>
+	<h1>Manage User</h1>
+</div>
+
+<p>To Grant a user to Roles, click a radio button next to the user name then click the &quot;Grant Roles To User&quot; link.</p>
+
+@using (Html.BeginForm())
+{
+    <div class="row">
+        <div class="col-xs-3" id="filterby-container">
+            <select id="filterby" name="filterby" class="form-control">
+                <option value="all" @if(Model.FilterBy == "all"){ <text>selected="selected"</text>}>View All</option>
+                <option value="username" @if (Model.FilterBy == "username"){ <text>selected="selected"</text>}>UserName</option>
+                <option value="email" @if (Model.FilterBy == "email"){ <text>selected="selected"</text>}>Email</option>
+            </select>
+        </div>
+        <div class="col-xs-3">@Html.TextBox("searchterm", Model.SearchTerm, new { @class = "form-control", placeholder = "Starts with" })</div>
+        <div class="col-xs-3">
+            <input type="submit" id="filter-button" value="Search" class="btn btn-default" />
+        </div>
+    </div>
+}
+<br />
+@if (Model.PaginatedUserList != null)
+{
+    if (Model.PaginatedUserList.TotalCount == 0)
+    {
+    <p>
+        No users for this search.</p>
+    }
+    else
+    {
+    <span>Records: @Model.PaginatedUserList.TotalCount.ToString()</span>
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th>
+                </th>
+                <th>
+                    UserName
+                </th>
+                <th>
+                    Is Approved?
+                </th>
+                <th>
+                    Status
+                </th>
+                <th>
+                    Email
+                </th>
+                <th>
+                    Last Activity
+                </th>
+            </tr>
+            @foreach (MembershipUser item in Model.PaginatedUserList)
+            {
+                <tr>
+                    <td>
+                        <input type="radio" name="userName" value="@item.UserName" class="userRadio" />
+                    </td>
+                    <td>@Html.ActionLink(item.UserName, "Update", "Membership", new { userName = item.UserName }, null)
+                    </td>
+                    <td>
+                        @if (item.IsApproved)
+                        {
+                            <text><span class="system positive">Approved</span></text>
+                        }
+                        else
+                        {
+                            <text><span class="system negative">Not Approved</span></text>   
+                        }
+                    </td>
+                    <td>
+                        @if (item.IsLockedOut)
+                        {
+                            <text><span class="system negative">Locked</span></text>
+                        }
+                        else
+                        {
+                            <text><span class="system positive">Unlocked</span></text>
+                        }
+                    </td>
+                    <td>
+                        @item.Email
+                    </td>
+                    <td>@string.Format("{0:g}", item.LastActivityDate)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    
+	<!--[if !IE]>start pagination<![endif]-->
+    <nav>
+		<ul class="pagination">
+			<li>
+            @if (Model.PaginatedUserList.HasPreviousPage)
+            {
+                @Html.ActionLink("Previous", "Index", "Membership", new { page = Model.PaginatedUserList.PageIndex - 1, pagesize = Model.PaginatedUserList.PageSize, searchterm = Model.PaginatedUserList.searchterm, filterby = Model.PaginatedUserList.filterby }, null);
+            }
+            else
+            {
+                @*<text>Previous</text>*@
+            }
+            </li>
+
+            @for (int i = 0; i < Model.PaginatedUserList.TotalPages; i++)
+            {
+                if (i == Model.PaginatedUserList.PageIndex)
+                {
+                    <li><span>@((i + 1).ToString())</span></li>
+                }
+                else
+                {
+                    <li>@Html.ActionLink((i + 1).ToString(), "Index", "Membership", new { page = i, pagesize = Model.PaginatedUserList.PageSize, searchterm = Model.PaginatedUserList.searchterm, filterby = Model.PaginatedUserList.filterby }, null)</li>
+                }
+            }
+			<li><a href="javascript:">...</a></li>
+			<li>@Html.ActionLink(Model.PaginatedUserList.TotalPages.ToString(), "Index", "Membership", new { page = Model.PaginatedUserList.TotalPages - 1, pagesize = Model.PaginatedUserList.PageSize, searchterm = Model.PaginatedUserList.searchterm, filterby = Model.PaginatedUserList.filterby }, null)</li>
+			<li>
+            @if (Model.PaginatedUserList.HasNextPage)
+            {
+                @Html.ActionLink("Next", "Index", "Membership", new { page = Model.PaginatedUserList.PageIndex + 1, pagesize = Model.PaginatedUserList.PageSize, searchterm = Model.PaginatedUserList.searchterm, filterby = Model.PaginatedUserList.filterby }, null);
+            }
+            else
+            {
+                @*<text>Next</text>*@
+            }
+            </li>
+		</ul>
+
+        <div id="page-size">
+            Page Size: 
+            <select id="pagesize" name="pagesize">
+            <option value="25" @if (Model.PageSize == 25)
+                                {<text>selected="selected"</text>}>25</option>
+            <option value="50" @if (Model.PageSize == 50)
+                                {<text>selected="selected"</text>}>50</option>
+            <option value="100" @if (Model.PageSize == 100)
+                                {<text>selected="selected"</text>}>100</option>
+            </select>
+        </div>
+    </nav>
+	<!--[if !IE]>end pagination<![endif]-->       
+    }
+}
+@section sgscripts{
+<script type="text/javascript">
+
+    $(function () {
+
+        /**************************************************
+        * Begin Radio Button functions
+        *
+        * This captures radio button event clicks and 
+        * enables the "Grant Roles To User" link.
+        **************************************************/
+        var anchor = $("a#grant-roles-to-user");
+        //anchor.attr("disabled", "disabled");
+
+        $(".userRadio").click(function () {
+            // Get the value of the clicked radio button
+            // which is the username.
+            var userName = $(this).val();
+
+            // Get a reference to the "href" of the link.
+            //var href = anchor.attr("href");
+            var href = '@Url.Action("GrantRolesToUser", "Membership")';
+
+            // Concatenate the existing href value with the username
+            var newHref = href + "?username=" + userName;
+
+            // Replace the existing href value with the new one
+            anchor.attr("href", newHref);
+
+            // Remove the disabled attribute on the 
+            // Grant Roles to User link
+            anchor.removeAttr("disabled");
+        });
+
+        /**************************************************
+        * End Radio Button functions
+        **************************************************/
+
+
+
+        /**************************************************
+        * Begin FilterBy functions
+        *
+        * This will enable or disable the search field
+        * if the "ViewAll" selection is chosen.
+        **************************************************/
+
+        $("#filterby-container").on('change', '#filterby', function () {
+            var optionValue = $("option:selected", this).val();
+            if (optionValue == "all") {
+                // Clear the search field
+                $("#searchterm").val("");
+
+                // Disable the search term field
+                $("#searchterm").attr("disabled", "disabled");
+            } else {
+                $("#searchterm").removeAttr("disabled");
+            }
+        });
+
+
+        function InitSearchField() {
+            var filterbyVal = $("#filterby option:selected").val();
+            if (filterbyVal == "all") {
+                $("#searchterm").attr("disabled", "disabled");
+            }
+        }
+
+        InitSearchField();
+
+        /**************************************************
+        * End FilterBy functions
+        **************************************************/
+
+
+
+        /**************************************************
+        * Begin PageSize functions
+        *
+        * This handles the page size selected change functions.
+        **************************************************/
+
+        $("#page-size").change(function () {
+            var filterbyVal = $("#filterby option:selected").val();
+            var searchtermVal = $("#searchterm").val();
+            var pageSizeVal = $("option:selected", this).val();
+
+            location.href = '/SecurityGuard/Membership/index/' + filterbyVal + '/' + searchtermVal + '?pagesize=' + pageSizeVal;
+        });
+
+        /**************************************************
+        * End PageSize functions
+        **************************************************/
+
+
+    });
+
+</script>
+}

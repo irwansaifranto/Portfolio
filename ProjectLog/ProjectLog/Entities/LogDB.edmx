@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="2.0" xmlns:edmx="http://schemas.microsoft.com/ado/2008/10/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="mobidigModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2008" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
+        <EntityContainer Name="mobidigModelStoreContainer">
+          <EntitySet Name="log" EntityType="mobidigModel.Store.log" store:Type="Tables" Schema="dbo" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" />
+        </EntityContainer>
+        <EntityType Name="log">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="timestamp" Type="datetime" />
+          <Property Name="application" Type="varchar" MaxLength="255" />
+          <Property Name="ip" Type="varchar" MaxLength="50" />
+          <Property Name="user" Type="varchar" MaxLength="255" />
+          <Property Name="action" Type="varchar" MaxLength="255" />
+          <Property Name="data" Type="varchar(max)" />
+        </EntityType>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="mobidigModel" Alias="Self" p1:UseStrongSpatialTypes="false" xmlns="http://schemas.microsoft.com/ado/2008/09/edm" xmlns:p1="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
+        <EntityContainer Name="mobidigEntities" p1:LazyLoadingEnabled="true">
+          <EntitySet Name="log" EntityType="mobidigModel.log" />
+        </EntityContainer>
+        <EntityType Name="log">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Type="Int64" Name="id" Nullable="false" annotation:StoreGeneratedPattern="Identity" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Type="DateTime" Name="timestamp" Precision="3" />
+          <Property Type="String" Name="application" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Type="String" Name="ip" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Type="String" Name="user" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Type="String" Name="action" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Type="String" Name="data" MaxLength="Max" FixedLength="false" Unicode="false" />
+        </EntityType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="mobidigModelStoreContainer" CdmEntityContainer="mobidigEntities">
+          <EntitySetMapping Name="log">
+            <EntityTypeMapping TypeName="mobidigModel.log">
+              <MappingFragment StoreEntitySet="log">
+                <ScalarProperty Name="data" ColumnName="data" />
+                <ScalarProperty Name="action" ColumnName="action" />
+                <ScalarProperty Name="user" ColumnName="user" />
+                <ScalarProperty Name="ip" ColumnName="ip" />
+                <ScalarProperty Name="application" ColumnName="application" />
+                <ScalarProperty Name="timestamp" ColumnName="timestamp" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2008/10/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="False" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams />
+  </Designer>
+</edmx:Edmx>

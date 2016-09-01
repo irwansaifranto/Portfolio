@@ -1,0 +1,526 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="UserManagement.Store" Provider="Npgsql" ProviderManifestToken="9.5" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Actions">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="uuid" Nullable="false" />
+          <Property Name="ActionName" Type="varchar" MaxLength="256" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ActionsInModules">
+          <Key>
+            <PropertyRef Name="ActionId" />
+            <PropertyRef Name="ModuleId" />
+          </Key>
+          <Property Name="ActionId" Type="uuid" Nullable="false" />
+          <Property Name="ModuleId" Type="uuid" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ActionsInModulesChosen">
+          <Key>
+            <PropertyRef Name="ModuleInRoleId" />
+            <PropertyRef Name="ActionId" />
+          </Key>
+          <Property Name="ModuleInRoleId" Type="uuid" Nullable="false" />
+          <Property Name="ActionId" Type="uuid" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Modules">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="uuid" Nullable="false" />
+          <Property Name="ModuleName" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="ParentModule" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="ModulesInRoles">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="ModuleId" Type="uuid" Nullable="false" />
+          <Property Name="RoleId" Type="int4" Nullable="false" />
+          <Property Name="Id" Type="uuid" Nullable="false" />
+        </EntityType>
+        <EntityType Name="roles">
+          <Key>
+            <PropertyRef Name="role_id" />
+          </Key>
+          <Property Name="role_id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="role_name" Type="varchar" MaxLength="250" Nullable="false" />
+          <Property Name="application_name" Type="varchar" MaxLength="250" Nullable="false" />
+          <Property Name="role_description" Type="text" />
+        </EntityType>
+        <EntityType Name="user_login_activity">
+          <Key>
+            <PropertyRef Name="activity_id" />
+          </Key>
+          <Property Name="activity_id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="when" Type="timestamptz" Precision="7" Nullable="false" />
+          <Property Name="from" Type="varchar" MaxLength="250" Nullable="false" />
+          <Property Name="success" Type="bool" Nullable="false" />
+          <Property Name="user_id" Type="int4" Nullable="false" />
+        </EntityType>
+        <EntityType Name="users">
+          <Key>
+            <PropertyRef Name="user_id" />
+          </Key>
+          <Property Name="user_id" Type="int4" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="user_name" Type="varchar" MaxLength="250" Nullable="false" />
+          <Property Name="application_name" Type="varchar" MaxLength="250" Nullable="false" />
+          <Property Name="last_activity" Type="timestamptz" Precision="7" />
+          <Property Name="created" Type="timestamptz" Precision="7" Nullable="false" />
+          <Property Name="email" Type="varchar" MaxLength="250" />
+          <Property Name="salt" Type="varchar" MaxLength="250" />
+          <Property Name="password" Type="bytea" />
+          <Property Name="approved" Type="bool" Nullable="false" />
+          <Property Name="last_lockout" Type="timestamptz" Precision="7" />
+          <Property Name="last_login" Type="timestamptz" Precision="7" />
+          <Property Name="last_password_changed" Type="timestamptz" Precision="7" Nullable="false" />
+          <Property Name="password_question" Type="varchar" MaxLength="1000" />
+          <Property Name="password_answer" Type="bytea" />
+          <Property Name="answer_salt" Type="varchar" MaxLength="250" />
+          <Property Name="comment" Type="text" />
+        </EntityType>
+        <EntityType Name="users_roles">
+          <Key>
+            <PropertyRef Name="user_id" />
+            <PropertyRef Name="role_id" />
+          </Key>
+          <Property Name="user_id" Type="int4" Nullable="false" />
+          <Property Name="role_id" Type="int4" Nullable="false" />
+        </EntityType>
+        <EntityType Name="versions">
+          <Key>
+            <PropertyRef Name="name" />
+          </Key>
+          <Property Name="name" Type="varchar" MaxLength="250" Nullable="false" />
+          <Property Name="version" Type="varchar" MaxLength="15" Nullable="false" />
+        </EntityType>
+        <Association Name="fk_aim_action">
+          <End Role="Actions" Type="Self.Actions" Multiplicity="1" />
+          <End Role="ActionsInModules" Type="Self.ActionsInModules" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Actions">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="ActionsInModules">
+              <PropertyRef Name="ActionId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_aim_module">
+          <End Role="Modules" Type="Self.Modules" Multiplicity="1" />
+          <End Role="ActionsInModules" Type="Self.ActionsInModules" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Modules">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="ActionsInModules">
+              <PropertyRef Name="ModuleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_aimc_action">
+          <End Role="Actions" Type="Self.Actions" Multiplicity="1" />
+          <End Role="ActionsInModulesChosen" Type="Self.ActionsInModulesChosen" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Actions">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="ActionsInModulesChosen">
+              <PropertyRef Name="ActionId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_aimc_mir">
+          <End Role="ModulesInRoles" Type="Self.ModulesInRoles" Multiplicity="1" />
+          <End Role="ActionsInModulesChosen" Type="Self.ActionsInModulesChosen" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ModulesInRoles">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="ActionsInModulesChosen">
+              <PropertyRef Name="ModuleInRoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_mir_module">
+          <End Role="Modules" Type="Self.Modules" Multiplicity="1" />
+          <End Role="ModulesInRoles" Type="Self.ModulesInRoles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Modules">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="ModulesInRoles">
+              <PropertyRef Name="ModuleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_mir_role">
+          <End Role="roles" Type="Self.roles" Multiplicity="1" />
+          <End Role="ModulesInRoles" Type="Self.ModulesInRoles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="roles">
+              <PropertyRef Name="role_id" />
+            </Principal>
+            <Dependent Role="ModulesInRoles">
+              <PropertyRef Name="RoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="users_roles_role_id_fkey">
+          <End Role="roles" Type="Self.roles" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="users_roles" Type="Self.users_roles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="roles">
+              <PropertyRef Name="role_id" />
+            </Principal>
+            <Dependent Role="users_roles">
+              <PropertyRef Name="role_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="users_roles_user_id_fkey">
+          <End Role="users" Type="Self.users" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="users_roles" Type="Self.users_roles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="user_id" />
+            </Principal>
+            <Dependent Role="users_roles">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="UserManagementStoreContainer">
+          <EntitySet Name="Actions" EntityType="Self.Actions" Schema="public" store:Type="Tables" />
+          <EntitySet Name="ActionsInModules" EntityType="Self.ActionsInModules" Schema="public" store:Type="Tables" />
+          <EntitySet Name="ActionsInModulesChosen" EntityType="Self.ActionsInModulesChosen" Schema="public" store:Type="Tables" />
+          <EntitySet Name="Modules" EntityType="Self.Modules" Schema="public" store:Type="Tables" />
+          <EntitySet Name="ModulesInRoles" EntityType="Self.ModulesInRoles" Schema="public" store:Type="Tables" />
+          <EntitySet Name="roles" EntityType="Self.roles" Schema="public" store:Type="Tables" />
+          <EntitySet Name="user_login_activity" EntityType="Self.user_login_activity" Schema="public" store:Type="Tables" />
+          <EntitySet Name="users" EntityType="Self.users" Schema="public" store:Type="Tables" />
+          <EntitySet Name="users_roles" EntityType="Self.users_roles" Schema="public" store:Type="Tables" />
+          <EntitySet Name="versions" EntityType="Self.versions" Schema="public" store:Type="Tables" />
+          <AssociationSet Name="fk_aim_action" Association="Self.fk_aim_action">
+            <End Role="Actions" EntitySet="Actions" />
+            <End Role="ActionsInModules" EntitySet="ActionsInModules" />
+          </AssociationSet>
+          <AssociationSet Name="fk_aim_module" Association="Self.fk_aim_module">
+            <End Role="Modules" EntitySet="Modules" />
+            <End Role="ActionsInModules" EntitySet="ActionsInModules" />
+          </AssociationSet>
+          <AssociationSet Name="fk_aimc_action" Association="Self.fk_aimc_action">
+            <End Role="Actions" EntitySet="Actions" />
+            <End Role="ActionsInModulesChosen" EntitySet="ActionsInModulesChosen" />
+          </AssociationSet>
+          <AssociationSet Name="fk_aimc_mir" Association="Self.fk_aimc_mir">
+            <End Role="ModulesInRoles" EntitySet="ModulesInRoles" />
+            <End Role="ActionsInModulesChosen" EntitySet="ActionsInModulesChosen" />
+          </AssociationSet>
+          <AssociationSet Name="fk_mir_module" Association="Self.fk_mir_module">
+            <End Role="Modules" EntitySet="Modules" />
+            <End Role="ModulesInRoles" EntitySet="ModulesInRoles" />
+          </AssociationSet>
+          <AssociationSet Name="fk_mir_role" Association="Self.fk_mir_role">
+            <End Role="roles" EntitySet="roles" />
+            <End Role="ModulesInRoles" EntitySet="ModulesInRoles" />
+          </AssociationSet>
+          <AssociationSet Name="users_roles_role_id_fkey" Association="Self.users_roles_role_id_fkey">
+            <End Role="roles" EntitySet="roles" />
+            <End Role="users_roles" EntitySet="users_roles" />
+          </AssociationSet>
+          <AssociationSet Name="users_roles_user_id_fkey" Association="Self.users_roles_user_id_fkey">
+            <End Role="users" EntitySet="users" />
+            <End Role="users_roles" EntitySet="users_roles" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="UserManagement" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Actions">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="ActionName" Type="String" MaxLength="256" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="Modules" Relationship="Self.ActionsInModules" FromRole="Actions" ToRole="Modules" />
+          <NavigationProperty Name="ModulesInRoles" Relationship="Self.ActionsInModulesChosen" FromRole="Actions" ToRole="ModulesInRoles" />
+        </EntityType>
+        <EntityType Name="Modules">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="ModuleName" Type="String" MaxLength="256" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ParentModule" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="ModulesInRoles" Relationship="Self.fk_mir_module" FromRole="Modules" ToRole="ModulesInRoles" />
+          <NavigationProperty Name="Actions" Relationship="Self.ActionsInModules" FromRole="Modules" ToRole="Actions" />
+        </EntityType>
+        <EntityType Name="ModulesInRoles">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="ModuleId" Type="Guid" Nullable="false" />
+          <Property Name="RoleId" Type="Int32" Nullable="false" />
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <NavigationProperty Name="Modules" Relationship="Self.fk_mir_module" FromRole="ModulesInRoles" ToRole="Modules" />
+          <NavigationProperty Name="roles" Relationship="Self.fk_mir_role" FromRole="ModulesInRoles" ToRole="roles" />
+          <NavigationProperty Name="Actions" Relationship="Self.ActionsInModulesChosen" FromRole="ModulesInRoles" ToRole="Actions" />
+        </EntityType>
+        <EntityType Name="roles">
+          <Key>
+            <PropertyRef Name="role_id" />
+          </Key>
+          <Property Name="role_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="role_name" Type="String" MaxLength="250" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="application_name" Type="String" MaxLength="250" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="role_description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="ModulesInRoles" Relationship="Self.fk_mir_role" FromRole="roles" ToRole="ModulesInRoles" />
+          <NavigationProperty Name="users" Relationship="Self.users_roles" FromRole="roles" ToRole="users" />
+        </EntityType>
+        <EntityType Name="user_login_activity">
+          <Key>
+            <PropertyRef Name="activity_id" />
+          </Key>
+          <Property Name="activity_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="when" Type="DateTimeOffset" Precision="7" Nullable="false" />
+          <Property Name="from" Type="String" MaxLength="250" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="success" Type="Boolean" Nullable="false" />
+          <Property Name="user_id" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="users">
+          <Key>
+            <PropertyRef Name="user_id" />
+          </Key>
+          <Property Name="user_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="user_name" Type="String" MaxLength="250" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="application_name" Type="String" MaxLength="250" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="last_activity" Type="DateTimeOffset" Precision="7" />
+          <Property Name="created" Type="DateTimeOffset" Precision="7" Nullable="false" />
+          <Property Name="email" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="salt" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="password" Type="Binary" MaxLength="2147483647" FixedLength="false" />
+          <Property Name="approved" Type="Boolean" Nullable="false" />
+          <Property Name="last_lockout" Type="DateTimeOffset" Precision="7" />
+          <Property Name="last_login" Type="DateTimeOffset" Precision="7" />
+          <Property Name="last_password_changed" Type="DateTimeOffset" Precision="7" Nullable="false" />
+          <Property Name="password_question" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="password_answer" Type="Binary" MaxLength="2147483647" FixedLength="false" />
+          <Property Name="answer_salt" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+          <Property Name="comment" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="roles" Relationship="Self.users_roles" FromRole="users" ToRole="roles" />
+        </EntityType>
+        <EntityType Name="versions">
+          <Key>
+            <PropertyRef Name="name" />
+          </Key>
+          <Property Name="name" Type="String" MaxLength="250" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="version" Type="String" MaxLength="15" FixedLength="false" Unicode="true" Nullable="false" />
+        </EntityType>
+        <Association Name="fk_mir_module">
+          <End Role="Modules" Type="Self.Modules" Multiplicity="1" />
+          <End Role="ModulesInRoles" Type="Self.ModulesInRoles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Modules">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="ModulesInRoles">
+              <PropertyRef Name="ModuleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_mir_role">
+          <End Role="roles" Type="Self.roles" Multiplicity="1" />
+          <End Role="ModulesInRoles" Type="Self.ModulesInRoles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="roles">
+              <PropertyRef Name="role_id" />
+            </Principal>
+            <Dependent Role="ModulesInRoles">
+              <PropertyRef Name="RoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="ActionsInModules">
+          <End Role="Actions" Type="Self.Actions" Multiplicity="*" />
+          <End Role="Modules" Type="Self.Modules" Multiplicity="*" />
+        </Association>
+        <Association Name="ActionsInModulesChosen">
+          <End Role="Actions" Type="Self.Actions" Multiplicity="*" />
+          <End Role="ModulesInRoles" Type="Self.ModulesInRoles" Multiplicity="*" />
+        </Association>
+        <Association Name="users_roles">
+          <End Role="roles" Type="Self.roles" Multiplicity="*" />
+          <End Role="users" Type="Self.users" Multiplicity="*" />
+        </Association>
+        <EntityContainer Name="Entities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Actions" EntityType="Self.Actions" />
+          <EntitySet Name="Modules" EntityType="Self.Modules" />
+          <EntitySet Name="ModulesInRoles" EntityType="Self.ModulesInRoles" />
+          <EntitySet Name="roles" EntityType="Self.roles" />
+          <EntitySet Name="user_login_activity" EntityType="Self.user_login_activity" />
+          <EntitySet Name="users" EntityType="Self.users" />
+          <EntitySet Name="versions" EntityType="Self.versions" />
+          <AssociationSet Name="fk_mir_module" Association="Self.fk_mir_module">
+            <End Role="Modules" EntitySet="Modules" />
+            <End Role="ModulesInRoles" EntitySet="ModulesInRoles" />
+          </AssociationSet>
+          <AssociationSet Name="fk_mir_role" Association="Self.fk_mir_role">
+            <End Role="roles" EntitySet="roles" />
+            <End Role="ModulesInRoles" EntitySet="ModulesInRoles" />
+          </AssociationSet>
+          <AssociationSet Name="ActionsInModules" Association="Self.ActionsInModules">
+            <End Role="Actions" EntitySet="Actions" />
+            <End Role="Modules" EntitySet="Modules" />
+          </AssociationSet>
+          <AssociationSet Name="ActionsInModulesChosen" Association="Self.ActionsInModulesChosen">
+            <End Role="Actions" EntitySet="Actions" />
+            <End Role="ModulesInRoles" EntitySet="ModulesInRoles" />
+          </AssociationSet>
+          <AssociationSet Name="users_roles" Association="Self.users_roles">
+            <End Role="roles" EntitySet="roles" />
+            <End Role="users" EntitySet="users" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="UserManagementStoreContainer" CdmEntityContainer="Entities">
+          <EntitySetMapping Name="Actions">
+            <EntityTypeMapping TypeName="UserManagement.Actions">
+              <MappingFragment StoreEntitySet="Actions">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="ActionName" ColumnName="ActionName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Modules">
+            <EntityTypeMapping TypeName="UserManagement.Modules">
+              <MappingFragment StoreEntitySet="Modules">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="ModuleName" ColumnName="ModuleName" />
+                <ScalarProperty Name="ParentModule" ColumnName="ParentModule" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ModulesInRoles">
+            <EntityTypeMapping TypeName="UserManagement.ModulesInRoles">
+              <MappingFragment StoreEntitySet="ModulesInRoles">
+                <ScalarProperty Name="ModuleId" ColumnName="ModuleId" />
+                <ScalarProperty Name="RoleId" ColumnName="RoleId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="roles">
+            <EntityTypeMapping TypeName="UserManagement.roles">
+              <MappingFragment StoreEntitySet="roles">
+                <ScalarProperty Name="role_id" ColumnName="role_id" />
+                <ScalarProperty Name="role_name" ColumnName="role_name" />
+                <ScalarProperty Name="application_name" ColumnName="application_name" />
+                <ScalarProperty Name="role_description" ColumnName="role_description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="user_login_activity">
+            <EntityTypeMapping TypeName="UserManagement.user_login_activity">
+              <MappingFragment StoreEntitySet="user_login_activity">
+                <ScalarProperty Name="activity_id" ColumnName="activity_id" />
+                <ScalarProperty Name="when" ColumnName="when" />
+                <ScalarProperty Name="from" ColumnName="from" />
+                <ScalarProperty Name="success" ColumnName="success" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="users">
+            <EntityTypeMapping TypeName="UserManagement.users">
+              <MappingFragment StoreEntitySet="users">
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="user_name" ColumnName="user_name" />
+                <ScalarProperty Name="application_name" ColumnName="application_name" />
+                <ScalarProperty Name="last_activity" ColumnName="last_activity" />
+                <ScalarProperty Name="created" ColumnName="created" />
+                <ScalarProperty Name="email" ColumnName="email" />
+                <ScalarProperty Name="salt" ColumnName="salt" />
+                <ScalarProperty Name="password" ColumnName="password" />
+                <ScalarProperty Name="approved" ColumnName="approved" />
+                <ScalarProperty Name="last_lockout" ColumnName="last_lockout" />
+                <ScalarProperty Name="last_login" ColumnName="last_login" />
+                <ScalarProperty Name="last_password_changed" ColumnName="last_password_changed" />
+                <ScalarProperty Name="password_question" ColumnName="password_question" />
+                <ScalarProperty Name="password_answer" ColumnName="password_answer" />
+                <ScalarProperty Name="answer_salt" ColumnName="answer_salt" />
+                <ScalarProperty Name="comment" ColumnName="comment" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="versions">
+            <EntityTypeMapping TypeName="UserManagement.versions">
+              <MappingFragment StoreEntitySet="versions">
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="version" ColumnName="version" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <AssociationSetMapping Name="ActionsInModules" TypeName="UserManagement.ActionsInModules" StoreEntitySet="ActionsInModules">
+            <EndProperty Name="Actions">
+              <ScalarProperty Name="Id" ColumnName="ActionId" />
+            </EndProperty>
+            <EndProperty Name="Modules">
+              <ScalarProperty Name="Id" ColumnName="ModuleId" />
+            </EndProperty>
+          </AssociationSetMapping>
+          <AssociationSetMapping Name="ActionsInModulesChosen" TypeName="UserManagement.ActionsInModulesChosen" StoreEntitySet="ActionsInModulesChosen">
+            <EndProperty Name="Actions">
+              <ScalarProperty Name="Id" ColumnName="ActionId" />
+            </EndProperty>
+            <EndProperty Name="ModulesInRoles">
+              <ScalarProperty Name="Id" ColumnName="ModuleInRoleId" />
+            </EndProperty>
+          </AssociationSetMapping>
+          <AssociationSetMapping Name="users_roles" TypeName="UserManagement.users_roles" StoreEntitySet="users_roles">
+            <EndProperty Name="roles">
+              <ScalarProperty Name="role_id" ColumnName="role_id" />
+            </EndProperty>
+            <EndProperty Name="users">
+              <ScalarProperty Name="user_id" ColumnName="user_id" />
+            </EndProperty>
+          </AssociationSetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

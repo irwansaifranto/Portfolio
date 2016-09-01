@@ -1,0 +1,10 @@
+http://localhost/mobidig/Services/UserService/GetUserLogin.php
+{"id":"0f12b4ac-1197-4f37-b9cb-8ea60e3c30f6","username":"chandra.admin","rolename":["Admin testing","PMO AP","PMO Admin"]}
+http://localhost/mobidig/Services/UserService/GetUserLogin.php
+{"id":"0f12b4ac-1197-4f37-b9cb-8ea60e3c30f6","username":"chandra.admin","rolename":["Admin testing","PMO AP","PMO Admin"]}
+http://localhost/mobidig/Services/UserService/GetUserLogin.php
+{"id":"0f12b4ac-1197-4f37-b9cb-8ea60e3c30f6","username":"chandra.admin","rolename":["Admin testing","PMO AP","PMO Admin"]}
+http://localhost/mobidig/Services/UserService/GetUserLogin.php
+{"id":"0f12b4ac-1197-4f37-b9cb-8ea60e3c30f6","username":"chandra.admin","rolename":["Admin testing","PMO AP","PMO Admin"]}
+http://localhost/mobidig/Services/UserService/GetUserLogin.php
+{"id":"0f12b4ac-1197-4f37-b9cb-8ea60e3c30f6","username":"chandra.admin","rolename":["Admin testing","PMO AP","PMO Admin"]}

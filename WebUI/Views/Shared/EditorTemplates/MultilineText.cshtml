@@ -1,0 +1,12 @@
+﻿@model string
+
+@{
+    var htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(ViewData["htmlAttributes"]);
+
+    if (htmlAttributes.ContainsKey("class") == false)
+    {
+        htmlAttributes.Add("class", "form-control-editor");
+    }
+}
+
+@Html.TextArea("", Model, htmlAttributes)

@@ -1,0 +1,155 @@
+﻿@using WebUI.Extension;
+@using MvcSiteMapProvider.Web.Html;
+@{
+    //...
+
+    string fileTypeErrMsg = HttpContext.GetGlobalResourceObject("MyGlobalMessage", "FileUploadImageTypeError").ToString();
+    string template = HttpContext.GetGlobalResourceObject("MyGlobalMessage", "FileUploadSizeError").ToString();
+    string fileSizeErrMsg = string.Format(template, System.Configuration.ConfigurationManager.AppSettings["maxImageWord"]);
+}
+
+@model WebUI.Models.Profile.ProfileFormStub
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentController = (WebUI.Controllers.ProfileController)ViewContext.Controller;
+    string currentControllerProfile = (string)ViewContext.RouteData.Values["controller"];
+    string currentAction = (string)ViewContext.RouteData.Values["action"];
+    string backLink = "";
+    
+    ViewBag.Title = "Ubah Profil Rental";
+    
+    backLink = Url.Action("Update");
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+@Html.Raw(currentController.GetMessage())
+<p class="alert alert-info">Data profil digunakan ketika mencetak invoice.</p>
+
+
+@using (@Html.BeginForm(currentAction,currentControllerProfile, FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(model => model.Id) 
+  
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Logo, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.HiddenFor(model => model.Logo)                       
+            @Html.TextBox("files", "", new { type = "file", id = "kendo-upload" })
+            <br />
+            @if (Model.Logo == null) 
+            { 
+            <img id="uploaded-image" src="" class="img-responsive" alt="" />
+            }
+            else
+            {
+             <img id="uploaded-image" src="@Url.Content(Model.Logo)" class="img-responsive" alt="" />
+            }
+            @Html.ValidationMessageFor(model => model.Logo)
+            <em class="text-info">*ukuran file maksimal 1 mb dan bertipe (jpg,jpeg,png)</em>
+            <em class="text-info">**saran : untuk ukuran lebar x tinggi (100px s/d 150px)</em>
+        </div>       
+    </div>
+    
+    <div class="form-group">
+        @Html.LabelFor(model => model.Contact, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.EditorFor(model => model.Contact)
+            @Html.ValidationMessageFor(model => model.Contact)
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Terms, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.EditorFor(model => model.Terms)
+            @Html.ValidationMessageFor(model => model.Terms)
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <div class="col-xs-offset-2 col-xs-10">
+            
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="@backLink" class="btn btn-link">Cancel</a>
+        </div>
+    </div>
+}
+
+@section scripts
+{
+<script type="text/javascript">
+    // scripts here
+    var fileInputSelector = '#Logo';  //
+    var fileNameSelector = '#uploaded-filename';
+    var imageContainerSelector = '#uploaded-image';
+
+    //functions
+    function onRemove(e) {
+        $(fileInputSelector).val("");
+        $(imageContainerSelector).hide();
+    }
+
+    function onSelectFile(e) {
+        var flagExtension = 0;
+        var flagSize = 0;
+        var allowedExtension = ['.png', '.jpeg','.jpg'];
+        var file = e.files;
+        var maxImage = '@System.Configuration.ConfigurationManager.AppSettings["maxImage"]';
+
+        if (file[0].size > maxImage) {
+            flagSize = 1;
+        }
+
+        if ($.inArray((file[0].extension).toLowerCase(), allowedExtension) === -1) {
+            flagExtension = 1;
+        }
+        if (flagExtension == 1) {
+            alert("@fileTypeErrMsg");
+            e.preventDefault();
+        }
+        if (flagSize == 1) {
+            alert("@fileSizeErrMsg");
+            e.preventDefault();
+
+        }
+    }
+
+    function onSuccessFile(e) {
+        if (e.operation == "upload") {
+            var file = e.response;
+            console.log(file);
+            $(fileInputSelector).val(file.filepath);
+            $(fileNameSelector).html(file.filepath);
+            $(imageContainerSelector).attr('src', file.absolutepath);
+            $(imageContainerSelector).show();
+
+        }
+    }
+
+    $(document).ready(function () {
+        if ($(imageContainerSelector).attr('src') === '') {
+            $(imageContainerSelector).hide();
+        }
+
+        $("#kendo-upload").kendoUpload({
+            multiple: false,
+            async: {
+                saveUrl: '@Url.Action("Save", "FileManagement", new { area = "" })',
+                removeUrl: '@Url.Action("Remove", "FileManagement", new { area = "" })',
+                autoUpload: true
+            },
+            //files: initialFilesContent,
+            select: onSelectFile,
+            success: onSuccessFile,
+            remove: onRemove,
+            showFileList: true,
+        });
+    });
+    </script>
+}
+

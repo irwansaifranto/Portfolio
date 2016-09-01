@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Security Guard</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    @Styles.Render("~/Content/jqueryui/css")
+    @Styles.Render("~/Content/kendo/css")
+    @Styles.Render("~/Content/bootstrapcss/css")
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><img src="@Url.Content("~/Content/theme/logo.png")" /></h1>
+            <div class="pull-right">
+                <img src="@Url.Content("~/Content/theme/header-right.jpg")" />      
+            </div>
+        </div>
+    </header>
+    <div class="navbar" role="navigation">
+		<div class="container">
+            @{
+                Html.RenderPartial("_Menu");   
+            }
+			@if (User.Identity.IsAuthenticated)
+			{
+			<div class="usermenu pull-right">
+                <div class="greeting">Hi, @(Session["username"] != null ? Session["username"] : User.Identity.Name)</div>
+                <ul class="nav pull-right navbar-nav navbar-right">
+                    <li class="">
+		                <a data-toggle="dropdown" href="javascript:"><span class="glyphicon glyphicon-cog"></span></a>
+		                <ul class="dropdown-menu pull-left" role="menu">
+							<li>@Html.ActionLink("Change Password", "ChangePassword", "SGAccount", new { area = "" }, null)</li>
+							<li>@using (Html.BeginForm("LogOff", "SGAccount", new { area = "" }, FormMethod.Post, new { id = "logoutForm" }))
+                                                                    {
+                                @Html.AntiForgeryToken()
+                                                                    }
+                                <a href="javascript:document.getElementById('logoutForm').submit()">Log off</a>
+							</li>
+                        </ul>
+                    </li>
+                </ul>
+			</div>
+			}
+		</div>
+	</div>
+    
+	<div class="container">
+        @RenderSection("featured", required: false)
+        @RenderBody()
+	</div>
+		
+	<footer>
+		<div class="container">
+            <div class="row">
+                <div class="col-md-6 text-left">
+                    © 2014 PT Rekadia Solusi Teknologi<br />
+                    Grand Slipi Tower Lantai 42, Jl. S. Parman Kav 22-24, Jakarta 10110, Indonesia<br/>
+                    Phone +62 21 3049 0220
+                </div>
+                <div class="col-md-6 text-right">
+                    Contact Us<br />
+                    <a href="mailto:contact@rekadia.co.id">contact@rekadia.co.id</a>
+                </div>
+            </div>
+		</div>
+	</footer>
+    
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/kendo")
+    @Scripts.Render("~/bundles/webapp")
+    @RenderSection("sgscripts", required: false)
+</body>
+</html>

@@ -1,0 +1,164 @@
+@model WebUI.Models.Booking.BookingPresentationStub
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    string currentController = (string)ViewContext.RouteData.Values["controller"];
+    string currentAction = (string)ViewContext.RouteData.Values["action"];
+    string backLink = "";
+
+    ViewBag.Title = "Booking " + Model.Name;
+
+    backLink = Url.Action("Index");
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+<div class="form-horizontal form-display">
+    <div class="form-group">
+        @Html.LabelFor(model => model.Code, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.DisplayFor(model => model.Code)
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-6">
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Name, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.Name)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.PhoneNumber, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.PhoneNumber)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.PickupLocation, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.PickupLocation)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.DriverName, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.DriverName)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.CarModelName, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.CarModelName)
+                </div>
+            </div>
+
+            <div class="form-group zero-margin-bottom">
+                @Html.LabelFor(model => model.LicensePlate, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.LicensePlate)
+                </div>
+            </div>
+
+        </div>
+        <div class="col-xs-6">
+            <div class="form-group">
+                @Html.LabelFor(model => model.StartRent, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.StartRent)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.FinishRent, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.FinishRent)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Price, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.Price)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Notes, new { @class = "col-xs-4 control-label" })
+                <div class="col-xs-8">
+                    @Html.DisplayFor(model => model.Notes)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.PackagePrice, new { @class = "col-xs-4 control-label" })
+                <div class="col-lg-12">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th width="10">Paket</th>
+                                <th width="5">Quantity</th>
+                                <th width="20">Harga</th>
+                                <th width="20">Sub Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.ListRentPackage)
+                            {
+                                <tr>
+                                    <td>@item.car_package.name</td>
+                                    <td>@item.quantity</td>
+                                    <td>@item.car_package.price.ToString("n0")</td>
+                                    <td>@item.price_each.ToString("n0")</td>
+                                </tr>   
+                            }
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Status, new { @class = "col-xs-2 control-label" })
+        <div class="col-xs-4">
+            @Html.DisplayFor(model => model.Status)
+        </div>
+    </div>
+
+    @if (Model.CancelNotes != null) {
+        <div class="form-group">
+            @Html.LabelFor(model => model.CancelNotes, new { @class = "col-xs-2 control-label" })
+            <div class="col-xs-4">
+                @Html.DisplayFor(model => model.CancelNotes)
+            </div>
+        </div>
+    }
+
+    <div class="form-group">
+        <div class="col-xs-offset-2 col-xs-10">
+            <a href="javascript:" class="btn btn-primary" onclick="printQuotation()">Print Quotation</a>
+            <a href="@backLink" class="btn btn-link">Kembali</a>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        function printQuotation(id) {
+            var url = '@Url.Action("PrintQuotation", new { id = Model.Id })';
+            var windowName = "quotation";
+
+            openPrintWindow(url, windowName);
+        }
+    </script>
+}

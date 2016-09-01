@@ -1,0 +1,225 @@
+@model WebUI.Models.Customer.CustomerFormStub
+
+@{
+    //...
+
+    string fileTypeErrMsg = HttpContext.GetGlobalResourceObject("MyGlobalMessage", "FileUploadImageTypeError").ToString();
+    string template = HttpContext.GetGlobalResourceObject("MyGlobalMessage", "FileUploadSizeError").ToString();
+    string fileSizeErrMsg = string.Format(template, System.Configuration.ConfigurationManager.AppSettings["maxImageWord"]);
+}
+@{
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    string currentController = (string)ViewContext.RouteData.Values["controller"];
+    string currentAction = (string)ViewContext.RouteData.Values["action"];
+    string backLink = "";
+
+    if (currentAction == "Create")
+    {
+        ViewBag.Title = "Tambah Tamu";
+    }
+    else
+    {
+        ViewBag.Title = ViewBag.name + " | Edit";
+    }
+    backLink = Url.Action("Index");
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+@using (@Html.BeginForm(currentAction, currentController, FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(model => model.Id)
+    @Html.HiddenFor(model => model.IdOwner)
+    
+    <div class="row">
+    <div class="col-xs-6">
+        <div class="form-group">           
+            @Html.LabelFor(model => model.Name, new { @class = "col-xs-4 control-label" }) 
+            <div class="col-xs-3">
+                @Html.DropDownListFor(model => model.CustomerTitle, new SelectList(Model.TitleOptions, "Value", "Text"), new { @class = "form-control" })
+            </div>
+            <div class="col-xs-5">
+               
+                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                @Html.ValidationMessageFor(model => model.Name)
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.CustomerType, new { @class = "col-xs-4 control-label" })
+            <div class="col-xs-8">
+                @Html.DropDownListFor(model => model.CustomerType, new SelectList(Model.TypeOptions, "Value", "Text"), new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.CustomerType)
+            </div>
+        </div>
+               
+        <div class="form-group">
+            @Html.LabelFor(model => model.PhoneNumber, new { @class = "col-xs-4 control-label" })
+            <div class="col-xs-8">
+                @Html.EditorFor(model => model.PhoneNumber)
+                @Html.ValidationMessageFor(model => model.PhoneNumber)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PhoneNumber2, new { @class = "col-xs-4 control-label" })
+            <div class="col-xs-8">
+                @Html.EditorFor(model => model.PhoneNumber2)
+                @Html.ValidationMessageFor(model => model.PhoneNumber2)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Address, new { @class = "col-xs-4 control-label" })
+            <div class="col-xs-8">
+                @Html.EditorFor(model => model.Address, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                @Html.ValidationMessageFor(model => model.Address)
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.City, new { @class = "col-xs-4 control-label" })
+            <div class="col-xs-8">
+                @Html.EditorFor(model => model.City, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                @Html.ValidationMessageFor(model => model.City)
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Email, new { @class = "col-xs-4 control-label" })
+            <div class="col-xs-8">
+                @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                @Html.ValidationMessageFor(model => model.Email)
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Company, new { @class = "col-xs-4 control-label" })
+            <div class="col-xs-8">
+                @Html.EditorFor(model => model.Company, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                @Html.ValidationMessageFor(model => model.Company)
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Notes, new { @class = "col-xs-4 control-label" })
+            <div class="col-xs-8">
+                @Html.EditorFor(model => model.Notes, new { htmlAttributes = new { @class = "form-control", style = "" } })
+                @Html.ValidationMessageFor(model => model.Notes)
+            </div>
+        </div>        
+    </div>
+
+    <div class="col-xs-6">
+        <div class="form-group ">
+            @Html.LabelFor(model => model.Photo, new { @class = "col-xs-4 control-label" })
+            <div class="col-xs-8">
+                @Html.HiddenFor(model => model.Photo)
+                @Html.TextBox("files", "", new { type = "file", id = "kendo-upload" })
+                <br /><em class="text-info">*ukuran file maksimal 1 mb dan bertipe (jpg, jpeg, atau png)</em>
+                @*<em class="text-info">**saran : untuk ukuran lebar x tinggi (100px s/d 150px)</em><br />*@
+                <br />
+
+                @if (Model.Photo == null)
+                {
+                    <img id="uploaded-image" src="" class="img-responsive" alt="" />
+                }
+                else
+                {
+                    <img id="uploaded-image" src="@Url.Content(Model.Photo)" class="img-responsive" alt="" />
+                }
+                @Html.ValidationMessageFor(model => model.Photo)
+
+                <br />
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+            <div class="form-group">
+                <div class="col-xs-offset-2 col-xs-10">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a href="@backLink" class="btn btn-link">Cancel</a>
+                </div>
+            </div>
+            }
+
+            @section scripts
+    {
+                <script type="text/javascript">
+                    // scripts here
+                    var fileInputSelector = '#Photo';  //
+                    var fileNameSelector = '#uploaded-filename';
+                    var imageContainerSelector = '#uploaded-image';
+
+                    //functions
+                    function onRemove(e) {
+                        $(fileInputSelector).val("");
+                        $(imageContainerSelector).hide();
+                    }
+
+                    function onSelectFile(e) {
+                        var flagExtension = 0;
+                        var flagSize = 0;
+                        var allowedExtension = ['.png', '.jpeg', '.jpg'];
+                        var file = e.files;
+                        var maxImage = '@System.Configuration.ConfigurationManager.AppSettings["maxImage"]';
+
+                        if (file[0].size > maxImage) {
+                            flagSize = 1;
+                        }
+
+                        if ($.inArray((file[0].extension).toLowerCase(), allowedExtension) === -1) {
+                            flagExtension = 1;
+                        }
+                        if (flagExtension == 1) {
+                            alert("@fileTypeErrMsg");
+                            e.preventDefault();
+                        }
+                        if (flagSize == 1) {
+                            alert("@fileSizeErrMsg");
+                            e.preventDefault();
+
+                        }
+                    }
+
+                    function onSuccessFile(e) {
+                        if (e.operation == "upload") {
+                            var file = e.response;
+                            console.log(file);
+                            $(fileInputSelector).val(file.filepath);
+                            $(fileNameSelector).html(file.filepath);
+                            $(imageContainerSelector).attr('src', file.absolutepath);
+                            $(imageContainerSelector).show();
+
+                        }
+                    }
+
+                    $(document).ready(function () {
+                        if ($(imageContainerSelector).attr('src') === '') {
+                            $(imageContainerSelector).hide();
+                        }
+
+                        $("#PhoneNumber").kendoMaskedTextBox({
+                            mask: "000000000000"
+                        });
+
+                        $("#PhoneNumber2").kendoMaskedTextBox({
+                            mask: "000000000000"
+                        });
+                        $("#kendo-upload").kendoUpload({
+                            multiple: false,
+                            async: {
+                                saveUrl: '@Url.Action("Save", "FileManagement", new { area = "" })',
+                                removeUrl: '@Url.Action("Remove", "FileManagement", new { area = "" })',
+                                autoUpload: true
+                            },
+                            //files: initialFilesContent,
+                            select: onSelectFile,
+                            success: onSuccessFile,
+                            remove: onRemove,
+                            showFileList: true,
+                        });
+                    });
+                </script>
+            }
+

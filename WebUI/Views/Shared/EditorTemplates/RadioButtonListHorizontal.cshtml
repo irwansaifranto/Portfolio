@@ -1,0 +1,25 @@
+﻿@model int?
+@{
+    List<SelectListItem> options = new List<SelectListItem>();
+
+    options = (List<SelectListItem>)ViewData["options"];
+}
+
+@foreach (SelectListItem row in options)
+{
+<div class="@ViewData["class"]">
+	<div class="radio">
+		<label>
+    @if (Model.ToString().Equals(row.Value))
+    {
+        @Html.RadioButtonFor(m => m, row.Value, new { @checked = "checked", id = "" })
+    }
+    else
+    {
+        @Html.RadioButtonFor(m => m, row.Value, new { id = "" })
+    }
+        @row.Text
+        </label>
+    </div>
+</div>
+}

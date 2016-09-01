@@ -1,0 +1,119 @@
+@model SecurityGuard.ViewModels.DashboardViewModel
+@{
+    ViewBag.Title = "Index";
+    //Layout = "~/Areas/SecurityGuard/Views/Shared/_SecurityGuardLayoutPage.cshtml";
+}
+
+<div class="page-header">
+	<h1>Security Guard</h1>
+</div>
+
+<div class="row">
+
+    <!-- Manage Roles -->
+    <div class="col-xs-6">        
+        <div class="panel panel-default">
+		    <div class="panel-heading">
+			    <h3 class="panel-title">Manage Roles</h3>
+		    </div>
+		    <div class="panel-body">
+                <p>@Html.ActionLink("Manage Roles", "Index", "Role", new { area = "SecurityGuard" }, null)</p>
+                <table>
+                    <tr>
+                        <td>
+                            Total Roles:
+                        </td>
+                        <td>@Model.TotalRolesCount
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                </table>
+		    </div>
+	    </div>
+    </div>
+
+    <!-- Manage Actions -->
+    <div class="col-xs-6">
+        <div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Manage Actions</h3>
+			</div>
+			<div class="panel-body">
+                <p>@Html.ActionLink("Manage Actions", "Index", "Action", new { area = "SecurityGuard" }, null)</p>
+                <table>
+                    <tr>
+                        <td>
+                            Total Action:
+                        </td>
+                        <td>@Model.TotalActionsCount
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                </table>
+			</div>
+		</div>
+    </div>
+</div>
+
+<div class="row">
+
+    <!-- Manage Users -->
+    <div class="col-xs-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Manage Users</h3>
+			</div>
+			<div class="panel-body">
+                <p>@Html.ActionLink("Manage Users", "Index", "Membership", new { area = "SecurityGuard" }, null)
+                    | @Html.ActionLink("Create User", "CreateUser", "Membership", new { area = "SecurityGuard" }, null)</p>
+                <table>
+                    <tr>
+                        <td>
+                            Total Users:
+                        </td>
+                        <td>@Model.TotalUserCount
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Users Online:
+                        </td>
+                        <td>@Model.TotalUsersOnlineCount
+                        </td>
+                    </tr>
+                </table>
+			</div>
+		</div>	    
+	</div>
+
+    <!-- Manage Modul -->
+    <div class="col-xs-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Manage Modul</h3>
+			</div>
+			<div class="panel-body">
+                <p>@Html.ActionLink("Manage Modul", "Index", "Module", new { area = "SecurityGuard" }, null)</p>
+                <table>
+                    <tr>
+                        <td>
+                            Total Modul:
+                        </td>
+                        <td>@Model.TotalModulesCount
+                        </td>
+                    </tr>
+                </table>
+			</div>
+		</div>		
+	</div>
+</div>

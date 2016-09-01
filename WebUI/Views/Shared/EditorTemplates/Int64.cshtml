@@ -1,0 +1,6 @@
+﻿@model Int64?
+@{
+    var htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(ViewData["htmlAttributes"]);
+    htmlAttributes.Add("kendo-numeric-text-box", null); //add new value
+}
+@Html.TextBox("", Model, htmlAttributes)

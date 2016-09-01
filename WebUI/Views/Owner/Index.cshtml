@@ -1,0 +1,262 @@
+@using WebUI.Extension;
+@using MvcSiteMapProvider.Web.Html;
+@{
+    ViewBag.Title = "Owner";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentController = (WebUI.Controllers.OwnerController)ViewContext.Controller;
+}
+<div class="page-header">
+    <div class="btn-group pull-right">
+        @Html.ActionLink("Add Owner", "Create", new { area = "" }, new { @class = "btn btn-default" })
+        @Html.ActionLink("Assign User to Owner", "AssignUser", new { area = "" }, new { @class = "btn btn-default" })
+    </div>
+    <h1>@ViewBag.Title</h1>
+</div>
+@Html.Raw(currentController.GetMessage())
+<div id="grid"></div>
+
+@section scripts
+    {
+
+<script type="text/x-kendo-template" id="template">
+    <div class="user-list" style="max-height:500px"></div>
+</script>
+
+    <script type="text/javascript">
+
+        function deleteItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            goToDeletePage('@Url.Action("Delete")' + "?id=" + data.Id,this.dataSource);
+        }
+
+        function editItem(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            window.location.href = "@Url.Action("Edit")" + "?id=" + data.Id;
+        }
+
+        function deleteUser(e) {
+            e.preventDefault();
+            var data = this.dataItem(getDataRowGrid(e));
+            goToDeletePage('@Url.Action("DeleteUser")' + "?id=" + data.Id, this.dataSource);
+        }
+
+        $(document).ready(function () {
+
+            var ds = {
+                pageable: true,
+                pageSize: 10,
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                sortable:true,
+                transport: {
+                    read: {
+                        url: "@Url.Action("Binding")",
+                        dataType: "json",
+                        type:"POST",
+                    },
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options != '') {
+                            return kendo.stringify(options);
+                        }
+                        else if (operation == "read") {
+                            if (options.filter) {
+                                filter = options.filter.filters;
+                                for (var i in filter) {
+                                    if (filter[i].field == "CityName") {
+                                        filter[i].field = "city.name";
+                                    }
+                                }
+                            }
+
+                            if (options.sort) {
+                                sort = options.sort;
+                                for (var i in sort) {
+                                    if (sort[i].field == "CityName") {
+                                        sort[i].field = "city.name";
+                                    }
+                                }
+                            }
+                            return options;
+                        }
+                    }
+                },
+				schema: {
+                    data: "data",
+                    total: "total",
+                    model: {
+                        fields: {
+							"Id": { type: "string" },
+							"Code": { type: "string" },
+							"Name": { type: "string" },
+							"CreatedBy": { type: "string" },
+							"CreatedTime": { type: "string" },
+							"UpdatedBy": { type: "string" },
+							"UpdatedTime": { type: "string" },
+							"CityName": { type: "string" },
+                        }
+                    }
+				},
+				sort: { field: "name", dir: "asc" }
+            };
+
+            $("#grid").kendoGrid({
+                dataSource: ds,
+                filterable: kendoGridFilterable,
+                pageable: true,
+                sortable: true,
+                resizable: true,
+                detailTemplate: kendo.template($("#template").html()),
+                detailInit: detailInit,
+                columns: [
+                     {
+                         command: [
+                             {
+                                 name: "edit",
+                                 text: "edit",
+                                 click: editItem,
+                                 imageClass: "glyphicon glyphicon-edit",
+                                 template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=imageClass#"></span></a>'
+                             },
+                             //{
+                             //    name: "assign",
+                             //    text: "assign",
+                             //    click: assignUser,
+                             //    imageClass: "glyphicon glyphicon-user",
+                             //    template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=imageClass#"></span></a>'
+                             //},
+                             //{
+                             //    name: "delete",
+                             //    text: "delete",
+                             //    click: deleteItem,
+                             //    imageClass: "glyphicon glyphicon-remove",
+                             //    template: '<a class="k-button-icon #=className#" #=attr# href="\\#"><span class="#=iconClass# #=imageClass#"></span></a>'
+                             //}
+                         ],
+                         width: "90px"
+                     },
+					{
+                        field: "Code",
+                        title: "Code",
+                    },
+					{
+                        field: "Name",
+                        title: "Name",
+					},
+                    {
+                        field: "CityName",
+                        title: "City",
+                    },
+                   
+                ],
+            });
+        });
+
+
+        function detailInit(e) {
+            var detailRow = e.detailRow;
+
+            detailRow.find(".user-list").kendoGrid({
+                
+                dataSource: {
+                    sync: function (e) {
+                        //console.log(e);
+                        $('#grid').data('kendoGrid').dataSource.read()
+                        //var childRow = e.container.next(".k-detail-row");
+                        //console.log(childRow);
+                    },
+                    transport: {
+                        read: {
+                            url: "@Url.Action("BindingUser")",
+                        dataType: "json",
+                        type:"POST"
+                    },
+            parameterMap: function (data, operation) {
+                //console.log(data);
+                //if (operation === "update" || operation === "create") {
+                //    return JSON.stringify({ model:data });
+                //}
+                //return data;
+                //data.IdSPBG = e.data.Id;
+                if (operation === "read") {
+                    if (data.filter) {
+                        filter = data.filter.filters;
+                        for (var i in filter) {
+                            //if (filter[i].field == "CloseTime") {
+                            //    var date = filter[i].value;
+                            //    //date = date.split(' ');
+                            //    //date = date[2] + " " + date[1] + " " + date[3];
+                            //    //console.log(typeof (kendo.parseDate(date, "d MMM yyyy")));
+                            //    //filter[i].value = kendo.toString(kendo.parseDate(date, "d MMM yyyy"), "G");
+                            //    //console.log(filter[i].value);
+                            //    filter[i].value = kendo.toString(date, "G");
+                            //}
+                            //if (filter[i].field == "ReopenedTime") {
+                            //    var date = filter[i].value;
+                            //    //date = date.split(' ');
+                            //    //date = date[2] + " " + date[1] + " " + date[3];
+                            //    //console.log(typeof (kendo.parseDate(date, "d MMM yyyy")));
+                            //    //filter[i].value = kendo.toString(kendo.parseDate(date, "d MMM yyyy"), "G");
+                            //    //console.log(filter[i].value);
+                            //    filter[i].value = kendo.toString(date, "G");
+                            //}
+                        }
+                    }
+                }
+                return data; 
+            }
+        },
+        schema: {
+                data: "data",
+                total: "total",
+                model: {
+                id: "Id",
+                fields: {
+                    "IdOwner": {
+                        defaultValue:e.data.Id,
+                        },
+                }
+                }
+        },
+        serverPaging: true,
+            serverSorting: true,
+        serverFiltering: true,
+        pageSize: 5,
+        filter: { field: "IdOwner", operator: "eq", value: e.data.Id }
+        },
+        filterable: kendoGridFilterable,
+            scrollable: false,
+        sortable: true,
+        pageable: true,
+        columns: [
+            {
+                command: [
+                    {
+                        name: "delete",
+                        text: "delete",
+                        click: deleteUser,
+                        imageClass: "glyphicon glyphicon-remove",
+                        template: '<a class="k-button-icon #=className#" #=attr# title="delete" href="\\#"><span class="#=iconClass# #=imageClass#"></span></a>'
+                    },
+                ],
+                width: 100
+            },
+            {
+                field: "IdOwner",
+                hidden: true,
+            },
+            {
+                field: "Username",
+                title: "Username",
+            },
+            
+
+        ]
+        });
+
+        }
+    </script>
+}
+

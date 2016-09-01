@@ -1,0 +1,56 @@
+﻿@model WebUI.Models.LoginModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var currentController = (WebUI.Controllers.AccountController)ViewContext.Controller;
+
+    ViewBag.Title = "Login";
+}
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+<div class="row">
+    <div class="col-xs-6">
+        &nbsp;
+    </div>
+    <div class="col-xs-6">
+        @Html.ValidationSummary(true, "Login was unsuccessful. Please correct the errors and try again.")
+        @using (@Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal" }))
+        {
+             @Html.AntiForgeryToken()
+	        <div class="form-group clearfix">
+		        <label class="col-xs-4 control-label">Username</label>
+		        <div class="col-xs-8">
+                    @Html.TextBoxFor(m => m.Username, new {@class = "form-control", placeholder = Html.DisplayNameFor(m => m.Username) })
+		            @Html.ValidationMessageFor(m => m.Username)
+                </div>
+	        </div>
+	        <div class="form-group clearfix">
+		        <label class="col-xs-4 control-label">Password</label>
+		        <div class="col-xs-8">
+			        @Html.PasswordFor(m => m.Password, new {@class = "form-control", placeholder = Html.DisplayNameFor(m => m.Password) })
+		            @Html.ValidationMessageFor(m => m.Password)
+                </div>
+	        </div>
+	        <div class="form-group">
+		        <div class="col-xs-offset-4 col-xs-8">
+			        <button type="submit" class="btn btn-primary" onclick="">Sign in</button>
+		        </div>
+	        </div>
+        }
+    </div>
+</div>
+<hr class="vspace-100" />
+
+@section scripts
+{
+    <script type="text/ecmascript">
+        $(document).ready(function () {
+            if ($('#Username').val() == "")
+                $('#Username').focus();
+            else
+                $('#Password').focus();
+        });
+    </script>
+}

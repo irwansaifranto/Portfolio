@@ -1,0 +1,26 @@
+﻿@model DateTimeOffset?
+@{
+    string dt;
+    RouteValueDictionary htmlAttributes = HtmlHelper.AnonymousObjectToHtmlAttributes(ViewData["htmlAttributes"]);
+    if (htmlAttributes == null)
+    {
+        htmlAttributes = new RouteValueDictionary();
+    }
+
+    if (htmlAttributes.ContainsKey("class") == false)
+    {
+        htmlAttributes.Add("class", "form-control-static");
+    }
+}
+
+@if (Model != null)
+{
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+    
+    dt = Model.Value.ToString(dfh.FullDateTimeFormat);
+}
+else
+{
+    dt = "-";
+}
+@Html.Label("", dt, htmlAttributes)

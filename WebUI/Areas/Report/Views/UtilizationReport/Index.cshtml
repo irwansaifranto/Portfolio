@@ -1,0 +1,145 @@
+@using WebUI.Extension
+@model WebUI.Areas.Report.Models.DailyMonthlyFilterModel
+
+@{
+    ViewBag.Title = "Laporan Utilisasi";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentController = (WebUI.Areas.Report.Controllers.UtilizationReportController)ViewContext.Controller;
+}
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+@Html.Raw(currentController.GetMessage())
+<div class="form-inline filter-form">
+    <div class="form-group">
+        @Html.EditorFor(model => model.StartMonth, new { htmlAttributes = new { autocomplete = "off" } })
+    </div>
+    <div class="form-group">
+        <label>s/d</label>
+        @Html.EditorFor(model => model.EndMonth, new { htmlAttributes = new { autocomplete = "off" } })
+    </div>
+    <a href="javascript:" class="btn btn-default" onclick="redisplayChart()">Tampilkan</a>
+</div>
+
+<div class="alert alert-info">Data Utilisasi diambil dari data booking yang tidak "Batal"</div>
+
+<div id="chart" class="chart"></div>
+
+@section scripts
+{
+    <script type="text/javascript">
+    var ds;
+
+    function createChart() {
+        ds = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: '@Url.Action("Binding")',
+                    dataType: "json"
+                }
+            },
+            sort: {
+                field: "year",
+                dir: "asc"
+            },
+            schema: {
+                model: {
+                    fields: {
+                        Category: { type: "date" }
+                    }
+                }
+            },
+            serverFiltering: true,
+        });
+
+        $("#chart").kendoChart({
+            dataSource: ds,
+            autoBind: false,
+            legend: {
+                position: "top",
+                visible: false
+            },
+            seriesDefaults: {
+                type: "column"
+            },
+            series: [{
+                field: "Value",
+                name: "Value"
+            }],
+            categoryAxis: {
+                field: "Category",
+                crosshair: {
+                    visible: true
+                }
+            },
+            valueAxis: {
+                labels: {
+                    //format: "N0",
+                    template: kendo.template("#: value # %")
+                },
+                majorUnit: 10,
+                max: 100,
+            },
+            tooltip: {
+                visible: true,
+                //shared: true,
+                //format: "N0"
+                template: '#: kendo.toString(value, \'N0\') # %',
+            }
+        });
+    }
+
+    function redisplayChart() {
+        //kamus
+        var sSelector, eSelector, start, end;
+
+        //algoritma
+        sSelector = '#StartMonth';
+        eSelector = '#EndMonth';
+
+        start = $(sSelector).data('kendoDatePicker').value();
+        end = $(eSelector).data('kendoDatePicker').value();
+
+        ds.filter({
+            filters: [
+                { field: 'StartDate', operator: 'eq', value: kendo.toString(start, "yyyy-MM-dd") },
+                { field: 'EndDate', operator: 'eq', value: kendo.toString(end, "yyyy-MM-dd") },
+            ]
+        });
+    }
+
+    $(document).ready(function () {
+        createChart();
+
+        //datepicker
+        var dpSM = $('#StartMonth').data('kendoDatePicker');
+        dpSM.setOptions({
+            start: 'year',
+            depth: 'year',
+            format: 'MMMM yyyy',
+            max: new Date()
+        });
+
+        var dpEM = $('#EndMonth').data('kendoDatePicker');
+        dpEM.setOptions({
+            start: 'year',
+            depth: 'year',
+            format: 'MMMM yyyy',
+            max: new Date()
+        });
+        dpEM.bind('change', function () {
+            var value = this.value();
+            dpSM.setOptions({
+                max: value
+            });
+            if (dpSM.value() > value) {
+                dpSM.value(value);
+            }
+        });
+
+        //chart
+        redisplayChart();
+    });
+</script>
+}

@@ -1,0 +1,306 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9F43EB24-78BB-49C9-9017-37854F721BE6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Business</RootNamespace>
+    <AssemblyName>Business</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework6.Npgsql">
+      <HintPath>..\packages\EntityFramework6.Npgsql.3.0.4\lib\net45\EntityFramework6.Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="Npgsql">
+      <HintPath>..\packages\Npgsql.3.0.4\lib\net45\Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Abstract\IActionRepository.cs" />
+    <Compile Include="Abstract\ICarBrandRepository.cs" />
+    <Compile Include="Abstract\ICarExpenseRepository.cs" />
+    <Compile Include="Abstract\ICarModelRepository.cs" />
+    <Compile Include="Abstract\ICarPackageRepository.cs" />
+    <Compile Include="Abstract\ICityRepository.cs" />
+    <Compile Include="Abstract\IDummyNotificationRepository.cs" />
+    <Compile Include="Abstract\IApiRentRepository.cs" />
+    <Compile Include="Abstract\IRentPositionRepository.cs" />
+    <Compile Include="Abstract\IExpenseRepository.cs" />
+    <Compile Include="Abstract\IUserRepository.cs" />
+    <Compile Include="Abstract\IRentRepository.cs" />
+    <Compile Include="Abstract\IInvoiceRepository.cs" />
+    <Compile Include="Abstract\ICarRepository.cs" />
+    <Compile Include="Abstract\ICustomerRepository.cs" />
+    <Compile Include="Abstract\IDriverRepository.cs" />
+    <Compile Include="Abstract\ILogRepository.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Abstract\IModuleRepository.cs" />
+    <Compile Include="Abstract\IModulesInRoleRepository.cs" />
+    <Compile Include="Abstract\IOwnerRepository.cs" />
+    <Compile Include="Abstract\IRoleRepository.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Concrete\EFActionRepository.cs" />
+    <Compile Include="Concrete\EFCarBrandRepository.cs" />
+    <Compile Include="Concrete\EFCarExpenseRepository.cs" />
+    <Compile Include="Concrete\EFCarModelRepository.cs" />
+    <Compile Include="Concrete\EFCarPackageRepository.cs" />
+    <Compile Include="Concrete\EFCityRepository.cs" />
+    <Compile Include="Concrete\EFDummyNotificationRepository.cs" />
+    <Compile Include="Concrete\EFApiRentRepository.cs" />
+    <Compile Include="Concrete\EFRentPositionRepository.cs" />
+    <Compile Include="Concrete\EFExpenseRepository.cs" />
+    <Compile Include="Concrete\EFUserRepository.cs" />
+    <Compile Include="Concrete\EFRentRepository.cs" />
+    <Compile Include="Concrete\EFInvoiceRepository.cs" />
+    <Compile Include="Concrete\EFCarRepository.cs" />
+    <Compile Include="Concrete\EFCustomerRepository.cs" />
+    <Compile Include="Concrete\EFDriverRepository.cs" />
+    <Compile Include="Concrete\EFLogRepository.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Concrete\EFModuleRepository.cs" />
+    <Compile Include="Concrete\EFModulesInRoleRepository.cs" />
+    <Compile Include="Concrete\EFOwnerRepository.cs" />
+    <Compile Include="Concrete\EFRoleRepository.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Entities\Actions.cs">
+      <DependentUpon>UserManagement.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\api_rent.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\Application.cs" />
+    <Compile Include="Entities\car.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\car_brand.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\car_expense.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\car_model.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\car_package.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\city.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\customer.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\DetailVehicleExpenseReport.cs" />
+    <Compile Include="Entities\driver.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\d_notification.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\expense.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\expense_item.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\invoice.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\invoice_item.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\log_api_rent.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\log_ws.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\Model.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Model.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\Model.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\Model.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Model.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\owner.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\owner_user.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\rent.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\rent_code.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\rent_package.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\rent_position.cs">
+      <DependentUpon>Model.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\VehicleExpenseReport.cs" />
+    <Compile Include="Entities\DriverExpenseReport.cs" />
+    <Compile Include="Entities\log.cs" />
+    <Compile Include="Entities\Membership.cs" />
+    <Compile Include="Entities\Modules.cs">
+      <DependentUpon>UserManagement.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\ModulesInRoles.cs">
+      <DependentUpon>UserManagement.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\Profile.cs" />
+    <Compile Include="Entities\roles.cs">
+      <DependentUpon>UserManagement.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\UserManagement.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserManagement.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\UserManagement.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserManagement.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\UserManagement.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserManagement.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\users.cs">
+      <DependentUpon>UserManagement.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\user_login_activity.cs">
+      <DependentUpon>UserManagement.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\versions.cs">
+      <DependentUpon>UserManagement.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Infrastructure\FilterInfo.cs" />
+    <Compile Include="Infrastructure\GridHelper.cs" />
+    <Compile Include="Infrastructure\SortingInfo.cs" />
+    <Compile Include="Linq\DynamicQueryable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="CodeTemplates\Scaffolders\EntitiesRepo\EFEntitiesRepoTemplate.cs.t4" />
+    <None Include="CodeTemplates\Scaffolders\EntitiesRepo\EntitiesRepo.ps1" />
+    <None Include="CodeTemplates\Scaffolders\EntitiesRepo\IEntitiesRepoTemplate.cs.t4" />
+    <EntityDeploy Include="Entities\UserManagement.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>UserManagement.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <EntityDeploy Include="Entities\Model.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>Model.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <None Include="Entities\Model.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>Model.edmx</DependentUpon>
+      <LastGenOutput>Model.Context.cs</LastGenOutput>
+    </None>
+    <None Include="Entities\Model.edmx.diagram">
+      <DependentUpon>Model.edmx</DependentUpon>
+    </None>
+    <None Include="Entities\Model.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>Model.edmx</DependentUpon>
+      <LastGenOutput>Model.cs</LastGenOutput>
+    </None>
+    <None Include="Entities\UserManagement.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>UserManagement.edmx</DependentUpon>
+      <LastGenOutput>UserManagement.Context.cs</LastGenOutput>
+    </None>
+    <None Include="Entities\UserManagement.edmx.diagram">
+      <DependentUpon>UserManagement.edmx</DependentUpon>
+    </None>
+    <None Include="Entities\UserManagement.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>UserManagement.edmx</DependentUpon>
+      <LastGenOutput>UserManagement.cs</LastGenOutput>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common.Enums\Common.Enums.csproj">
+      <Project>{a54cd331-2a18-4015-b7d0-bc8483605885}</Project>
+      <Name>Common.Enums</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Extension\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,82 @@
+﻿@using WebUI.Extension;
+@using MvcSiteMapProvider.Web.Html;
+@using Common.Enums
+
+@{
+    ViewBag.Title = "Lokasi Mobil";
+    WebUI.Models.Owner.OwnerPresentationStub owner = ViewBag.Owner;
+}
+
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+<div id="map-canvas" style="height: 550px;"></div>
+
+@section scripts
+{
+    <script src="http://maps.google.com/maps/api/js?sensor=true" type="text/javascript"></script>
+    <script type="text/javascript">
+        var map;
+        var markers = [];
+
+        $(document).ready(function () {
+            Initialize();
+            UpdateMarker();
+            setInterval(UpdateMarker, 300000);
+            //setInterval(DeleteMarkers, 5000);
+        });
+
+        function Initialize() {
+            var mapCenter = new google.maps.LatLng(@owner.Latitude.ToString(new System.Globalization.CultureInfo("en-US")), @owner.Longitude.ToString(new System.Globalization.CultureInfo("en-US")));
+            var mapOptions = {
+                zoom: 13,
+                center: mapCenter,
+                mapTypeId: google.maps.MapTypeId.G_NORMAL_MAP
+            };
+
+            map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+        }
+
+        function UpdateMarker() {
+            $.post('@Url.Action("BindingMap")', function (data) {
+                //menghapus existing marker di map
+                DeleteMarkers();
+                //menambahkan marker dari data
+                $.each(data, function (i, item) {
+                    var marker = new google.maps.Marker({
+                        'position': new google.maps.LatLng(item.Latitude, item.Longitude),
+                        'map': map,
+                        'title': item.Rent.Code,
+                        'icon' : '@Url.Content("~/Content/theme/car.png")'
+                    });
+
+                    var infowindow = new google.maps.InfoWindow({
+                        content: "<div class='map-window'><p><b>" + item.Rent.Code + "</b></p><div> " + item.Rent.DriverName + "</div><div>" + item.Rent.LicensePlate + "</div></div>"
+                    });
+
+                    google.maps.event.addListener(marker, 'click', function () {
+                        infowindow.open(map, marker);
+                    });
+
+                    markers.push(marker);
+                })
+            }, 'json');
+        }
+
+        function SetMapOnAll(map) {
+            for (var i = 0; i < markers.length; i++) {
+                markers[i].setMap(map);
+            }
+        }
+
+        function ClearMarkers() {
+            SetMapOnAll(null);
+        }
+
+        function DeleteMarkers() {
+            ClearMarkers();
+            markers = [];
+        }
+    </script>
+}

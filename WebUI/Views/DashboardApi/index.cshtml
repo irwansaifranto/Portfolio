@@ -1,0 +1,190 @@
+﻿@using WebUI.Extension;
+@using MvcSiteMapProvider.Web.Html;
+@model WebUI.Models.ApiRent.ApiRentPresentationStub
+@{
+    ViewBag.Title = "Dashboard API";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    WebUI.Infrastructure.DisplayFormatHelper dfh = new WebUI.Infrastructure.DisplayFormatHelper();
+    var currentController = (WebUI.Controllers.DashboardApiController)ViewContext.Controller;
+}
+<div class="page-header">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+@Html.Raw(currentController.GetMessage())
+<div id="grid"></div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        var ds;
+
+        function ListStatus (element) {
+            element.kendoDropDownList({
+                dataTextField: "Text",
+                dataValueField: "Value",
+                dataSource: {
+                    data: @Html.Raw(ViewBag.ListStatus)
+                },
+                optionLabel: "--Pilih--",
+            });
+        }
+
+        function CancelStatus (element){
+            element.kendoDropDownList({
+                dataTextField: "Text",
+                dataValueField: "Value",
+                dataSource: {
+                    data: @Html.Raw(ViewBag.CancelStatus) 
+                    },
+                optionLabel: "--Pilih--",
+            });
+        }
+
+        $(document).ready(function () {
+            ds = new kendo.data.DataSource({
+                pageable: true,
+                pageSize: 10,
+                serverFiltering: true,
+                serverPaging: true,
+                serverSorting: true,
+                sortable: true,
+                transport: {
+                    read: {
+                        url: "@Url.Action("Binding")",
+                        dataType: "json",
+                        type: "POST",
+                    },
+                    parameterMap: function (options, operation) {
+                        if (operation !== "read" && options != '') {
+                            return kendo.stringify(options);
+                        }
+                        else if (operation == "read") {
+                            if (options.filter) {
+                                filter = options.filter.filters;
+                                for (var i in filter) {
+                                    if (filter[i].field == "BookDate") {
+                                        var date = filter[i].value;
+                                        filter[i].field = "rent.created_time";
+                                        filter[i].value = kendo.toString(date, "yyyy-MM-dd");
+                                    } else if (filter[i].field == "Departure") {
+                                        var date = filter[i].value;
+                                        filter[i].field = "rent.start_rent";
+                                        filter[i].value = kendo.toString(date, "yyyy-MM-dd");
+                                    } else if (filter[i].field == "BookingCode") {
+                                        filter[i].field = "rent.code";
+                                    } else if (filter[i].field == "Rental") {
+                                        filter[i].field = "rent.owner.name";
+                                    }
+                                }
+                            }
+
+                            if (options.sort) {
+                                sort = options.sort;
+                                for (var i in sort) {
+                                    if (sort[i].field == "BookDate") {
+                                        sort[i].field = "rent.created_time";
+                                    }
+                                    if (sort[i].field == "Departure") {
+                                        sort[i].field = "rent.start_rent";
+                                    }
+                                    if (sort[i].field == "BookingCode") {
+                                        sort[i].field = "rent.code";
+                                    }
+                                    if (sort[i].field == "Rental") {
+                                        sort[i].field = "rent.owner.name";
+                                    }
+
+                                }
+                            }
+                            return options;
+                        }
+                    }
+
+                },
+                schema: {
+                    data: "data",
+                    total: "total",
+                    model: {
+                        fields: {
+                            "Id": { type: "string" },
+                            "IdRent": { type: "string" },
+                            "BookDate": { type: "date" },
+                            "Partner": { type: "string" },
+                            "Rental": { type: "string" },
+                            "BookingCode": { type: "string" },
+                            "Departure": { type: "date" },
+                            "Status": { type: "string" },
+                            "CancellationStatus": { type: "string" },
+                        }
+                    }
+                },
+                sort: { field: "BookDate", dir: "desc" }
+            });
+
+            $("#grid").kendoGrid({
+                dataSource: ds,
+                filterable: kendoGridFilterable,
+                pageable: true,
+                sortable: true,
+                resizable: true,
+                columns: [
+                    {
+                        field: "BookDate",
+                        title: "Book Date",
+                        format: "@dfh.JsFullDateTimeFormat",
+                    },
+                    {
+                        field: "Partner",
+                        title: "Partner",
+                    },
+                    {
+                        field: "Rental",
+                        title: "Rental",
+                    },
+                    {
+                        field: "BookingCode",
+                        title: "Kode Booking",
+                        width: 150,
+                    },
+                    {
+                        field: "Departure",
+                        title: "Tanggal Berangkat",
+                        format: "@dfh.JsCompactDateFormat",
+                    },
+                    {
+                        field: "Status",
+                        title: "Status",
+                        filterable: {
+                            ui: ListStatus,
+                            operators: {
+                                string: {
+                                    eq: "Sama Dengan",
+                                }
+                            },
+                            extra: false,
+                        },
+                    },
+                    {
+                        field: "CancellationStatus",
+                        title: "Pembatalan",
+                        filterable: {
+                            ui: CancelStatus,
+                            operators: {
+                                string: {
+                                    eq: "Sama Dengan",
+                                }
+                            },
+                            extra: false,
+                        },
+                    },
+                ],
+            });
+                        
+            setInterval(function(){
+               ds.read();
+            }, 30000);
+        });
+    </script>
+}
+

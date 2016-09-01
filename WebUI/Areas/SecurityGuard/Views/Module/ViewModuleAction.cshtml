@@ -1,0 +1,44 @@
+﻿@{
+    ViewBag.Title = "ViewModuleAction";
+    //Layout = "~/Areas/SecurityGuard/Views/Shared/_SecurityGuardLayoutPage.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="form-group">
+            <select id="module" class="form-control">
+                @foreach (Business.Entities.Module m in ViewBag.modules)
+                {
+                    <option value="@m.Id">@m.ModuleName</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <select id="actions" multiple="true" size="10">
+            @foreach (Business.Entities.Action a in ViewBag.actions)
+            {
+                <option value="@a.Id">@a.ActionName</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <input type="button" class="btn btn-default" value="Grant" id="grant" />
+    </div>
+</div>
+
+@section sgscripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#grant').click(function () {
+                console.log($('#actions').val());
+                var a = $('#actions').val();
+                a = a.join(',');
+                var m = $('#module').val();
+                $.post('@Url.Action("GrantActionsToModule","Module",new { area = "SecurityGuard" })', { moduleId: m, actions: a }, function (resp) {
+                    console.log('a');
+                });
+            });
+        });
+    </script>
+}
